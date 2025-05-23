@@ -14,13 +14,12 @@ import { Loader } from '@/components/ui/loader'
 import { getAll } from '@/actions/settings/users'
 import { User } from '@/types/auth/user'
 import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { useAuthStore } from '@/store/auth/useAuthStore'
 import Pagination from './Pagination'
 import { usePaginationStore } from '@/store/shared/usePaginationStore'
 import { useDebouncedCallback } from 'use-debounce'
 import AccountOptions from './SettingsAccount'
+import SearchBar from '@/components/blocks/SearchBar'
 
 function UsersSettingsPage() {
   const [data, setData] = useState<User[]>([])
@@ -86,21 +85,7 @@ function UsersSettingsPage() {
     <>
       <div className="w-full flex justify-between gap-4 mb-4">
         <div className="pt-4 flex-1">
-          <form>
-            <div className="grid w-full max-w-sm items-center gap-1.5">
-              <Label htmlFor="search" className="sr-only">
-                Buscar
-              </Label>
-              <Input
-                type="search"
-                id="search"
-                placeholder="Buscar usuarios"
-                value={search}
-                autoFocus
-                onChange={(e) => handleSearchChange(e.target.value)}
-              />
-            </div>
-          </form>
+          <SearchBar value={search} onChange={handleSearchChange} />
         </div>
         <div className="flex items-center gap-2">
           <Button

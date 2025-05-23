@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Table,
   TableBody,
@@ -9,9 +9,7 @@ import {
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { GhostIcon, RefreshCwIcon } from 'lucide-react'
-// import { getLocalDateTime, getUserRole } from '@/lib/utils'
 import { Loader } from '@/components/ui/loader'
-// import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useDebouncedCallback } from 'use-debounce'
@@ -32,15 +30,57 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { Product } from '@/types/product'
+import { Category } from '@/types/category'
+import { Unity } from '@/types/unity'
+import CreateProduct from './Create'
+import { getAll as getCategories } from '@/actions/settings/categories'
+import { getAll as getUnities } from '@/actions/settings/unities'
+import { getProducts } from '@/actions/settings/products'
 
 function ProductsSettingsPage() {
-  const [data, setData] = useState([1, 2, 3, 4, 5, 6])
+  const [products, setProducts] = useState<Product[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [unities, setUnities] = useState<Unity[]>([])
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
-
   const [isLoading, setIsLoading] = useState(false)
 
-  const fetchData = async (page: number, search: string) => {}
+  const fetchData = async (page: number, search: string) => {
+    setIsLoading(true)
+    try {
+      const response = await getProducts({ page, search })
+      setProducts(response.data.objects)
+    } catch (error) {
+      console.error('Error al obtener productos', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const getAssociatedData = async () => {
+    setIsLoading(true)
+    try {
+      const [categoriesResponse, unitiesResponse] = await Promise.all([
+        getCategories(),
+        getUnities(),
+      ])
+      setCategories(categoriesResponse.data)
+      setUnities(unitiesResponse.data)
+    } catch (error) {
+      console.error('Error al obtener categorias y unidades', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchData(page, search)
+  }, [page, search])
+
+  useEffect(() => {
+    getAssociatedData()
+  }, [])
 
   const debounced = useDebouncedCallback((value) => {
     fetchData(1, value)
@@ -51,28 +91,6 @@ function ProductsSettingsPage() {
     debounced(value)
   }
 
-  const SortableItem = ({ id }: { id: number }) => {
-    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: id })
-
-    const style = {
-      transform: CSS.Transform.toString(transform),
-      transition,
-    }
-
-    return (
-      <TableRow key={id} style={style} ref={setNodeRef} {...attributes} {...listeners}>
-        <TableCell>{id}</TableCell>
-
-        <TableCell className="text-right">
-          <div className="flex items-center gap-2">
-            {/* <Update user={user} categories={data} setData={setData} /> */}
-            {/* <DeleteDialog action={() => destroy(user.id)} callback={fetchData} /> */}
-          </div>
-        </TableCell>
-      </TableRow>
-    )
-  }
-
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -80,18 +98,13 @@ function ProductsSettingsPage() {
     })
   )
 
-  useEffect(() => console.log(data), [data])
-
   async function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
-
     if (active.id !== over?.id) {
-      setData((items) => {
-        const oldIndex = items.indexOf(Number(active.id))
-        const newIndex = items.indexOf(Number(over?.id))
-        const newOrder = arrayMove(items, oldIndex, newIndex)
-
-        return newOrder
+      setProducts((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id)
+        const newIndex = items.findIndex((item) => item.id === over?.id)
+        return arrayMove(items, oldIndex, newIndex)
       })
     }
   }
@@ -105,12 +118,10 @@ function ProductsSettingsPage() {
     )
   }
 
-  if (data.length <= 0) {
+  if (products.length <= 0) {
     return (
       <div className="p-4 w-full flex justify-center items-center flex-col">
-        <div>
-          <GhostIcon className="w-16 h-16 animate-bounce" />
-        </div>
+        <GhostIcon className="w-16 h-16 animate-bounce" />
         <span>No existen productos</span>
       </div>
     )
@@ -137,6 +148,12 @@ function ProductsSettingsPage() {
           </form>
         </div>
         <div className="flex items-center gap-2">
+          <CreateProduct
+            products={products}
+            setProducts={setProducts}
+            categories={categories}
+            unities={unities}
+          />
           <Button
             variant={'outline'}
             onClick={() => fetchData(page, search)}
@@ -151,20 +168,45 @@ function ProductsSettingsPage() {
         <Table className="my-4">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">Producto</TableHead>
+              <TableHead className="w-[100px]">#</TableHead>
+              <TableHead>Producto</TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            <SortableContext items={data} strategy={verticalListSortingStrategy}>
-              {data.map((id) => (
-                <SortableItem id={id} key={id} />
+            <SortableContext
+              items={products.map((p) => p.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {products.map((product) => (
+                <SortableItem product={product} key={product.id} />
               ))}
             </SortableContext>
           </TableBody>
         </Table>
       </DndContext>
     </>
+  )
+}
+
+function SortableItem({ product }: { product: Product }) {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+    id: product.id,
+  })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
+
+  return (
+    <TableRow key={product.id} style={style} ref={setNodeRef} {...attributes} {...listeners}>
+      <TableCell>{product.displayOrder}</TableCell>
+      <TableCell>{product.id}</TableCell>
+      <TableCell className="text-right">
+        <div className="flex items-center gap-2">{/* acciones */}</div>
+      </TableCell>
+    </TableRow>
   )
 }
 
