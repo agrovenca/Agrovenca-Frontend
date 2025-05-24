@@ -1,3 +1,14 @@
+export interface ProductResponse {
+  objects: Product[]
+  page: number
+  totalItems: number
+  totalPages: number
+  hasNextPage: boolean
+  hasPreviousPage: boolean
+  nextPage: number | null
+  previousPage: number | null
+}
+
 export interface ProductImage {
   id: string
   url: string

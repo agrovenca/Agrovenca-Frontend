@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   Table,
   TableBody,
@@ -8,10 +8,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import { GhostIcon, RefreshCwIcon } from 'lucide-react'
+import { RefreshCwIcon } from 'lucide-react'
 import { Loader } from '@/components/ui/loader'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { useDebouncedCallback } from 'use-debounce'
 import {
   DndContext,
@@ -37,6 +35,10 @@ import CreateProduct from './Create'
 import { getAll as getCategories } from '@/actions/settings/categories'
 import { getAll as getUnities } from '@/actions/settings/unities'
 import { getProducts } from '@/actions/settings/products'
+import SearchBar from '@/components/blocks/SearchBar'
+import { usePaginationStore } from '@/store/shared/usePaginationStore'
+import Pagination from '../users/Pagination'
+import { formatDecimal } from '@/lib/utils'
 
 function ProductsSettingsPage() {
   const [products, setProducts] = useState<Product[]>([])
@@ -45,18 +47,25 @@ function ProductsSettingsPage() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const paginationData = usePaginationStore((state) => state.paginationData)
+  const setPaginationData = usePaginationStore((state) => state.setPaginationData)
 
-  const fetchData = async (page: number, search: string) => {
-    setIsLoading(true)
-    try {
-      const response = await getProducts({ page, search })
-      setProducts(response.data.objects)
-    } catch (error) {
-      console.error('Error al obtener productos', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const fetchData = useCallback(
+    async (currentPage: number, search: string) => {
+      setIsLoading(true)
+      try {
+        const { data } = await getProducts({ page: currentPage, search })
+        setProducts(data.objects)
+        setPaginationData({ ...data })
+      } catch (error) {
+        console.error('Error al obtener productos', error)
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [setPaginationData]
+  )
 
   const getAssociatedData = async () => {
     setIsLoading(true)
@@ -75,15 +84,16 @@ function ProductsSettingsPage() {
   }
 
   useEffect(() => {
-    fetchData(page, search)
-  }, [page, search])
+    fetchData(page, debouncedSearch)
+  }, [fetchData, page, debouncedSearch])
 
   useEffect(() => {
     getAssociatedData()
   }, [])
 
   const debounced = useDebouncedCallback((value) => {
-    fetchData(1, value)
+    setPage(1)
+    setDebouncedSearch(value)
   }, 500)
 
   const handleSearchChange = (value: string) => {
@@ -118,34 +128,11 @@ function ProductsSettingsPage() {
     )
   }
 
-  if (products.length <= 0) {
-    return (
-      <div className="p-4 w-full flex justify-center items-center flex-col">
-        <GhostIcon className="w-16 h-16 animate-bounce" />
-        <span>No existen productos</span>
-      </div>
-    )
-  }
-
   return (
     <>
       <div className="w-full flex justify-between gap-4 mb-4">
         <div className="pt-4 flex-1">
-          <form>
-            <div className="grid w-full max-w-sm items-center gap-1.5">
-              <Label htmlFor="search" className="sr-only">
-                Buscar
-              </Label>
-              <Input
-                type="search"
-                id="search"
-                placeholder="Buscar usuarios"
-                value={search}
-                autoFocus
-                onChange={(e) => handleSearchChange(e.target.value)}
-              />
-            </div>
-          </form>
+          <SearchBar value={search} onChange={handleSearchChange} />
         </div>
         <div className="flex items-center gap-2">
           <CreateProduct
@@ -168,22 +155,40 @@ function ProductsSettingsPage() {
         <Table className="my-4">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">#</TableHead>
+              <TableHead className="w-[50px]">#</TableHead>
+              <TableHead className="w-34"></TableHead>
               <TableHead>Producto</TableHead>
+              <TableHead className="w-[100px]">Stock</TableHead>
+              <TableHead className="w-[150px]">Precio</TableHead>
+              <TableHead className="w-[150px]">Segundo Precio</TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            <SortableContext
-              items={products.map((p) => p.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              {products.map((product) => (
-                <SortableItem product={product} key={product.id} />
-              ))}
-            </SortableContext>
+            {products.length > 0 ? (
+              <SortableContext
+                items={products.map((p) => p.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                {products.map((product) => (
+                  <SortableItem product={product} key={product.id} />
+                ))}
+              </SortableContext>
+            ) : (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center">
+                  No existen productos
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
+        {paginationData && (
+          <Pagination
+            paginationData={paginationData}
+            onPageChange={(newPage) => setPage(newPage)}
+          />
+        )}
       </DndContext>
     </>
   )
@@ -202,7 +207,32 @@ function SortableItem({ product }: { product: Product }) {
   return (
     <TableRow key={product.id} style={style} ref={setNodeRef} {...attributes} {...listeners}>
       <TableCell>{product.displayOrder}</TableCell>
-      <TableCell>{product.id}</TableCell>
+      <TableCell>
+        <figure className="w-30 h-30 overflow-hidden rounded-md border relative">
+          <img
+            className="w-full h-full object-cover"
+            src={'https://ralfvanveen.com/wp-content/uploads/2021/06/Placeholder-_-Glossary.svg'}
+            alt={`Imagen del producto ${product.name}`}
+          />
+          <span className="absolute top-0 right-0 bg-blue-500 text-white py-0.5 px-2 rounded-full">
+            0
+          </span>
+        </figure>
+      </TableCell>
+      <TableCell>{product.name}</TableCell>
+      <TableCell>
+        <span className="py-1 px-3 rounded-md bg-gray-200 dark:bg-gray-700">{product.stock}</span>
+      </TableCell>
+      <TableCell>
+        <span className="py-1 px-3 rounded-md bg-gray-200 dark:bg-gray-700">
+          $ {formatDecimal(product.price)}
+        </span>
+      </TableCell>
+      <TableCell>
+        <span className="py-1 px-3 rounded-md bg-gray-200 dark:bg-gray-700">
+          $ {formatDecimal(product.secondPrice)}
+        </span>
+      </TableCell>
       <TableCell className="text-right">
         <div className="flex items-center gap-2">{/* acciones */}</div>
       </TableCell>

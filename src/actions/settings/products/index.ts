@@ -1,9 +1,13 @@
 import { apiWithCredentials } from '@/actions/api'
 import { ProductSchema } from '@/schemas/products'
+import { ProductResponse } from '@/types/product'
 import axios from 'axios'
 import { z } from 'zod'
 
-export const getProducts = async (params?: { page: number; search: string }) => {
+export const getProducts = async (params?: {
+  page: number
+  search: string
+}): Promise<{ data: ProductResponse }> => {
   const url = new URL(apiWithCredentials.defaults.baseURL?.toString() + '/settings/products' || '')
 
   if (params) {
@@ -20,7 +24,7 @@ export const getProducts = async (params?: { page: number; search: string }) => 
     if (axios.isAxiosError(error)) {
       return error.response?.data || { error: 'An unknown error occurred' }
     }
-    return { error: 'An unknown error occurred' }
+    throw new Error('An unknown error occurred')
   }
 }
 

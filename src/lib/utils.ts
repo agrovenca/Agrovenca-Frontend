@@ -55,3 +55,8 @@ export const getUserRole = (user: User) => {
   if (user.isMod) return 'Mod'
   return 'Cliente'
 }
+
+export const formatDecimal = (value?: number | string): string => {
+  const num = typeof value === 'number' ? value : Number(value)
+  return isNaN(num) ? '0.00' : num.toFixed(2)
+}
