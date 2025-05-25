@@ -15,23 +15,24 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import ErrorForm from '@/components/pages/ErrorForm'
 import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { UnitySchema } from '@/schemas/unity'
 import { Unity } from '@/types/unity'
 import { Loader } from '@/components/ui/loader'
 import { update } from '@/actions/settings/unities'
+import { useUnityStore } from '@/store/dashboard/useUnityStore'
 
 type Props = {
   unity: Unity
-  unities: Unity[]
-  setData: Dispatch<SetStateAction<Unity[]>>
 }
 
-function Update({ unity, unities, setData }: Props) {
+function Update({ unity }: Props) {
   const [charCount, setCharCount] = useState(unity.description?.length || 0)
   const [open, setOpen] = useState(false)
+  const unities = useUnityStore((state) => state.unities)
+  const setUnities = useUnityStore((state) => state.setUnities)
   const errorStatus = useResponseStatusStore((state) => state.errorStatus)
   const setError = useResponseStatusStore((state) => state.setError)
 
@@ -64,7 +65,7 @@ function Update({ unity, unities, setData }: Props) {
       setOpen(false)
 
       const newData = unities.map((unity) => (unity.id === updatedUnity.id ? updatedUnity : unity))
-      setData(newData)
+      setUnities(newData)
     }
   }
 

@@ -39,3 +39,15 @@ export const create = async (data: z.infer<typeof ProductSchema>) => {
     return { error: 'An unknown error occurred' }
   }
 }
+
+export const destroy = async (id: string) => {
+  try {
+    const res = await apiWithCredentials.delete(`/settings/products/${id}`, {})
+    return res
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      return error.response?.data || { error: 'An unknown error occurred' }
+    }
+    return { error: 'An unknown error occurred' }
+  }
+}

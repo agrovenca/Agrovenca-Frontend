@@ -1,5 +1,5 @@
 import { destroy, getAll } from '@/actions/settings/categories'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   Table,
   TableBody,
@@ -9,7 +9,6 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import CreateCategory from './Create'
-import { Category } from '@/types/category'
 import { Button } from '@/components/ui/button'
 import { RefreshCwIcon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
@@ -17,26 +16,27 @@ import { getLocalDateTime, truncateText } from '@/lib/utils'
 import DeleteDialog from '@/components/blocks/DeleteDialog'
 import Update from './Update'
 import { Loader } from '@/components/ui/loader'
+import { useCategoryStore } from '@/store/dashboard/useCategoriesStore'
 
 function CategoriesSettingsPage() {
-  const [data, setData] = useState<Category[]>([])
+  const categories = useCategoryStore((state) => state.categories)
+  const setCategories = useCategoryStore((state) => state.setCategories)
   const [isLoading, setIsLoading] = useState(false)
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setIsLoading(true)
     const res = await getAll()
     if ('data' in res) {
-      console.log(res.data)
-      setData(res.data)
+      setCategories(res.data)
     } else {
       console.error('Error al obtener categorías:', res.error)
     }
     setIsLoading(false)
-  }
+  }, [setCategories])
 
   useEffect(() => {
     fetchData()
-  }, [])
+  }, [fetchData])
 
   if (isLoading) {
     return (
@@ -55,7 +55,7 @@ function CategoriesSettingsPage() {
             <RefreshCwIcon />
             <span>Recargar</span>
           </Button>
-          <CreateCategory categories={data} setData={setData} />
+          <CreateCategory />
         </div>
       </div>
       <Table className="my-4">
@@ -70,8 +70,8 @@ function CategoriesSettingsPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.length > 0 ? (
-            data.map((category) => (
+          {categories.length > 0 ? (
+            categories.map((category) => (
               <TableRow key={category.id}>
                 <TableCell className="font-medium">{category.name}</TableCell>
                 <TableCell className="italic">{truncateText(category.description, 25)}</TableCell>
@@ -84,7 +84,7 @@ function CategoriesSettingsPage() {
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center gap-2">
-                    <Update category={category} categories={data} setData={setData} />
+                    <Update category={category} />
                     <DeleteDialog action={() => destroy(category.id)} callback={fetchData} />
                   </div>
                 </TableCell>

@@ -15,22 +15,19 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { Dispatch, SetStateAction, useState } from 'react'
+import { useState } from 'react'
 import ErrorForm from '@/components/pages/ErrorForm'
 import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { UnitySchema } from '@/schemas/unity'
 import { create } from '@/actions/settings/unities'
 import { Loader } from '@/components/ui/loader'
-import { Unity } from '@/types/unity'
+import { useUnityStore } from '@/store/dashboard/useUnityStore'
 
-type Props = {
-  unities: Unity[]
-  setData: Dispatch<SetStateAction<Unity[]>>
-}
-
-function CreateUnity({ unities, setData }: Props) {
+function CreateUnity() {
   const [charCount, setCharCount] = useState(0)
   const [open, setOpen] = useState(false)
+  const unities = useUnityStore((state) => state.unities)
+  const setUnities = useUnityStore((state) => state.setUnities)
   const errorStatus = useResponseStatusStore((state) => state.errorStatus)
   const setError = useResponseStatusStore((state) => state.setError)
 
@@ -61,7 +58,7 @@ function CreateUnity({ unities, setData }: Props) {
       reset()
       setCharCount(0)
       setOpen(false)
-      setData([unity, ...unities])
+      setUnities([unity, ...unities])
     }
   }
 

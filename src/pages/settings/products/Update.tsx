@@ -16,13 +16,13 @@ import {
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
+  SheetDescription,
 } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
-import { PlusIcon } from 'lucide-react'
+import { EditIcon } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { SubmitHandler, useForm } from 'react-hook-form'
@@ -33,6 +33,7 @@ import { useState } from 'react'
 import ErrorForm from '@/components/pages/ErrorForm'
 import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { ProductSchema } from '@/schemas/products'
+import { Product } from '@/types/product'
 import { Loader } from '@/components/ui/loader'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
@@ -41,8 +42,12 @@ import { useProductsStore } from '@/store/dashboard/useProductsStore'
 import { useCategoryStore } from '@/store/dashboard/useCategoriesStore'
 import { useUnityStore } from '@/store/dashboard/useUnityStore'
 
-function CreateProduct() {
-  const [charCount, setCharCount] = useState(0)
+type Props = {
+  object: Product
+}
+
+function UpdateProduct({ object }: Props) {
+  const [charCount, setCharCount] = useState(object.description.length)
   const [isLoading, setIsLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
 
@@ -56,15 +61,15 @@ function CreateProduct() {
   const form = useForm<z.infer<typeof ProductSchema>>({
     resolver: zodResolver(ProductSchema),
     defaultValues: {
-      name: '',
-      description: '',
-      price: 0,
-      secondPrice: 0,
-      stock: 1,
-      freeShipping: true,
-      videoId: '',
-      categoryId: '',
-      unityId: '',
+      name: object.name,
+      description: object.description,
+      price: object.price,
+      secondPrice: object.secondPrice,
+      stock: object.stock,
+      freeShipping: object.freeShipping,
+      videoId: object.videoId,
+      categoryId: object.categoryId,
+      unityId: object.unityId,
     },
   })
 
@@ -96,17 +101,16 @@ function CreateProduct() {
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button className="flex items-center gap-2 bg-yellow-400 text-black hover:text-white">
-          <PlusIcon />
-          <span>Crear</span>
+        <Button variant={'ghost'} size={'icon'} className="text-blue-500" title="Editar producto">
+          <EditIcon />
         </Button>
       </SheetTrigger>
       <SheetContent className="overflow-auto sm:max-w-lg">
         <SheetHeader>
-          <SheetTitle>Crear un nuevo producto</SheetTitle>
+          <SheetTitle>Actualizar producto</SheetTitle>
           <SheetDescription>
-            Completa el formulario para crear un nuevo producto. Asegúrate de que todos los campos
-            sean válidos antes de enviar.
+            Actualiza la información del producto. Puedes cambiar el nombre, descripción, precio,
+            stock, unidad y categoría.
           </SheetDescription>
         </SheetHeader>
         <section className="p-4 space-y-4">
@@ -330,4 +334,4 @@ function CreateProduct() {
   )
 }
 
-export default CreateProduct
+export default UpdateProduct

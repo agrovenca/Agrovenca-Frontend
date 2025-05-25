@@ -1,7 +1,6 @@
 import { destroy, getAll } from '@/actions/settings/unities'
 import { Loader } from '@/components/ui/loader'
-import { Unity } from '@/types/unity'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   Table,
   TableBody,
@@ -16,25 +15,27 @@ import { getLocalDateTime, truncateText } from '@/lib/utils'
 import DeleteDialog from '@/components/blocks/DeleteDialog'
 import CreateUnity from './Create'
 import Update from './Update'
+import { useUnityStore } from '@/store/dashboard/useUnityStore'
 
 function UnitiesSettingsPage() {
   const [isLoading, setIsLoading] = useState(false)
-  const [data, setData] = useState<Unity[]>([])
+  const unities = useUnityStore((state) => state.unities)
+  const setUnities = useUnityStore((state) => state.setUnities)
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setIsLoading(true)
     const res = await getAll()
     if ('data' in res) {
-      setData(res.data)
+      setUnities(res.data)
     } else {
       console.error('Error al obtener categorías:', res.error)
     }
     setIsLoading(false)
-  }
+  }, [setUnities])
 
   useEffect(() => {
     fetchData()
-  }, [])
+  }, [fetchData])
 
   if (isLoading) {
     return (
@@ -53,7 +54,7 @@ function UnitiesSettingsPage() {
             <RefreshCwIcon />
             <span>Recargar</span>
           </Button>
-          <CreateUnity unities={data} setData={setData} />
+          <CreateUnity />
         </div>
       </div>
       <Table className="my-4">
@@ -67,8 +68,8 @@ function UnitiesSettingsPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.length > 0 ? (
-            data.map((unity) => (
+          {unities.length > 0 ? (
+            unities.map((unity) => (
               <TableRow key={unity.id}>
                 <TableCell className="font-medium">{unity.name}</TableCell>
                 <TableCell className="italic">{truncateText(unity.description, 25)}</TableCell>
@@ -76,7 +77,7 @@ function UnitiesSettingsPage() {
                 <TableCell>{getLocalDateTime(unity.updatedAt, ['es-ve'])}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center gap-2">
-                    <Update unity={unity} unities={data} setData={setData} />
+                    <Update unity={unity} />
                     <DeleteDialog action={() => destroy(unity.id)} callback={fetchData} />
                   </div>
                 </TableCell>

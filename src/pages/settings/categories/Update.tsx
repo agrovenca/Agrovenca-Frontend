@@ -15,23 +15,24 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import ErrorForm from '@/components/pages/ErrorForm'
 import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { CategorySchema } from '@/schemas/category'
 import { Category } from '@/types/category'
 import { Loader } from '@/components/ui/loader'
 import { update } from '@/actions/settings/categories'
+import { useCategoryStore } from '@/store/dashboard/useCategoriesStore'
 
 type Props = {
   category: Category
-  categories: Category[]
-  setData: Dispatch<SetStateAction<Category[]>>
 }
 
-function Update({ category, categories, setData }: Props) {
+function Update({ category }: Props) {
   const [charCount, setCharCount] = useState(category.description?.length || 0)
   const [open, setOpen] = useState(false)
+  const categories = useCategoryStore((state) => state.categories)
+  const setCategories = useCategoryStore((state) => state.setCategories)
   const errorStatus = useResponseStatusStore((state) => state.errorStatus)
   const setError = useResponseStatusStore((state) => state.setError)
 
@@ -66,7 +67,7 @@ function Update({ category, categories, setData }: Props) {
       const newData = categories.map((cat) =>
         cat.id === updatedCategory.id ? updatedCategory : cat
       )
-      setData(newData)
+      setCategories(newData)
     }
   }
 
