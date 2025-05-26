@@ -32,12 +32,12 @@ import { toast } from 'sonner'
 import { useState } from 'react'
 import ErrorForm from '@/components/pages/ErrorForm'
 import { useResponseStatusStore } from '@/store/api/useResponseStatus'
-import { ProductSchema } from '@/schemas/products'
+import { ProductUpdateSchema } from '@/schemas/products'
 import { Product } from '@/types/product'
 import { Loader } from '@/components/ui/loader'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
-import { create } from '@/actions/settings/products'
+import { update } from '@/actions/settings/products'
 import { useProductsStore } from '@/store/dashboard/useProductsStore'
 import { useCategoryStore } from '@/store/dashboard/useCategoriesStore'
 import { useUnityStore } from '@/store/dashboard/useUnityStore'
@@ -58,8 +58,8 @@ function UpdateProduct({ object }: Props) {
   const errorStatus = useResponseStatusStore((state) => state.errorStatus)
   const setError = useResponseStatusStore((state) => state.setError)
 
-  const form = useForm<z.infer<typeof ProductSchema>>({
-    resolver: zodResolver(ProductSchema),
+  const form = useForm<z.infer<typeof ProductUpdateSchema>>({
+    resolver: zodResolver(ProductUpdateSchema),
     defaultValues: {
       name: object.name,
       description: object.description,
@@ -73,16 +73,16 @@ function UpdateProduct({ object }: Props) {
     },
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof ProductSchema>> = async (data) => {
+  const onSubmit: SubmitHandler<z.infer<typeof ProductUpdateSchema>> = async (data) => {
     setIsLoading(true)
     try {
-      const res = await create(data)
+      const res = await update(object.id, data)
 
       if (res.error) {
         setError(res.error)
       }
 
-      if (res.status === 201) {
+      if (res.status === 200) {
         const { message, product } = res.data
         toast.success(message)
 

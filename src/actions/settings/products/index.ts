@@ -1,5 +1,5 @@
 import { apiWithCredentials } from '@/actions/api'
-import { ProductSchema } from '@/schemas/products'
+import { ProductSchema, ProductUpdateSchema } from '@/schemas/products'
 import { ProductResponse } from '@/types/product'
 import axios from 'axios'
 import { z } from 'zod'
@@ -31,6 +31,18 @@ export const getProducts = async (params?: {
 export const create = async (data: z.infer<typeof ProductSchema>) => {
   try {
     const res = await apiWithCredentials.post(`/settings/products`, data)
+    return res
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      return error.response?.data || { error: 'An unknown error occurred' }
+    }
+    return { error: 'An unknown error occurred' }
+  }
+}
+
+export const update = async (id: string, data: z.infer<typeof ProductUpdateSchema>) => {
+  try {
+    const res = await apiWithCredentials.patch(`/settings/products/${id}`, data, {})
     return res
   } catch (error) {
     if (axios.isAxiosError(error)) {
