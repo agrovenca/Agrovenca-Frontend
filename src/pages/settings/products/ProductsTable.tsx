@@ -48,8 +48,8 @@ const GetTableRow = ({
   page,
   search,
   product,
-  fetchData,
   isDraggable,
+  fetchData,
 }: {
   page: number
   search: string
@@ -57,6 +57,7 @@ const GetTableRow = ({
   isDraggable: boolean
   fetchData: (page: number, search: string) => Promise<void>
 }) => {
+  const deleteProduct = useProductsStore((state) => state.deleteProduct)
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: product.id,
   })
@@ -67,6 +68,15 @@ const GetTableRow = ({
   }
 
   const sortableProps = isDraggable ? { ref: setNodeRef, style, ...attributes, ...listeners } : {}
+
+  const handleDelete = async (productId: string) => {
+    try {
+      deleteProduct(productId)
+      await fetchData(page, search)
+    } catch (error) {
+      console.error('Error al eliminar el producto:', error)
+    }
+  }
 
   return (
     <TableRow key={product.id} {...sortableProps}>
@@ -111,7 +121,7 @@ const GetTableRow = ({
             <UpdateProduct object={product} />
             <DeleteDialog
               action={() => destroy(product.id)}
-              callback={() => fetchData(page, search)}
+              callback={() => handleDelete(product.id)}
             />
           </div>
         )}

@@ -279,11 +279,12 @@ function UpdateProduct({ object }: Props) {
 
               {errorStatus.error && <ErrorForm message={errorStatus.message} />}
 
-              <div className="flex items-center gap-2 justify-end">
+              <div className="flex flex-col items-center gap-2 justify-end">
                 <Button
                   type="button"
                   variant={'secondary'}
                   onClick={() => form.reset({ ...object })}
+                  className="w-full uppercase"
                 >
                   Restablecer
                 </Button>

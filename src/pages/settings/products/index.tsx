@@ -125,11 +125,11 @@ function ProductsSettingsPage() {
         </div>
       </div>
       <ProductsTable
+        setPage={setPage}
+        isDraggable={dragAndDropActive}
         page={page}
         search={search}
-        setPage={setPage}
         fetchData={fetchData}
-        isDraggable={dragAndDropActive}
       />
     </>
   )

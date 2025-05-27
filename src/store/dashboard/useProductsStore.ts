@@ -5,6 +5,7 @@ interface ProductsState {
   products: Product[]
   setProducts: (products: Product[] | ((products: Product[]) => Product[])) => void
   updateProduct: (updatedProduct: Product) => void
+  deleteProduct: (id: string) => void
 }
 
 export const useProductsStore = create<ProductsState>((set) => ({
@@ -19,5 +20,9 @@ export const useProductsStore = create<ProductsState>((set) => ({
       products: state.products.map((product) =>
         product.id === updatedProduct.id ? updatedProduct : product
       ),
+    })),
+  deleteProduct: (id: string) =>
+    set((state) => ({
+      products: state.products.filter((product) => product.id !== id),
     })),
 }))
