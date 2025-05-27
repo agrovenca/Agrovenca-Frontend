@@ -29,7 +29,7 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import ErrorForm from '@/components/pages/ErrorForm'
 import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { ProductUpdateSchema } from '@/schemas/products'
@@ -39,8 +39,8 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
 import { update } from '@/actions/settings/products'
 import { useProductsStore } from '@/store/dashboard/useProductsStore'
-import { useCategoryStore } from '@/store/dashboard/useCategoriesStore'
-import { useUnityStore } from '@/store/dashboard/useUnityStore'
+import { useCategoriesStore } from '@/store/dashboard/useCategoriesStore'
+import { useUnitiesStore } from '@/store/dashboard/useUnitiesStore'
 
 type Props = {
   object: Product
@@ -51,26 +51,15 @@ function UpdateProduct({ object }: Props) {
   const [isLoading, setIsLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
 
-  const products = useProductsStore((state) => state.products)
-  const setProducts = useProductsStore((state) => state.setProducts)
-  const categories = useCategoryStore((state) => state.categories)
-  const unities = useUnityStore((state) => state.unities)
+  const updateProduct = useProductsStore((state) => state.updateProduct)
+  const categories = useCategoriesStore((state) => state.categories)
+  const unities = useUnitiesStore((state) => state.unities)
   const errorStatus = useResponseStatusStore((state) => state.errorStatus)
   const setError = useResponseStatusStore((state) => state.setError)
 
   const form = useForm<z.infer<typeof ProductUpdateSchema>>({
     resolver: zodResolver(ProductUpdateSchema),
-    defaultValues: {
-      name: object.name,
-      description: object.description,
-      price: object.price,
-      secondPrice: object.secondPrice,
-      stock: object.stock,
-      freeShipping: object.freeShipping,
-      videoId: object.videoId,
-      categoryId: object.categoryId,
-      unityId: object.unityId,
-    },
+    defaultValues: { ...object },
   })
 
   const onSubmit: SubmitHandler<z.infer<typeof ProductUpdateSchema>> = async (data) => {
@@ -86,10 +75,10 @@ function UpdateProduct({ object }: Props) {
         const { message, product } = res.data
         toast.success(message)
 
-        setCharCount(0)
+        updateProduct(product)
         form.reset()
+        setCharCount(0)
         setIsOpen(false)
-        setProducts([product, ...products])
       }
     } catch (_error) {
       toast.error('Ocurrió un error. Por favor intenta de nuevo.')
@@ -97,6 +86,13 @@ function UpdateProduct({ object }: Props) {
       setIsLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (isOpen) {
+      form.reset({ ...object })
+      setCharCount(object.description?.length || 0)
+    }
+  }, [isOpen, object, form])
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -283,15 +279,24 @@ function UpdateProduct({ object }: Props) {
 
               {errorStatus.error && <ErrorForm message={errorStatus.message} />}
 
-              <Button
-                type="submit"
-                disabled={isLoading || !form.formState.isValid}
-                className={`${
-                  isLoading || !form.formState.isValid ? 'cursor-not-allowed' : 'cursor-pointer'
-                } w-full uppercase`}
-              >
-                {isLoading ? <Loader size="sm" variant="spinner" /> : 'Crear'}
-              </Button>
+              <div className="flex items-center gap-2 justify-end">
+                <Button
+                  type="button"
+                  variant={'secondary'}
+                  onClick={() => form.reset({ ...object })}
+                >
+                  Restablecer
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isLoading || !form.formState.isValid}
+                  className={`${
+                    isLoading || !form.formState.isValid ? 'cursor-not-allowed' : 'cursor-pointer'
+                  } w-full uppercase`}
+                >
+                  {isLoading ? <Loader size="sm" variant="spinner" /> : 'Actualizar'}
+                </Button>
+              </div>
             </form>
           </Form>
           <Separator />

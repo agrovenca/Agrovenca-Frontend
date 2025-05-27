@@ -16,11 +16,11 @@ import { getLocalDateTime, truncateText } from '@/lib/utils'
 import DeleteDialog from '@/components/blocks/DeleteDialog'
 import Update from './Update'
 import { Loader } from '@/components/ui/loader'
-import { useCategoryStore } from '@/store/dashboard/useCategoriesStore'
+import { useCategoriesStore } from '@/store/dashboard/useCategoriesStore'
 
 function CategoriesSettingsPage() {
-  const categories = useCategoryStore((state) => state.categories)
-  const setCategories = useCategoryStore((state) => state.setCategories)
+  const categories = useCategoriesStore((state) => state.categories)
+  const setCategories = useCategoriesStore((state) => state.setCategories)
   const [isLoading, setIsLoading] = useState(false)
 
   const fetchData = useCallback(async () => {

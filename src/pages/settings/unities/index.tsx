@@ -15,12 +15,12 @@ import { getLocalDateTime, truncateText } from '@/lib/utils'
 import DeleteDialog from '@/components/blocks/DeleteDialog'
 import CreateUnity from './Create'
 import Update from './Update'
-import { useUnityStore } from '@/store/dashboard/useUnityStore'
+import { useUnitiesStore } from '@/store/dashboard/useUnitiesStore'
 
 function UnitiesSettingsPage() {
   const [isLoading, setIsLoading] = useState(false)
-  const unities = useUnityStore((state) => state.unities)
-  const setUnities = useUnityStore((state) => state.setUnities)
+  const unities = useUnitiesStore((state) => state.unities)
+  const setUnities = useUnitiesStore((state) => state.setUnities)
 
   const fetchData = useCallback(async () => {
     setIsLoading(true)

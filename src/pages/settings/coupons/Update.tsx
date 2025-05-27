@@ -35,80 +35,77 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import ErrorForm from '@/components/pages/ErrorForm'
 import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { CouponUpdateSchema } from '@/schemas/coupons'
 import { CouponType } from '@/types/coupon'
 import { Loader } from '@/components/ui/loader'
 import { update } from '@/actions/settings/coupons'
+import { useCouponsStore } from '@/store/dashboard/useCouponsStore'
 
 type Props = {
   coupon: CouponType
-  coupons: CouponType[]
-  setData: Dispatch<SetStateAction<CouponType[]>>
 }
 
-function Update({ coupon, coupons, setData }: Props) {
-  const [isLoading, setIsLoading] = useState(false)
+function UpdateCoupon({ coupon }: Props) {
   const [descriptionCount, setDescriptionCount] = useState(coupon.description?.length || 0)
-  const [open, setOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const updateCoupon = useCouponsStore((state) => state.updateCoupon)
   const errorStatus = useResponseStatusStore((state) => state.errorStatus)
   const setError = useResponseStatusStore((state) => state.setError)
 
   const form = useForm<z.infer<typeof CouponUpdateSchema>>({
     resolver: zodResolver(CouponUpdateSchema),
     defaultValues: {
-      description: coupon.description,
-      discount: coupon.discount,
-      active: coupon.active,
-      type: coupon.type,
-      usageLimit: coupon.usageLimit,
+      ...coupon,
+      description: coupon.description || undefined,
       expiresAt: coupon.expiresAt ? new Date(coupon.expiresAt) : undefined,
     },
   })
 
   const onSubmit: SubmitHandler<z.infer<typeof CouponUpdateSchema>> = async (data) => {
-    const res = await update(coupon.id, data)
-    const { reset } = form
+    setIsLoading(true)
+    try {
+      const res = await update(coupon.id, data)
 
-    if (res.error) {
-      setError(res.error)
+      if (res.error) {
+        setError(res.error)
+      }
+
+      if (res.status === 200) {
+        const { message, coupon: updatedCoupon } = res.data
+        toast.success(message)
+
+        form.reset()
+        setDescriptionCount(0)
+        setIsOpen(false)
+        updateCoupon(updatedCoupon)
+      }
+    } catch (_error) {
+      toast.error('Ocurrió un error. Por favor intenta de nuevo.')
+    } finally {
       setIsLoading(false)
-    }
-
-    if (res.status === 200) {
-      const { message, coupon: updatedCoupon } = res.data
-      toast.success(message)
-
-      reset()
-      setDescriptionCount(0)
-      setOpen(false)
-      setIsLoading(false)
-
-      const newData = coupons.map((c) => (c.id === updatedCoupon.id ? updatedCoupon : c))
-      setData(newData)
     }
   }
 
   useEffect(() => {
-    const { description, discount, active, type, usageLimit, expiresAt } = coupon
+    const { description, expiresAt } = coupon
     const expiresAtDate = expiresAt ? new Date(expiresAt) : undefined
 
-    if (open) {
+    if (isOpen) {
       form.reset({
-        description,
-        discount,
-        active,
-        type,
-        usageLimit,
+        ...coupon,
+        description: description || undefined,
         expiresAt: expiresAtDate,
       })
     }
-  }, [open, coupon, form])
+  }, [isOpen, coupon, form])
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button size={'icon'} variant={'ghost'} className="cursor-pointer text-blue-500">
           <EditIcon />
@@ -132,6 +129,7 @@ function Update({ coupon, coupons, setData }: Props) {
                       placeholder="Escribe una breve descripción"
                       id="description"
                       className="field-sizing-content"
+                      maxLength={255}
                       {...field}
                       onChange={(e) => {
                         setDescriptionCount(e.target.value.length)
@@ -292,4 +290,4 @@ function Update({ coupon, coupons, setData }: Props) {
   )
 }
 
-export default Update
+export default UpdateCoupon

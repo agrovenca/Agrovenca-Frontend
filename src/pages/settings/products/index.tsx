@@ -10,8 +10,8 @@ import { getProducts } from '@/actions/settings/products'
 import SearchBar from '@/components/blocks/SearchBar'
 import { usePaginationStore } from '@/store/shared/usePaginationStore'
 import { useProductsStore } from '@/store/dashboard/useProductsStore'
-import { useUnityStore } from '@/store/dashboard/useUnityStore'
-import { useCategoryStore } from '@/store/dashboard/useCategoriesStore'
+import { useUnitiesStore } from '@/store/dashboard/useUnitiesStore'
+import { useCategoriesStore } from '@/store/dashboard/useCategoriesStore'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import ExtendedTooltip from '@/components/blocks/ExtendedTooltip'
@@ -25,8 +25,8 @@ function ProductsSettingsPage() {
   const [dragAndDropActive, setDragAndDropActive] = useState(false)
 
   const setProducts = useProductsStore((state) => state.setProducts)
-  const setUnities = useUnityStore((state) => state.setUnities)
-  const setCategories = useCategoryStore((state) => state.setCategories)
+  const setUnities = useUnitiesStore((state) => state.setUnities)
+  const setCategories = useCategoriesStore((state) => state.setCategories)
   const setPaginationData = usePaginationStore((state) => state.setPaginationData)
 
   const fetchData = useCallback(

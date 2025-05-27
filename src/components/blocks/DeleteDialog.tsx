@@ -35,7 +35,7 @@ function DeleteDialog({
   callback,
 }: Props) {
   const [isLoading, setIsLoading] = useState(false)
-  const [open, setOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
   const errorStatus = useResponseStatusStore((state) => state.errorStatus)
   const setError = useResponseStatusStore((state) => state.setError)
 
@@ -53,7 +53,7 @@ function DeleteDialog({
     if (res.status === 200) {
       const { message } = res.data
       toast.success(message)
-      setOpen(false)
+      setIsOpen(false)
       setIsLoading(false)
       if (callback) {
         callback()
@@ -63,7 +63,7 @@ function DeleteDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button size={'icon'} variant={'ghost'} className="cursor-pointer text-red-500">
           <TrashIcon />

@@ -1,5 +1,5 @@
 import { Loader } from '@/components/ui/loader'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   Table,
   TableBody,
@@ -11,31 +11,33 @@ import {
 import { Button } from '@/components/ui/button'
 import { RefreshCwIcon } from 'lucide-react'
 import { getLocalDateTime, truncateText } from '@/lib/utils'
-import { CouponType, CouponTypes } from '@/types/coupon'
+import { CouponTypes } from '@/types/coupon'
 import { Badge } from '@/components/ui/badge'
 import CreateCoupon from './Create'
 import { destroy, getAll } from '@/actions/settings/coupons'
-import Update from './Update'
+import UpdateCoupon from './Update'
 import DeleteDialog from '@/components/blocks/DeleteDialog'
+import { useCouponsStore } from '@/store/dashboard/useCouponsStore'
 
 function CouponsSettingsPage() {
-  const [data, setData] = useState<CouponType[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const coupons = useCouponsStore((state) => state.coupons)
+  const setCoupons = useCouponsStore((state) => state.setCoupons)
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setIsLoading(true)
     const res = await getAll()
     if ('data' in res) {
-      setData(res.data)
+      setCoupons(res.data)
     } else {
       console.error('Error al obtener los cupones:', res.error)
     }
     setIsLoading(false)
-  }
+  }, [setCoupons])
 
   useEffect(() => {
     fetchData()
-  }, [])
+  }, [fetchData])
 
   if (isLoading) {
     return (
@@ -55,7 +57,7 @@ function CouponsSettingsPage() {
             <RefreshCwIcon />
             <span>Recargar</span>
           </Button>
-          <CreateCoupon coupons={data} setData={setData} />
+          <CreateCoupon />
         </div>
       </div>
       <Table className="my-4">
@@ -74,8 +76,8 @@ function CouponsSettingsPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.length > 0 ? (
-            data.map((coupon) => (
+          {coupons.length > 0 ? (
+            coupons.map((coupon) => (
               <TableRow key={coupon.id}>
                 <TableCell className="font-medium">{coupon.code}</TableCell>
                 <TableCell className="italic">{truncateText(coupon.description, 20)}</TableCell>
@@ -106,7 +108,7 @@ function CouponsSettingsPage() {
                 <TableCell>{getLocalDateTime(coupon.updatedAt, ['es-ve'])}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center gap-2">
-                    <Update coupon={coupon} coupons={data} setData={setData} />
+                    <UpdateCoupon coupon={coupon} />
                     <DeleteDialog action={() => destroy(coupon.id)} callback={fetchData} />
                   </div>
                 </TableCell>

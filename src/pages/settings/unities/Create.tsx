@@ -8,7 +8,6 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { PlusIcon } from 'lucide-react'
-import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { SubmitHandler, useForm } from 'react-hook-form'
@@ -21,22 +20,27 @@ import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { UnitySchema } from '@/schemas/unity'
 import { create } from '@/actions/settings/unities'
 import { Loader } from '@/components/ui/loader'
-import { useUnityStore } from '@/store/dashboard/useUnityStore'
+import { useUnitiesStore } from '@/store/dashboard/useUnitiesStore'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
 
 function CreateUnity() {
   const [charCount, setCharCount] = useState(0)
-  const [open, setOpen] = useState(false)
-  const unities = useUnityStore((state) => state.unities)
-  const setUnities = useUnityStore((state) => state.setUnities)
+  const [isOpen, setIsOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const unities = useUnitiesStore((state) => state.unities)
+  const setUnities = useUnitiesStore((state) => state.setUnities)
   const errorStatus = useResponseStatusStore((state) => state.errorStatus)
   const setError = useResponseStatusStore((state) => state.setError)
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isLoading },
-  } = useForm<z.infer<typeof UnitySchema>>({
+  const form = useForm<z.infer<typeof UnitySchema>>({
     resolver: zodResolver(UnitySchema),
     defaultValues: {
       name: '',
@@ -45,25 +49,33 @@ function CreateUnity() {
   })
 
   const onSubmit: SubmitHandler<z.infer<typeof UnitySchema>> = async (data) => {
-    const res = await create(data)
+    setIsLoading(true)
 
-    if (res.error) {
-      setError(res.error)
-    }
+    try {
+      const res = await create(data)
 
-    if (res.status === 201) {
-      const { message, unity } = res.data
-      toast.success(message)
+      if (res.error) {
+        setError(res.error)
+      }
 
-      reset()
-      setCharCount(0)
-      setOpen(false)
-      setUnities([unity, ...unities])
+      if (res.status === 201) {
+        const { message, unity } = res.data
+        toast.success(message)
+
+        form.reset()
+        setCharCount(0)
+        setIsOpen(false)
+        setUnities([unity, ...unities])
+      }
+    } catch (_error) {
+      toast.error('Ocurrió un error. Por favor intenta de nuevo.')
+    } finally {
+      setIsLoading(false)
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button className="ms-auto bg-blue-500 text-white dark:hover:bg-blue-600 cursor-pointer flex gap-2 items-center">
           <PlusIcon />
@@ -75,44 +87,64 @@ function CreateUnity() {
           <DialogTitle>Crear una unidad</DialogTitle>
           <DialogDescription>Estás a punto de crear una nueva unidad</DialogDescription>
         </DialogHeader>
-        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-          <div className="grid w-full gap-1.5">
-            <Label htmlFor="name">Nombre</Label>
-            <Input
-              id="name"
-              type="text"
-              {...register('name')}
-              placeholder="Nombre de la unidad"
-              maxLength={50}
+        <Form {...form}>
+          <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel htmlFor="name">Nombre</FormLabel>
+                  <Input
+                    id="name"
+                    type="text"
+                    maxLength={50}
+                    placeholder="Nombre de la unidad"
+                    {...field}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.name && <ErrorForm message={errors.name.message || ''} />}
-          </div>
-          <div className="grid w-full gap-1.5">
-            <Label htmlFor="description">Descripción (opcional)</Label>
-            <Textarea
-              placeholder="Escribe una breve descripción"
-              id="description"
-              className="field-sizing-content"
-              maxLength={255}
-              {...register('description', {
-                onChange: (e) => {
-                  setCharCount(e.target.value.length)
-                  return e
-                },
-              })}
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripción (opcional)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Escribe una breve descripción"
+                      className="resize-none"
+                      maxLength={255}
+                      {...field}
+                      onChange={(e) => {
+                        setCharCount(e.target.value.length)
+                        field.onChange(e)
+                      }}
+                    />
+                  </FormControl>
+                  <p className="text-sm text-muted-foreground" id="description-count">
+                    {charCount}/255
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            <p className="text-sm text-muted-foreground" id="description-count">
-              {charCount}/255
-            </p>
-            {errors.description && <ErrorForm message={errors.description.message || ''} />}
-          </div>
 
-          {errorStatus.error && <ErrorForm message={errorStatus.message} />}
+            {errorStatus.error && <ErrorForm message={errorStatus.message} />}
 
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? <Loader size="sm" variant="spinner" /> : 'Guardar'}
-          </Button>
-        </form>
+            <Button
+              type="submit"
+              className={
+                isLoading || !form.formState.isValid ? 'cursor-not-allowed' : 'cursor-pointer'
+              }
+              disabled={isLoading || !form.formState.isValid}
+            >
+              {isLoading ? <Loader size="sm" variant="spinner" /> : 'Guardar'}
+            </Button>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   )

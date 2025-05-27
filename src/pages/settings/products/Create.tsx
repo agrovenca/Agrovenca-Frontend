@@ -38,8 +38,8 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
 import { create } from '@/actions/settings/products'
 import { useProductsStore } from '@/store/dashboard/useProductsStore'
-import { useCategoryStore } from '@/store/dashboard/useCategoriesStore'
-import { useUnityStore } from '@/store/dashboard/useUnityStore'
+import { useCategoriesStore } from '@/store/dashboard/useCategoriesStore'
+import { useUnitiesStore } from '@/store/dashboard/useUnitiesStore'
 
 function CreateProduct() {
   const [charCount, setCharCount] = useState(0)
@@ -48,8 +48,8 @@ function CreateProduct() {
 
   const products = useProductsStore((state) => state.products)
   const setProducts = useProductsStore((state) => state.setProducts)
-  const categories = useCategoryStore((state) => state.categories)
-  const unities = useUnityStore((state) => state.unities)
+  const categories = useCategoriesStore((state) => state.categories)
+  const unities = useUnitiesStore((state) => state.unities)
   const errorStatus = useResponseStatusStore((state) => state.errorStatus)
   const setError = useResponseStatusStore((state) => state.setError)
 

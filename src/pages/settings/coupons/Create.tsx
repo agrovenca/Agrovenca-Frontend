@@ -16,7 +16,6 @@ import {
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { format } from 'date-fns'
-
 import { Button } from '@/components/ui/button'
 import { PlusIcon, Calendar as CalendarIcon } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
@@ -25,12 +24,12 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { Dispatch, SetStateAction, useState } from 'react'
+import { useState } from 'react'
 import ErrorForm from '@/components/pages/ErrorForm'
 import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { CouponSchema } from '@/schemas/coupons'
 import { create } from '@/actions/settings/coupons'
-import { CouponType, CouponTypes } from '@/types/coupon'
+import { CouponTypes } from '@/types/coupon'
 import { Loader } from '@/components/ui/loader'
 import {
   Form,
@@ -43,17 +42,16 @@ import {
 } from '@/components/ui/form'
 import { Checkbox } from '@/components/ui/checkbox'
 import { cn } from '@/lib/utils'
+import { useCouponsStore } from '@/store/dashboard/useCouponsStore'
 
-type Props = {
-  coupons: CouponType[]
-  setData: Dispatch<SetStateAction<CouponType[]>>
-}
-
-function CreateCoupon({ coupons, setData }: Props) {
+function CreateCoupon() {
   const [isLoading, setIsLoading] = useState(false)
   const [codeCount, setCodeCount] = useState(0)
   const [descriptionCount, setDescriptionCount] = useState(0)
-  const [open, setOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
+
+  const coupons = useCouponsStore((state) => state.coupons)
+  const setCoupons = useCouponsStore((state) => state.setCoupons)
   const errorStatus = useResponseStatusStore((state) => state.errorStatus)
   const setError = useResponseStatusStore((state) => state.setError)
 
@@ -72,28 +70,31 @@ function CreateCoupon({ coupons, setData }: Props) {
 
   const onSubmit: SubmitHandler<z.infer<typeof CouponSchema>> = async (data) => {
     setIsLoading(true)
-    const res = await create(data)
+    try {
+      const res = await create(data)
+      if (res.error) {
+        setError(res.error)
+      }
 
-    if (res.error) {
+      if (res.status === 201) {
+        const { message, newObject } = res.data
+        toast.success(message)
+
+        form.reset()
+        setCodeCount(0)
+        setDescriptionCount(0)
+        setIsOpen(false)
+        setCoupons([newObject, ...coupons])
+      }
+    } catch (_error) {
+      toast.error('Ocurrió un error. Por favor intenta de nuevo.')
+    } finally {
       setIsLoading(false)
-      setError(res.error)
-    }
-
-    if (res.status === 201) {
-      const { message, newObject } = res.data
-      toast.success(message)
-      setIsLoading(false)
-
-      form.reset()
-      setCodeCount(0)
-      setDescriptionCount(0)
-      setOpen(false)
-      setData([newObject, ...coupons])
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button className="ms-auto bg-blue-500 text-white dark:hover:bg-blue-600 cursor-pointer flex gap-2 items-center">
           <PlusIcon />
@@ -118,6 +119,7 @@ function CreateCoupon({ coupons, setData }: Props) {
                       id="code"
                       type="text"
                       placeholder="Código del cupón"
+                      maxLength={50}
                       {...field}
                       onChange={(e) => {
                         setCodeCount(e.target.value.length)
@@ -142,6 +144,7 @@ function CreateCoupon({ coupons, setData }: Props) {
                       placeholder="Escribe una breve descripción"
                       id="description"
                       className="field-sizing-content"
+                      maxLength={255}
                       {...field}
                       onChange={(e) => {
                         setDescriptionCount(e.target.value.length)

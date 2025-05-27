@@ -8,7 +8,6 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { EditIcon } from 'lucide-react'
-import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { SubmitHandler, useForm } from 'react-hook-form'
@@ -22,7 +21,15 @@ import { CategorySchema } from '@/schemas/category'
 import { Category } from '@/types/category'
 import { Loader } from '@/components/ui/loader'
 import { update } from '@/actions/settings/categories'
-import { useCategoryStore } from '@/store/dashboard/useCategoriesStore'
+import { useCategoriesStore } from '@/store/dashboard/useCategoriesStore'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
 
 type Props = {
   category: Category
@@ -30,59 +37,52 @@ type Props = {
 
 function Update({ category }: Props) {
   const [charCount, setCharCount] = useState(category.description?.length || 0)
-  const [open, setOpen] = useState(false)
-  const categories = useCategoryStore((state) => state.categories)
-  const setCategories = useCategoryStore((state) => state.setCategories)
+  const [isOpen, setIsOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const updateCategory = useCategoriesStore((state) => state.updateCategory)
   const errorStatus = useResponseStatusStore((state) => state.errorStatus)
   const setError = useResponseStatusStore((state) => state.setError)
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isLoading },
-  } = useForm<z.infer<typeof CategorySchema>>({
+  const form = useForm<z.infer<typeof CategorySchema>>({
     resolver: zodResolver(CategorySchema),
-    defaultValues: {
-      name: category.name,
-      description: category.description,
-    },
+    defaultValues: { ...category },
   })
 
   const onSubmit: SubmitHandler<z.infer<typeof CategorySchema>> = async (data) => {
-    const res = await update(category.id, data)
+    setIsLoading(true)
+    try {
+      const res = await update(category.id, data)
 
-    if (res.error) {
-      setError(res.error)
-    }
+      if (res.error) {
+        setError(res.error)
+      }
 
-    if (res.status === 200) {
-      const { message, category: updatedCategory } = res.data
-      toast.success(message)
+      if (res.status === 200) {
+        const { message, category: updatedCategory } = res.data
+        toast.success(message)
 
-      reset()
-      setCharCount(0)
-      setOpen(false)
-
-      const newData = categories.map((cat) =>
-        cat.id === updatedCategory.id ? updatedCategory : cat
-      )
-      setCategories(newData)
+        updateCategory(updatedCategory)
+        form.reset()
+        setCharCount(0)
+        setIsOpen(false)
+      }
+    } catch (_error) {
+      toast.error('Ocurrió un error. Por favor intenta de nuevo.')
+    } finally {
+      setIsLoading(false)
     }
   }
 
   useEffect(() => {
-    if (open) {
-      reset({
-        name: category.name,
-        description: category.description,
-      })
+    if (isOpen) {
+      form.reset({ ...category })
       setCharCount(category.description?.length || 0)
     }
-  }, [open, category, reset])
+  }, [isOpen, category, form])
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button size={'icon'} variant={'ghost'} className="cursor-pointer text-blue-500">
           <EditIcon />
@@ -93,43 +93,73 @@ function Update({ category }: Props) {
           <DialogTitle>Actualizar una categoría</DialogTitle>
           <DialogDescription>Estás a punto de actualizar esta categoría</DialogDescription>
         </DialogHeader>
-        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-          <div className="grid w-full gap-1.5">
-            <Label htmlFor="name">Nombre</Label>
-            <Input
-              id="name"
-              type="text"
-              {...register('name')}
-              placeholder="Nombre de la categoría"
-              maxLength={50}
+        <Form {...form}>
+          <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel htmlFor="name">Nombre</FormLabel>
+                  <Input
+                    id="name"
+                    type="text"
+                    maxLength={50}
+                    placeholder="Nombre de la categoría"
+                    {...field}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.name && <ErrorForm message={errors.name.message || ''} />}
-          </div>
-          <div className="grid w-full gap-1.5">
-            <Label htmlFor="description">Descripción (opcional)</Label>
-            <Textarea
-              placeholder="Escribe una breve descripción"
-              id="description"
-              className="field-sizing-content"
-              maxLength={255}
-              {...register('description', {
-                onChange: (e) => {
-                  setCharCount(e.target.value.length)
-                },
-              })}
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripción</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Escribe una breve descripción"
+                      className="resize-none"
+                      maxLength={255}
+                      {...field}
+                      onChange={(e) => {
+                        setCharCount(e.target.value.length)
+                        field.onChange(e)
+                      }}
+                    />
+                  </FormControl>
+                  <p className="text-sm text-muted-foreground" id="description-count">
+                    {charCount}/255
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            <p className="text-sm text-muted-foreground" id="description-count">
-              {charCount}/255
-            </p>
-            {errors.description && <ErrorForm message={errors.description.message || ''} />}
-          </div>
 
-          {errorStatus.error && <ErrorForm message={errorStatus.message} />}
+            {errorStatus.error && <ErrorForm message={errorStatus.message} />}
 
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? <Loader size="sm" variant="spinner" /> : 'Guardar'}
-          </Button>
-        </form>
+            <div className="flex items-center gap-2 justify-end">
+              <Button
+                type="button"
+                variant={'secondary'}
+                onClick={() => form.reset({ ...category })}
+              >
+                Restablecer
+              </Button>
+              <Button
+                className={
+                  isLoading || !form.formState.isValid ? 'cursor-not-allowed' : 'cursor-pointer'
+                }
+                type="submit"
+                disabled={isLoading || !form.formState.isValid}
+              >
+                {isLoading ? <Loader size="sm" variant="spinner" /> : 'Guardar'}
+              </Button>
+            </div>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   )

@@ -8,7 +8,6 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { EditIcon } from 'lucide-react'
-import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { SubmitHandler, useForm } from 'react-hook-form'
@@ -22,7 +21,15 @@ import { UnitySchema } from '@/schemas/unity'
 import { Unity } from '@/types/unity'
 import { Loader } from '@/components/ui/loader'
 import { update } from '@/actions/settings/unities'
-import { useUnityStore } from '@/store/dashboard/useUnityStore'
+import { useUnitiesStore } from '@/store/dashboard/useUnitiesStore'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
 
 type Props = {
   unity: Unity
@@ -30,18 +37,14 @@ type Props = {
 
 function Update({ unity }: Props) {
   const [charCount, setCharCount] = useState(unity.description?.length || 0)
-  const [open, setOpen] = useState(false)
-  const unities = useUnityStore((state) => state.unities)
-  const setUnities = useUnityStore((state) => state.setUnities)
+  const [isOpen, setIsOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const updateUnity = useUnitiesStore((state) => state.updateUnity)
   const errorStatus = useResponseStatusStore((state) => state.errorStatus)
   const setError = useResponseStatusStore((state) => state.setError)
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isLoading },
-  } = useForm<z.infer<typeof UnitySchema>>({
+  const form = useForm<z.infer<typeof UnitySchema>>({
     resolver: zodResolver(UnitySchema),
     defaultValues: {
       name: unity.name,
@@ -50,37 +53,39 @@ function Update({ unity }: Props) {
   })
 
   const onSubmit: SubmitHandler<z.infer<typeof UnitySchema>> = async (data) => {
-    const res = await update(unity.id, data)
+    setIsLoading(true)
+    try {
+      const res = await update(unity.id, data)
 
-    if (res.error) {
-      setError(res.error)
-    }
+      if (res.error) {
+        setError(res.error)
+      }
 
-    if (res.status === 200) {
-      const { message, unity: updatedUnity } = res.data
-      toast.success(message)
+      if (res.status === 200) {
+        const { message, unity: updatedUnity } = res.data
+        toast.success(message)
 
-      reset()
-      setCharCount(0)
-      setOpen(false)
-
-      const newData = unities.map((unity) => (unity.id === updatedUnity.id ? updatedUnity : unity))
-      setUnities(newData)
+        form.reset()
+        setCharCount(0)
+        setIsOpen(false)
+        updateUnity(updatedUnity)
+      }
+    } catch (_error) {
+      toast.error('Ocurrió un error. Por favor intenta de nuevo.')
+    } finally {
+      setIsLoading(false)
     }
   }
 
   useEffect(() => {
-    if (open) {
-      reset({
-        name: unity.name,
-        description: unity.description,
-      })
+    if (isOpen) {
+      form.reset({ ...unity })
       setCharCount(unity.description?.length || 0)
     }
-  }, [open, unity, reset])
+  }, [isOpen, unity, form])
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button size={'icon'} variant={'ghost'} className="cursor-pointer text-blue-500">
           <EditIcon />
@@ -91,43 +96,63 @@ function Update({ unity }: Props) {
           <DialogTitle>Actualizar una unidad</DialogTitle>
           <DialogDescription>Estás a punto de actualizar esta unidad</DialogDescription>
         </DialogHeader>
-        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-          <div className="grid w-full gap-1.5">
-            <Label htmlFor="name">Nombre</Label>
-            <Input
-              id="name"
-              type="text"
-              {...register('name')}
-              placeholder="Nombre de la unidad"
-              maxLength={50}
+        <Form {...form}>
+          <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel htmlFor="name">Nombre</FormLabel>
+                  <Input
+                    id="name"
+                    type="text"
+                    maxLength={50}
+                    placeholder="Nombre de la categoría"
+                    {...field}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.name && <ErrorForm message={errors.name.message || ''} />}
-          </div>
-          <div className="grid w-full gap-1.5">
-            <Label htmlFor="description">Descripción (opcional)</Label>
-            <Textarea
-              placeholder="Escribe una breve descripción"
-              id="description"
-              className="field-sizing-content"
-              maxLength={255}
-              {...register('description', {
-                onChange: (e) => {
-                  setCharCount(e.target.value.length)
-                },
-              })}
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripción (opcional)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Escribe una breve descripción"
+                      className="resize-none"
+                      maxLength={255}
+                      {...field}
+                      onChange={(e) => {
+                        setCharCount(e.target.value.length)
+                        field.onChange(e)
+                      }}
+                    />
+                  </FormControl>
+                  <p className="text-sm text-muted-foreground" id="description-count">
+                    {charCount}/255
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            <p className="text-sm text-muted-foreground" id="description-count">
-              {charCount}/255
-            </p>
-            {errors.description && <ErrorForm message={errors.description.message || ''} />}
-          </div>
 
-          {errorStatus.error && <ErrorForm message={errorStatus.message} />}
+            {errorStatus.error && <ErrorForm message={errorStatus.message} />}
 
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? <Loader size="sm" variant="spinner" /> : 'Guardar'}
-          </Button>
-        </form>
+            <div className="flex items-center gap-2 justify-end">
+              <Button type="button" variant={'secondary'} onClick={() => form.reset({ ...unity })}>
+                Restablecer
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? <Loader size="sm" variant="spinner" /> : 'Guardar'}
+              </Button>
+            </div>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   )

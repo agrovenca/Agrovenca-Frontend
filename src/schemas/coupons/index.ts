@@ -14,4 +14,4 @@ export const CouponSchema = z.object({
   expiresAt: z.date().min(new Date(), { message: 'No puede ser menor a hoy' }).optional(),
 })
 
-export const CouponUpdateSchema = CouponSchema.omit({ code: true })
+export const CouponUpdateSchema = CouponSchema.omit({ code: true }).partial()
