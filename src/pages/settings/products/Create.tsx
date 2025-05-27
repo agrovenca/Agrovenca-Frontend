@@ -84,7 +84,7 @@ function CreateProduct() {
         setCharCount(0)
         form.reset()
         setIsOpen(false)
-        setProducts([product, ...products])
+        setProducts([...products, product])
       }
     } catch (_error) {
       toast.error('Ocurrió un error. Por favor intenta de nuevo.')
