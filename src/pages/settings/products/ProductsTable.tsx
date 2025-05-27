@@ -14,7 +14,7 @@ import UpdateProduct from './Update'
 import DeleteDialog from '@/components/blocks/DeleteDialog'
 import { ExternalLinkIcon } from 'lucide-react'
 import { DndContext, closestCenter } from '@dnd-kit/core'
-import { destroy } from '@/actions/settings/products'
+import { destroy, updateProductOrder } from '@/actions/settings/products'
 
 import { KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core'
 import {
@@ -27,6 +27,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { useProductsStore } from '@/store/dashboard/useProductsStore'
 import { usePaginationStore } from '@/store/shared/usePaginationStore'
+import { toast } from 'sonner'
 
 const GetTableHeaders = () => {
   return (
@@ -136,9 +137,10 @@ type Props = {
   isDraggable: boolean
   setPage: React.Dispatch<React.SetStateAction<number>>
   fetchData: (page: number, search: string) => Promise<void>
+  setIsDraggable: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-function ProductsTable({ isDraggable, page, search, fetchData, setPage }: Props) {
+function ProductsTable({ isDraggable, page, search, fetchData, setPage, setIsDraggable }: Props) {
   const products = useProductsStore((state) => state.products)
   const setProducts = useProductsStore((state) => state.setProducts)
 
@@ -151,13 +153,51 @@ function ProductsTable({ isDraggable, page, search, fetchData, setPage }: Props)
     })
   )
 
+  const handleReorder = async (reorderedItems: { id: string; displayOrder: number }[]) => {
+    setIsDraggable(false)
+    try {
+      const res = await updateProductOrder(reorderedItems)
+      if (res.error) {
+        throw new Error(res.error)
+      }
+
+      if (res.status === 200) {
+        setProducts((prevProducts) =>
+          prevProducts.map((product) => {
+            const updatedItem = reorderedItems.find((item) => item.id === product.id)
+            return updatedItem ? { ...product, displayOrder: updatedItem.displayOrder } : product
+          })
+        )
+      }
+    } catch (_error) {
+      throw new Error('Error al actualizar el orden de los productos')
+    } finally {
+      setIsDraggable(true)
+    }
+  }
+
   async function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
     if (active.id !== over?.id) {
       setProducts((items) => {
         const oldIndex = items.findIndex((item) => item.id === active.id)
         const newIndex = items.findIndex((item) => item.id === over?.id)
-        return arrayMove(items, oldIndex, newIndex)
+        const newItems = arrayMove(items, oldIndex, newIndex)
+
+        const reordered = newItems.map((item, index) => ({
+          ...item,
+          displayOrder: index + 1,
+        }))
+
+        try {
+          handleReorder(reordered.map((p) => ({ id: p.id, displayOrder: p.displayOrder })))
+
+          toast.success('Orden actualizado correctamente')
+        } catch (error) {
+          console.error('Error actualizando el orden:', error)
+        }
+
+        return reordered
       })
     }
   }

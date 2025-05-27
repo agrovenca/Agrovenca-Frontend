@@ -63,3 +63,17 @@ export const destroy = async (id: string) => {
     return { error: 'An unknown error occurred' }
   }
 }
+
+export async function updateProductOrder(updatedProducts: { id: string; displayOrder: number }[]) {
+  try {
+    const res = await apiWithCredentials.patch(`/settings/products/order/`, {
+      updatedProducts,
+    })
+    return res
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      return error.response?.data || { error: 'An unknown error occurred' }
+    }
+    return { error: 'An unknown error occurred' }
+  }
+}

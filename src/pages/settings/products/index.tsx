@@ -127,6 +127,7 @@ function ProductsSettingsPage() {
       <ProductsTable
         setPage={setPage}
         isDraggable={dragAndDropActive}
+        setIsDraggable={setDragAndDropActive}
         page={page}
         search={search}
         fetchData={fetchData}
