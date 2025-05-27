@@ -24,6 +24,7 @@ function ProductsSettingsPage() {
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [dragAndDropActive, setDragAndDropActive] = useState(false)
 
+  const products = useProductsStore((state) => state.products)
   const setProducts = useProductsStore((state) => state.setProducts)
   const setUnities = useUnitiesStore((state) => state.setUnities)
   const setCategories = useCategoriesStore((state) => state.setCategories)
@@ -104,21 +105,23 @@ function ProductsSettingsPage() {
             <RefreshCwIcon />
             <span>Recargar</span>
           </Button>
-          <ExtendedTooltip content={<p>Arrastra los productos y cambia su orden.</p>}>
-            <Label
-              htmlFor="editableMode"
-              className={`flex items-center space-x-2 text-sm px-4 py-2 h-9 rounded-md bg-gray-100 border dark:bg-gray-700 ${
-                dragAndDropActive && 'bg-blue-500 text-white hover:bg-blue-600 animate-pulse'
-              }`}
-            >
-              <Switch
-                id="editableMode"
-                checked={dragAndDropActive}
-                onClick={() => setDragAndDropActive((prev) => !prev)}
-              />
-              <span>Modo Editable: {dragAndDropActive ? 'Activado' : 'Desactivado'}</span>
-            </Label>
-          </ExtendedTooltip>
+          {products.length > 0 && (
+            <ExtendedTooltip content={<p>Arrastra los productos y cambia su orden.</p>}>
+              <Label
+                htmlFor="editableMode"
+                className={`flex items-center space-x-2 text-sm px-4 py-2 h-9 rounded-md bg-gray-100 border dark:bg-gray-700 ${
+                  dragAndDropActive && 'bg-blue-500 text-white hover:bg-blue-600 animate-pulse'
+                }`}
+              >
+                <Switch
+                  id="editableMode"
+                  checked={dragAndDropActive}
+                  onClick={() => setDragAndDropActive((prev) => !prev)}
+                />
+                <span>Modo Editable: {dragAndDropActive ? 'Activado' : 'Desactivado'}</span>
+              </Label>
+            </ExtendedTooltip>
+          )}
         </div>
       </div>
       <ProductsTable
