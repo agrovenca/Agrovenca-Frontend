@@ -7,6 +7,8 @@ import { z } from 'zod'
 export const getProducts = async (params?: {
   page: number
   search: string
+  limit: number
+  categoryId: string
 }): Promise<{ data: ProductResponse }> => {
   const url = new URL(apiWithCredentials.defaults.baseURL?.toString() + '/settings/products' || '')
 

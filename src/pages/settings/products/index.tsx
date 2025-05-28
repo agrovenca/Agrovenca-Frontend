@@ -2,12 +2,10 @@ import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { RefreshCwIcon } from 'lucide-react'
 import { Loader } from '@/components/ui/loader'
-import { useDebouncedCallback } from 'use-debounce'
 import CreateProduct from './Create'
 import { getAll as getCategories } from '@/actions/settings/categories'
 import { getAll as getUnities } from '@/actions/settings/unities'
 import { getProducts } from '@/actions/settings/products'
-import SearchBar from '@/components/blocks/SearchBar'
 import { usePaginationStore } from '@/store/shared/usePaginationStore'
 import { useProductsStore } from '@/store/dashboard/useProductsStore'
 import { useUnitiesStore } from '@/store/dashboard/useUnitiesStore'
@@ -16,25 +14,28 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import ExtendedTooltip from '@/components/blocks/ExtendedTooltip'
 import ProductsTable from './ProductsTable'
+import ProductFilters from './ProductFilters'
 
 function ProductsSettingsPage() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
+  const [limit, setLimit] = useState(10)
+  const [categoryId, setCategoryId] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [dragAndDropActive, setDragAndDropActive] = useState(false)
 
   const products = useProductsStore((state) => state.products)
   const setProducts = useProductsStore((state) => state.setProducts)
+  const deleteProduct = useProductsStore((state) => state.deleteProduct)
   const setUnities = useUnitiesStore((state) => state.setUnities)
   const setCategories = useCategoriesStore((state) => state.setCategories)
   const setPaginationData = usePaginationStore((state) => state.setPaginationData)
 
   const fetchData = useCallback(
-    async (currentPage: number, search: string) => {
+    async (currentPage: number, search: string, limit: number, categoryId: string) => {
       setIsLoading(true)
       try {
-        const { data } = await getProducts({ page: currentPage, search })
+        const { data } = await getProducts({ page: currentPage, search, limit, categoryId })
         setProducts(data.objects)
         setPaginationData({ ...data })
       } catch (error) {
@@ -63,21 +64,35 @@ function ProductsSettingsPage() {
   }, [setUnities, setCategories])
 
   useEffect(() => {
-    fetchData(page, debouncedSearch)
-  }, [fetchData, page, debouncedSearch])
+    fetchData(page, search, limit, categoryId)
+  }, [fetchData, page, search, limit, categoryId])
 
   useEffect(() => {
     getAssociatedData()
   }, [getAssociatedData])
 
-  const debounced = useDebouncedCallback((value) => {
+  const handleFilterSubmit = ({
+    search,
+    limit,
+    categoryId,
+  }: {
+    search: string
+    limit: number
+    categoryId: string
+  }) => {
     setPage(1)
-    setDebouncedSearch(value)
-  }, 500)
+    setSearch(search)
+    setLimit(limit)
+    setCategoryId(categoryId)
+  }
 
-  const handleSearchChange = (value: string) => {
-    setSearch(value)
-    debounced(value)
+  const handleDelete = async (productId: string) => {
+    try {
+      deleteProduct(productId)
+      await fetchData(page, search, limit, categoryId)
+    } catch (error) {
+      console.error('Error al eliminar el producto:', error)
+    }
   }
 
   if (isLoading) {
@@ -93,13 +108,18 @@ function ProductsSettingsPage() {
     <>
       <div className="w-full flex justify-between gap-4 mb-4">
         <div className="pt-4 flex-1">
-          <SearchBar value={search} onChange={handleSearchChange} />
+          <ProductFilters
+            initialSearch={search}
+            initialLimit={limit}
+            initialCategoryId={categoryId}
+            onSubmit={handleFilterSubmit}
+          />
         </div>
         <div className="flex items-center gap-2">
           <CreateProduct />
           <Button
             variant={'outline'}
-            onClick={() => fetchData(page, search)}
+            onClick={() => fetchData(page, search, limit, categoryId)}
             className="flex items-center gap-2"
           >
             <RefreshCwIcon />
@@ -124,13 +144,12 @@ function ProductsSettingsPage() {
           )}
         </div>
       </div>
+
       <ProductsTable
         setPage={setPage}
         isDraggable={dragAndDropActive}
         setIsDraggable={setDragAndDropActive}
-        page={page}
-        search={search}
-        fetchData={fetchData}
+        handleDelete={handleDelete}
       />
     </>
   )

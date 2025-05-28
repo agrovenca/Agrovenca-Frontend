@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/table'
 import { CSS } from '@dnd-kit/utilities'
 import { Product } from '@/types/product'
-import Pagination from '../users/Pagination'
+import Pagination from '@/components/blocks/pagination'
 import { formatDecimal } from '@/lib/utils'
 import UpdateProduct from './Update'
 import DeleteDialog from '@/components/blocks/DeleteDialog'
@@ -46,19 +46,14 @@ const GetTableHeaders = () => {
 }
 
 const GetTableRow = ({
-  page,
-  search,
   product,
   isDraggable,
-  fetchData,
+  handleDelete,
 }: {
-  page: number
-  search: string
   product: Product
   isDraggable: boolean
-  fetchData: (page: number, search: string) => Promise<void>
+  handleDelete: (productId: string) => Promise<void>
 }) => {
-  const deleteProduct = useProductsStore((state) => state.deleteProduct)
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: product.id,
   })
@@ -69,15 +64,6 @@ const GetTableRow = ({
   }
 
   const sortableProps = isDraggable ? { ref: setNodeRef, style, ...attributes, ...listeners } : {}
-
-  const handleDelete = async (productId: string) => {
-    try {
-      deleteProduct(productId)
-      await fetchData(page, search)
-    } catch (error) {
-      console.error('Error al eliminar el producto:', error)
-    }
-  }
 
   return (
     <TableRow key={product.id} {...sortableProps}>
@@ -132,15 +118,13 @@ const GetTableRow = ({
 }
 
 type Props = {
-  page: number
-  search: string
   isDraggable: boolean
   setPage: React.Dispatch<React.SetStateAction<number>>
-  fetchData: (page: number, search: string) => Promise<void>
   setIsDraggable: React.Dispatch<React.SetStateAction<boolean>>
+  handleDelete: (productId: string) => Promise<void>
 }
 
-function ProductsTable({ isDraggable, page, search, fetchData, setPage, setIsDraggable }: Props) {
+function ProductsTable({ isDraggable, setPage, setIsDraggable, handleDelete }: Props) {
   const products = useProductsStore((state) => state.products)
   const setProducts = useProductsStore((state) => state.setProducts)
 
@@ -201,6 +185,7 @@ function ProductsTable({ isDraggable, page, search, fetchData, setPage, setIsDra
       })
     }
   }
+
   return (
     <>
       {isDraggable ? (
@@ -218,9 +203,7 @@ function ProductsTable({ isDraggable, page, search, fetchData, setPage, setIsDra
                       product={product}
                       key={product.id}
                       isDraggable={isDraggable}
-                      fetchData={fetchData}
-                      page={page}
-                      search={search}
+                      handleDelete={handleDelete}
                     />
                   ))}
                 </SortableContext>
@@ -244,9 +227,7 @@ function ProductsTable({ isDraggable, page, search, fetchData, setPage, setIsDra
                   product={product}
                   key={product.id}
                   isDraggable={isDraggable}
-                  fetchData={fetchData}
-                  page={page}
-                  search={search}
+                  handleDelete={handleDelete}
                 />
               ))
             ) : (

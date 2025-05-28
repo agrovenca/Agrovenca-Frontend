@@ -3,7 +3,10 @@ import { UserAccountSettingsSchema } from '@/schemas/user'
 import axios from 'axios'
 import { z } from 'zod'
 
-export const getAll = async (params?: { page: number; search: string }, signal?: AbortSignal) => {
+export const getAll = async (
+  params?: { page: number; search: string; limit: number },
+  signal?: AbortSignal
+) => {
   const url = new URL(apiWithCredentials.defaults.baseURL?.toString() + '/users' || '')
 
   if (params) {

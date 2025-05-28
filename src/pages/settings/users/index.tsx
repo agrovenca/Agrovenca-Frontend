@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   Table,
   TableBody,
@@ -15,38 +15,29 @@ import { getAll } from '@/actions/settings/users'
 import { User } from '@/types/auth/user'
 import { Badge } from '@/components/ui/badge'
 import { useAuthStore } from '@/store/auth/useAuthStore'
-import Pagination from './Pagination'
+import Pagination from '@/components/blocks/pagination'
 import { usePaginationStore } from '@/store/shared/usePaginationStore'
-import { useDebouncedCallback } from 'use-debounce'
 import AccountOptions from './SettingsAccount'
-import SearchBar from '@/components/blocks/SearchBar'
+import UserFilters from './UserFilters'
 
 function UsersSettingsPage() {
   const [data, setData] = useState<User[]>([])
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
+  const [limit, setLimit] = useState(1)
   const paginationData = usePaginationStore((state) => state.paginationData)
   const setPaginationData = usePaginationStore((state) => state.setPaginationData)
-  const controllerRef = useRef<AbortController | null>(null)
 
   const [isLoading, setIsLoading] = useState(false)
   const currentUser = useAuthStore((state) => state.user) as User
 
   const fetchData = useCallback(
-    async (page: number, search: string, signal?: AbortSignal) => {
+    async (page: number, search: string, limit: number, signal?: AbortSignal) => {
       setIsLoading(true)
-      const res = await getAll({ page, search }, signal)
+      const res = await getAll({ page, search, limit }, signal)
       if ('data' in res) {
         setData(res.data.objects)
-        setPaginationData({
-          page: res.data.page,
-          totalItems: res.data.totalItems,
-          totalPages: res.data.totalPages,
-          hasNextPage: res.data.hasNextPage,
-          hasPreviousPage: res.data.hasPreviousPage,
-          nextPage: res.data.nextPage,
-          previousPage: res.data.previousPage,
-        })
+        setPaginationData({ ...res.data })
       } else {
         console.error('Error al obtener los usuarios:', res.error)
       }
@@ -56,20 +47,13 @@ function UsersSettingsPage() {
   )
 
   useEffect(() => {
-    fetchData(page, '')
-  }, [fetchData, page])
+    fetchData(page, search, limit)
+  }, [fetchData, page, search, limit])
 
-  const debounced = useDebouncedCallback((value) => {
-    controllerRef.current?.abort() // Cancelar solicitud anterior
-    const newController = new AbortController()
-    controllerRef.current = newController
-
-    fetchData(1, value, newController.signal)
-  }, 500)
-
-  const handleSearchChange = (value: string) => {
-    setSearch(value)
-    debounced(value)
+  const handleFilterSubmit = ({ search, limit }: { search: string; limit: number }) => {
+    setPage(1)
+    setSearch(search)
+    setLimit(limit)
   }
 
   if (isLoading) {
@@ -85,12 +69,12 @@ function UsersSettingsPage() {
     <>
       <div className="w-full flex justify-between gap-4 mb-4">
         <div className="pt-4 flex-1">
-          <SearchBar value={search} onChange={handleSearchChange} />
+          <UserFilters initialSearch={search} initialLimit={limit} onSubmit={handleFilterSubmit} />
         </div>
         <div className="flex items-center gap-2">
           <Button
             variant={'outline'}
-            onClick={() => fetchData(page, search)}
+            onClick={() => fetchData(page, search, limit)}
             className="flex items-center gap-2"
           >
             <RefreshCwIcon />
