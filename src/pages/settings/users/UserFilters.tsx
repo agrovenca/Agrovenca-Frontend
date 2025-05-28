@@ -31,23 +31,30 @@ import { UserFilterParams } from '@/types/auth/user'
 interface UserFiltersProps {
   initialSearch: string
   initialLimit: number
+  initialIsActive: UserFilterParams['isActive']
   onSubmit: (values: Omit<UserFilterParams, 'page'>) => void
 }
 
-export default function UserFilters({ initialSearch, initialLimit, onSubmit }: UserFiltersProps) {
+export default function UserFilters({
+  initialSearch,
+  initialLimit,
+  initialIsActive,
+  onSubmit,
+}: UserFiltersProps) {
   const form = useForm({
     defaultValues: {
       search: initialSearch,
       limit: initialLimit,
+      isActive: initialIsActive,
     },
   })
 
   const handleFormSubmit = (data: Omit<UserFilterParams, 'page'>) => {
-    onSubmit({ search: data.search.trim(), limit: Number(data.limit) })
+    onSubmit({ search: data.search.trim(), limit: Number(data.limit), isActive: data.isActive })
   }
 
   const handleReset = () => {
-    const defaultValues = { search: '', limit: 10, categoryId: '' }
+    const defaultValues = { search: '', limit: 10, categoryId: '', isActive: undefined }
     form.reset(defaultValues)
     onSubmit(defaultValues)
   }
@@ -104,6 +111,27 @@ export default function UserFilters({ initialSearch, initialLimit, onSubmit }: U
                           {value} por página
                         </SelectItem>
                       ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="isActive"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel htmlFor="limit">Estado de usuarios</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Filtra usuario activos o inactivos" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value={'active'}>Activo</SelectItem>
+                      <SelectItem value={'inactive'}>Inactivo</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

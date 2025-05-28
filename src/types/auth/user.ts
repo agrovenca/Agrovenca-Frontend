@@ -13,5 +13,5 @@ export interface User {
 }
 
 export interface UserFilterParams extends BaseFilterParams {
-  isActive?: boolean
+  isActive: 'active' | 'inactive' | undefined
 }

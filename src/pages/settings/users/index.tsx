@@ -12,7 +12,7 @@ import { RefreshCwIcon } from 'lucide-react'
 import { getLocalDateTime, getUserRole } from '@/lib/utils'
 import { Loader } from '@/components/ui/loader'
 import { getAll } from '@/actions/settings/users'
-import { User } from '@/types/auth/user'
+import { User, UserFilterParams } from '@/types/auth/user'
 import { Badge } from '@/components/ui/badge'
 import { useAuthStore } from '@/store/auth/useAuthStore'
 import Pagination from '@/components/blocks/pagination'
@@ -25,6 +25,7 @@ function UsersSettingsPage() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [limit, setLimit] = useState(1)
+  const [isActive, setIsActive] = useState<UserFilterParams['isActive']>()
   const paginationData = usePaginationStore((state) => state.paginationData)
   const setPaginationData = usePaginationStore((state) => state.setPaginationData)
 
@@ -32,9 +33,9 @@ function UsersSettingsPage() {
   const currentUser = useAuthStore((state) => state.user) as User
 
   const fetchData = useCallback(
-    async (page: number, search: string, limit: number) => {
+    async (page: number, search: string, limit: number, isActive: UserFilterParams['isActive']) => {
       setIsLoading(true)
-      const res = await getAll({ page, search, limit })
+      const res = await getAll({ page, search, limit, isActive })
       if ('data' in res) {
         setData(res.data.objects)
         setPaginationData({ ...res.data })
@@ -47,13 +48,14 @@ function UsersSettingsPage() {
   )
 
   useEffect(() => {
-    fetchData(page, search, limit)
-  }, [fetchData, page, search, limit])
+    fetchData(page, search, limit, isActive)
+  }, [fetchData, page, search, limit, isActive])
 
-  const handleFilterSubmit = ({ search, limit }: { search: string; limit: number }) => {
+  const handleFilterSubmit = ({ search, limit, isActive }: Omit<UserFilterParams, 'page'>) => {
     setPage(1)
     setSearch(search)
     setLimit(limit)
+    setIsActive(isActive)
   }
 
   if (isLoading) {
@@ -69,12 +71,17 @@ function UsersSettingsPage() {
     <>
       <div className="w-full flex justify-between gap-4 mb-4">
         <div className="pt-4 flex-1">
-          <UserFilters initialSearch={search} initialLimit={limit} onSubmit={handleFilterSubmit} />
+          <UserFilters
+            initialSearch={search}
+            initialLimit={limit}
+            initialIsActive={isActive}
+            onSubmit={handleFilterSubmit}
+          />
         </div>
         <div className="flex items-center gap-2">
           <Button
             variant={'outline'}
-            onClick={() => fetchData(page, search, limit)}
+            onClick={() => fetchData(page, search, limit, isActive)}
             className="flex items-center gap-2"
           >
             <RefreshCwIcon />
