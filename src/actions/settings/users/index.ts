@@ -1,12 +1,10 @@
 import { apiWithCredentials } from '@/actions/api'
 import { UserAccountSettingsSchema } from '@/schemas/user'
+import { UserFilterParams } from '@/types/auth/user'
 import axios from 'axios'
 import { z } from 'zod'
 
-export const getAll = async (
-  params?: { page: number; search: string; limit: number },
-  signal?: AbortSignal
-) => {
+export const getAll = async (params?: UserFilterParams) => {
   const url = new URL(apiWithCredentials.defaults.baseURL?.toString() + '/users' || '')
 
   if (params) {
@@ -18,9 +16,7 @@ export const getAll = async (
   }
 
   try {
-    const res = await apiWithCredentials.get(url.toString(), {
-      signal,
-    })
+    const res = await apiWithCredentials.get(url.toString())
     return res
   } catch (error) {
     if (axios.isAxiosError(error)) {

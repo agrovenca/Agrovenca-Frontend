@@ -1,3 +1,5 @@
+import { BaseFilterParams } from '../shared'
+
 export interface User {
   id: string
   email: string
@@ -8,4 +10,8 @@ export interface User {
   isActive: boolean
   createdAt: string
   updatedAt: string
+}
+
+export interface UserFilterParams extends BaseFilterParams {
+  isActive?: boolean
 }

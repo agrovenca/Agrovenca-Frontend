@@ -1,15 +1,12 @@
 import { apiWithCredentials } from '@/actions/api'
 import { ProductSchema, ProductUpdateSchema } from '@/schemas/products'
-import { ProductResponse } from '@/types/product'
+import { ProductFilterParams, ProductResponse } from '@/types/product'
 import axios from 'axios'
 import { z } from 'zod'
 
-export const getProducts = async (params?: {
-  page: number
-  search: string
-  limit: number
-  categoryId: string
-}): Promise<{ data: ProductResponse }> => {
+export const getProducts = async (
+  params?: ProductFilterParams
+): Promise<{ data: ProductResponse }> => {
   const url = new URL(apiWithCredentials.defaults.baseURL?.toString() + '/settings/products' || '')
 
   if (params) {

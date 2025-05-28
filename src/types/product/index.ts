@@ -1,3 +1,5 @@
+import { BaseFilterParams } from '../shared'
+
 export interface ProductResponse {
   objects: Product[]
   page: number
@@ -36,4 +38,8 @@ export interface Product {
   createdAt: string
   updatedAt: string
   displayOrder: number
+}
+
+export interface ProductFilterParams extends BaseFilterParams {
+  categoryId: string
 }

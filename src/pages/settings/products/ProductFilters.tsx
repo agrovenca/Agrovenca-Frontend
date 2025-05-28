@@ -13,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { FilterIcon } from 'lucide-react'
@@ -27,12 +26,13 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useCategoriesStore } from '@/store/dashboard/useCategoriesStore'
+import { ProductFilterParams } from '@/types/product'
 
 interface ProductFiltersProps {
   initialSearch: string
   initialLimit: number
   initialCategoryId: string
-  onSubmit: (values: { search: string; limit: number; categoryId: string }) => void
+  onSubmit: (values: Omit<ProductFilterParams, 'page'>) => void
 }
 
 export default function ProductFilters({
@@ -51,9 +51,7 @@ export default function ProductFilters({
     },
   })
 
-  const handleFormSubmit = (data: { search: string; limit: number; categoryId: string }) => {
-    onSubmit({ search: data.search.trim(), limit: Number(data.limit), categoryId: data.categoryId })
-  }
+  const handleFormSubmit = (data: Omit<ProductFilterParams, 'page'>) => onSubmit(data)
 
   const handleReset = () => {
     const defaultValues = { search: '', limit: 10, categoryId: '' }

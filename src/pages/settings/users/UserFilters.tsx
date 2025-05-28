@@ -26,11 +26,12 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { UserFilterParams } from '@/types/auth/user'
 
 interface UserFiltersProps {
   initialSearch: string
   initialLimit: number
-  onSubmit: (values: { search: string; limit: number }) => void
+  onSubmit: (values: Omit<UserFilterParams, 'page'>) => void
 }
 
 export default function UserFilters({ initialSearch, initialLimit, onSubmit }: UserFiltersProps) {
@@ -41,7 +42,7 @@ export default function UserFilters({ initialSearch, initialLimit, onSubmit }: U
     },
   })
 
-  const handleFormSubmit = (data: { search: string; limit: number }) => {
+  const handleFormSubmit = (data: Omit<UserFilterParams, 'page'>) => {
     onSubmit({ search: data.search.trim(), limit: Number(data.limit) })
   }
 

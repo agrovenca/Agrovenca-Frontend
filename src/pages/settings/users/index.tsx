@@ -32,9 +32,9 @@ function UsersSettingsPage() {
   const currentUser = useAuthStore((state) => state.user) as User
 
   const fetchData = useCallback(
-    async (page: number, search: string, limit: number, signal?: AbortSignal) => {
+    async (page: number, search: string, limit: number) => {
       setIsLoading(true)
-      const res = await getAll({ page, search, limit }, signal)
+      const res = await getAll({ page, search, limit })
       if ('data' in res) {
         setData(res.data.objects)
         setPaginationData({ ...res.data })
