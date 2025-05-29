@@ -73,7 +73,11 @@ const GetTableRow = ({
         <figure className="w-30 h-30 overflow-hidden rounded-md border relative">
           <img
             className="w-full h-full object-cover"
-            src={'https://ralfvanveen.com/wp-content/uploads/2021/06/Placeholder-_-Glossary.svg'}
+            src={
+              product.images.length > 0
+                ? product.images[0].url
+                : 'https://ralfvanveen.com/wp-content/uploads/2021/06/Placeholder-_-Glossary.svg'
+            }
             alt={`Imagen del producto ${product.name}`}
           />
           <span className="absolute top-0 right-0 bg-blue-500 text-white py-0.5 px-2 rounded-full">

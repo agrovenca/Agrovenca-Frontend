@@ -27,7 +27,7 @@ function RegisterProductImage({ productId }: { productId: string }) {
   const [isLoading, setIsLoading] = useState(false)
 
   const products = useProductsStore((state) => state.products)
-  const setProducts = useProductsStore((state) => state.setProducts)
+  const updateProduct = useProductsStore((state) => state.updateProduct)
   const errorStatus = useResponseStatusStore((state) => state.errorStatus)
   const setError = useResponseStatusStore((state) => state.setError)
 
@@ -48,16 +48,15 @@ function RegisterProductImage({ productId }: { productId: string }) {
       }
 
       if (res.status === 201) {
-        const { message, image } = res.data
+        const { message, images, productId: updatedProductId } = res.data
         toast.success(message)
 
         form.reset()
         setIsOpen(false)
-        // setProducts(
-        //   products.filter((product) =>
-        //     product.id === image.productId ? product.images.push(image) : product
-        //   )
-        // )
+        const existingProduct = products.find((p) => p.id === updatedProductId)
+        if (existingProduct) {
+          updateProduct({ ...existingProduct, images })
+        }
       }
     } catch (_error) {
       toast.error('Ocurrió un error. Por favor intenta de nuevo.')
