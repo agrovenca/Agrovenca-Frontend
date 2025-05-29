@@ -28,6 +28,7 @@ import { Button } from '@/components/ui/button'
 import { useProductsStore } from '@/store/dashboard/useProductsStore'
 import { usePaginationStore } from '@/store/shared/usePaginationStore'
 import { toast } from 'sonner'
+import RegisterProductImage from './images/Create'
 
 const GetTableHeaders = () => {
   return (
@@ -35,7 +36,7 @@ const GetTableHeaders = () => {
       <TableRow>
         <TableHead className="w-[50px]">#</TableHead>
         <TableHead className="w-34"></TableHead>
-        <TableHead>Producto</TableHead>
+        <TableHead className="w-full">Producto</TableHead>
         <TableHead className="w-[100px]">Stock</TableHead>
         <TableHead className="w-[150px]">Precio</TableHead>
         <TableHead className="w-[150px]">Segundo Precio</TableHead>
@@ -76,7 +77,7 @@ const GetTableRow = ({
             alt={`Imagen del producto ${product.name}`}
           />
           <span className="absolute top-0 right-0 bg-blue-500 text-white py-0.5 px-2 rounded-full">
-            0
+            {product.images.length}
           </span>
         </figure>
       </TableCell>
@@ -97,6 +98,7 @@ const GetTableRow = ({
       <TableCell className="text-right">
         {!isDraggable && (
           <div className="flex items-center gap-2">
+            <RegisterProductImage productId={product.id} />
             <Button
               variant={'ghost'}
               size={'icon'}

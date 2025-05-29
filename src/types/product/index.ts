@@ -1,4 +1,5 @@
 import { BaseFilterParams } from '../shared'
+import { ProductImage } from './images'
 
 export interface ProductResponse {
   objects: Product[]
@@ -9,14 +10,6 @@ export interface ProductResponse {
   hasPreviousPage: boolean
   nextPage: number | null
   previousPage: number | null
-}
-
-export interface ProductImage {
-  id: string
-  url: string
-  createdAt: string
-
-  productId: string
 }
 
 export interface Product {
