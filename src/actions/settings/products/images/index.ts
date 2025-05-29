@@ -20,3 +20,19 @@ export const create = async (productId: string, data: z.infer<typeof ProductImag
     return { error: 'An unknown error occurred' }
   }
 }
+
+export async function updateProductImagesOrder(
+  updatedImages: { id: string; productId: string; displayOrder: number }[]
+) {
+  try {
+    const res = await apiWithCredentials.patch(`/settings/products/images/order/`, {
+      updatedImages,
+    })
+    return res
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      return error.response?.data || { error: 'An unknown error occurred' }
+    }
+    return { error: 'An unknown error occurred' }
+  }
+}

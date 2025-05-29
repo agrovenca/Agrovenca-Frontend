@@ -28,7 +28,7 @@ import { Button } from '@/components/ui/button'
 import { useProductsStore } from '@/store/dashboard/useProductsStore'
 import { usePaginationStore } from '@/store/shared/usePaginationStore'
 import { toast } from 'sonner'
-import RegisterProductImage from './images/Create'
+import ProductImagesPage from './images'
 
 const GetTableHeaders = () => {
   return (
@@ -75,7 +75,7 @@ const GetTableRow = ({
             className="w-full h-full object-cover"
             src={
               product.images.length > 0
-                ? product.images[0].url
+                ? product.images.find((image) => image.displayOrder === 1)?.s3Key
                 : 'https://ralfvanveen.com/wp-content/uploads/2021/06/Placeholder-_-Glossary.svg'
             }
             alt={`Imagen del producto ${product.name}`}
@@ -102,7 +102,7 @@ const GetTableRow = ({
       <TableCell className="text-right">
         {!isDraggable && (
           <div className="flex items-center gap-2">
-            <RegisterProductImage productId={product.id} />
+            <ProductImagesPage product={product} />
             <Button
               variant={'ghost'}
               size={'icon'}
@@ -150,15 +150,6 @@ function ProductsTable({ isDraggable, setPage, setIsDraggable, handleDelete }: P
       if (res.error) {
         throw new Error(res.error)
       }
-
-      if (res.status === 200) {
-        setProducts((prevProducts) =>
-          prevProducts.map((product) => {
-            const updatedItem = reorderedItems.find((item) => item.id === product.id)
-            return updatedItem ? { ...product, displayOrder: updatedItem.displayOrder } : product
-          })
-        )
-      }
     } catch (_error) {
       throw new Error('Error al actualizar el orden de los productos')
     } finally {
@@ -169,26 +160,27 @@ function ProductsTable({ isDraggable, setPage, setIsDraggable, handleDelete }: P
   async function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
     if (active.id !== over?.id) {
-      setProducts((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id)
-        const newIndex = items.findIndex((item) => item.id === over?.id)
-        const newItems = arrayMove(items, oldIndex, newIndex)
+      const previousProducts = [...products]
+      const oldIndex = products.findIndex((item) => item.id === active.id)
+      const newIndex = products.findIndex((item) => item.id === over?.id)
+      const newItems = arrayMove(products, oldIndex, newIndex)
 
-        const reordered = newItems.map((item, index) => ({
-          ...item,
-          displayOrder: index + 1,
-        }))
+      const reordered = newItems.map((item, index) => ({
+        ...item,
+        displayOrder: index + 1,
+      }))
 
-        try {
-          handleReorder(reordered.map((p) => ({ id: p.id, displayOrder: p.displayOrder })))
+      // Optimistic update
+      setProducts(reordered)
 
-          toast.success('Orden actualizado correctamente')
-        } catch (error) {
-          console.error('Error actualizando el orden:', error)
-        }
-
-        return reordered
-      })
+      try {
+        await handleReorder(reordered.map((p) => ({ id: p.id, displayOrder: p.displayOrder })))
+        toast.success('Orden actualizado correctamente')
+      } catch (error) {
+        console.error('Error actualizando el orden:', error)
+        toast.error('Error al actualizar el orden de los productos')
+        setProducts(previousProducts)
+      }
     }
   }
 

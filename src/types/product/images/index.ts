@@ -1,6 +1,6 @@
 export interface ProductImage {
   id: string
-  url: string
+  s3Key: string
   createdAt: string
   displayOrder: number
   productId: string

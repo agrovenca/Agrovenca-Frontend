@@ -7,6 +7,7 @@ export const ProductImageSchema = z.object({
   files: z
     .array(z.instanceof(File))
     .min(1, { message: 'Debes subir al menos una imagen.' })
+    .max(5, { message: 'Debes subir 5 imágenes o menos.' })
     .refine(
       (files) => files.every((file) => file.size <= MAX_FILE_SIZE),
       'La imagen debe ser de 5MB o menos'
