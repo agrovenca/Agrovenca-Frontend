@@ -120,6 +120,7 @@ function RegisterProductImage({
                     id="files"
                     type="file"
                     multiple
+                    accept="image/jpeg, image/jpg, image/png, image/webp"
                     placeholder="Selecciona las imágenes para este producto"
                     onChange={(e) => {
                       const files = Array.from(e.target.files ?? [])

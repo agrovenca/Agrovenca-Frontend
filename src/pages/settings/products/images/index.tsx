@@ -23,19 +23,25 @@ import { useState } from 'react'
 import RegisterProductImage from './Create'
 import { ProductImage } from '@/types/product/images'
 import { toast } from 'sonner'
-import { updateProductImagesOrder } from '@/actions/settings/products/images'
+import { destroy, updateProductImagesOrder } from '@/actions/settings/products/images'
 import { useProductsStore } from '@/store/dashboard/useProductsStore'
-
-type Props = {
-  product: Product
-}
+import ExtendedTooltip from '@/components/blocks/ExtendedTooltip'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 
 type SortableImageProps = {
   image: ProductImage
-  productName: string
+  product: Product
+  imagesDraggable: boolean
+  handleDelete({ id, product }: { id: string; product: Product }): Promise<void>
 }
 
-export function SortableImage({ image, productName }: SortableImageProps) {
+export function SortableImage({
+  image,
+  product,
+  imagesDraggable,
+  handleDelete,
+}: SortableImageProps) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: image.id })
 
   const style = {
@@ -43,27 +49,31 @@ export function SortableImage({ image, productName }: SortableImageProps) {
     transition,
   }
 
+  const sortableProps = imagesDraggable
+    ? { ref: setNodeRef, style, ...attributes, ...listeners }
+    : {}
+
   return (
     <figure
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
+      {...sortableProps}
       className="max-w-50 w-full overflow-hidden h-auto border rounded-md relative"
     >
       <img
         className="object-cover"
         loading="lazy"
         src={image.s3Key}
-        alt={`Imagen número ${image.displayOrder} del producto ${productName}`}
+        alt={`Imagen número ${image.displayOrder} del producto ${product.name}`}
       />
-      <button
-        type="button"
-        className="absolute bottom-1 right-1 bg-black/50 hover:bg-black text-white rounded-full p-1 transition cursor-pointer"
-        title="Eliminar imagen"
-      >
-        <TrashIcon size={16} />
-      </button>
+      {!imagesDraggable && (
+        <button
+          type="button"
+          onClick={() => handleDelete({ id: image.id, product })}
+          className="absolute bottom-1 right-1 bg-black/50 hover:bg-black text-white rounded-full p-1 transition cursor-pointer"
+          title="Eliminar imagen"
+        >
+          <TrashIcon size={16} />
+        </button>
+      )}
       <span className="absolute top-0 right-0 bg-blue-500 text-white py-0.5 px-2 rounded-full">
         {image.displayOrder}
       </span>
@@ -71,10 +81,15 @@ export function SortableImage({ image, productName }: SortableImageProps) {
   )
 }
 
+type Props = {
+  product: Product
+}
+
 function ProductImagesPage({ product }: Props) {
   const [isOpen, setIsOpen] = useState(false)
   const [images, setImages] = useState<ProductImage[]>(product.images)
   const [isLoading, setIsLoading] = useState(false)
+  const [imagesDraggable, setImagesDraggable] = useState(false)
 
   const updateProduct = useProductsStore((state) => state.updateProduct)
 
@@ -126,8 +141,29 @@ function ProductImagesPage({ product }: Props) {
       toast.success('Orden actualizado correctamente')
     } catch (error) {
       console.error('Error actualizando el orden:', error)
-      toast.error('Error al actualizar el orden de los productos')
+      toast.error('Error al actualizar el orden de las imágenes')
       setImages(previousImages)
+    }
+  }
+
+  async function handleDelete({ id, product }: { id: string; product: Product }) {
+    try {
+      const res = await destroy(id, product.id)
+
+      if (res.error) {
+        throw new Error(res.error)
+      }
+
+      if (res.status === 200) {
+        const { message, images: reorderedImages } = res.data
+        toast.success(message)
+
+        updateProduct({ ...product, images: reorderedImages })
+        setImages(reorderedImages)
+      }
+    } catch (error) {
+      console.error('Error eliminando la imagen:', error)
+      toast.error('Error al eliminar la imagen')
     }
   }
 
@@ -149,21 +185,67 @@ function ProductImagesPage({ product }: Props) {
               }}
             />
           </DialogTitle>
-          <DialogDescription></DialogDescription>
+          <DialogDescription>
+            {images.length > 0 && (
+              <ExtendedTooltip content={<p>Arrastra las imágenes y cambia su orden.</p>}>
+                <Label
+                  htmlFor="imagesEditableMode"
+                  className={`flex items-center space-x-2 text-sm px-4 py-2 h-9 rounded-md bg-gray-100 border dark:bg-gray-700 ${
+                    imagesDraggable && 'bg-blue-500 text-white hover:bg-blue-600 animate-pulse'
+                  }`}
+                >
+                  <Switch
+                    id="imagesEditableMode"
+                    checked={imagesDraggable}
+                    onClick={() => setImagesDraggable((prev) => !prev)}
+                  />
+                  <span>Modo Editable: {imagesDraggable ? 'Activado' : 'Desactivado'}</span>
+                </Label>
+              </ExtendedTooltip>
+            )}
+          </DialogDescription>
         </DialogHeader>
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={images} strategy={rectSortingStrategy} disabled={isLoading}>
-            <section className="flex flex-wrap justify-evenly gap-4">
-              {images.length > 0 ? (
-                images.map((image) => (
-                  <SortableImage key={image.id} image={image} productName={product.name} />
-                ))
-              ) : (
-                <p>No hay imágenes para este producto</p>
-              )}
-            </section>
-          </SortableContext>
-        </DndContext>
+        {imagesDraggable ? (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext items={images} strategy={rectSortingStrategy} disabled={isLoading}>
+              <section className="flex flex-wrap justify-evenly gap-4">
+                {images.length > 0 ? (
+                  images.map((image) => (
+                    <SortableImage
+                      key={image.id}
+                      image={image}
+                      product={product}
+                      imagesDraggable={imagesDraggable}
+                      handleDelete={handleDelete}
+                    />
+                  ))
+                ) : (
+                  <p>No hay imágenes para este producto</p>
+                )}
+              </section>
+            </SortableContext>
+          </DndContext>
+        ) : (
+          <section className="flex flex-wrap justify-evenly gap-4">
+            {images.length > 0 ? (
+              images.map((image) => (
+                <SortableImage
+                  key={image.id}
+                  image={image}
+                  product={product}
+                  imagesDraggable={imagesDraggable}
+                  handleDelete={handleDelete}
+                />
+              ))
+            ) : (
+              <p>No hay imágenes para este producto</p>
+            )}
+          </section>
+        )}
       </DialogContent>
     </Dialog>
   )

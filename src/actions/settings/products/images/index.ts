@@ -36,3 +36,15 @@ export async function updateProductImagesOrder(
     return { error: 'An unknown error occurred' }
   }
 }
+
+export const destroy = async (id: string, productId: string) => {
+  try {
+    const res = await apiWithCredentials.delete(`/settings/products/images/${id}/${productId}`)
+    return res
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      return error.response?.data || { error: 'An unknown error occurred' }
+    }
+    return { error: 'An unknown error occurred' }
+  }
+}
