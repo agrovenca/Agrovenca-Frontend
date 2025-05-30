@@ -138,7 +138,7 @@ function ProductsSettingsPage() {
                   checked={dragAndDropActive}
                   onClick={() => setDragAndDropActive((prev) => !prev)}
                 />
-                <span>Modo Editable: {dragAndDropActive ? 'Activado' : 'Desactivado'}</span>
+                <span>Ordenamiento {dragAndDropActive ? 'activado' : 'desactivado'}</span>
               </Label>
             </ExtendedTooltip>
           )}

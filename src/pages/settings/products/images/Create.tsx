@@ -7,7 +7,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { ImagePlus, TrashIcon } from 'lucide-react'
+import { PlusIcon, TrashIcon } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -94,7 +94,7 @@ function RegisterProductImage({
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant={'ghost'} size={'icon'} title="Registrar imágenes al producto">
-          <ImagePlus />
+          <PlusIcon />
         </Button>
       </DialogTrigger>
       <DialogContent>

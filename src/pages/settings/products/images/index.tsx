@@ -199,7 +199,7 @@ function ProductImagesPage({ product }: Props) {
                     checked={imagesDraggable}
                     onClick={() => setImagesDraggable((prev) => !prev)}
                   />
-                  <span>Modo Editable: {imagesDraggable ? 'Activado' : 'Desactivado'}</span>
+                  <span>Ordenamiento {imagesDraggable ? 'activado' : 'desactivado'}</span>
                 </Label>
               </ExtendedTooltip>
             )}
