@@ -27,6 +27,20 @@ export const getProducts = async (
   }
 }
 
+export const exportProducts = async (format: string) => {
+  try {
+    const res = await apiWithCredentials.get(`/settings/products/export/${format}`, {
+      responseType: 'blob',
+    })
+    return res
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      return error.response?.data || { error: 'An unknown error occurred' }
+    }
+    throw new Error('An unknown error occurred')
+  }
+}
+
 export const create = async (data: z.infer<typeof ProductSchema>) => {
   try {
     const res = await apiWithCredentials.post(`/settings/products`, data)

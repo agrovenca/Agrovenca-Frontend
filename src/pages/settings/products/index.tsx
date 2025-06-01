@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { RefreshCwIcon } from 'lucide-react'
+import { DownloadIcon, RefreshCwIcon } from 'lucide-react'
 import { Loader } from '@/components/ui/loader'
 import CreateProduct from './Create'
 import { getAll as getCategories } from '@/actions/settings/categories'
 import { getAll as getUnities } from '@/actions/settings/unities'
-import { getProducts } from '@/actions/settings/products'
+import { exportProducts, getProducts } from '@/actions/settings/products'
 import { usePaginationStore } from '@/store/shared/usePaginationStore'
 import { useProductsStore } from '@/store/dashboard/useProductsStore'
 import { useUnitiesStore } from '@/store/dashboard/useUnitiesStore'
@@ -15,6 +15,8 @@ import { Label } from '@/components/ui/label'
 import ExtendedTooltip from '@/components/blocks/ExtendedTooltip'
 import ProductsTable from './ProductsTable'
 import ProductFilters from './ProductFilters'
+import { useExcelExport } from '@/hooks/useExcelExport'
+import { toast } from 'sonner'
 
 function ProductsSettingsPage() {
   const [page, setPage] = useState(1)
@@ -23,6 +25,8 @@ function ProductsSettingsPage() {
   const [categoryId, setCategoryId] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [dragAndDropActive, setDragAndDropActive] = useState(false)
+
+  const { exportExcel } = useExcelExport()
 
   const products = useProductsStore((state) => state.products)
   const setProducts = useProductsStore((state) => state.setProducts)
@@ -95,6 +99,18 @@ function ProductsSettingsPage() {
     }
   }
 
+  const handleExport = async (format: string) => {
+    try {
+      const res = await exportProducts(format)
+      if (res.status === 200) {
+        toast.success('Archivo generado correctamente')
+      }
+      return res
+    } catch (error) {
+      console.error('Error al exportar los productos:', error)
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full w-full gap-2">
@@ -117,6 +133,14 @@ function ProductsSettingsPage() {
         </div>
         <div className="flex items-center gap-2">
           <CreateProduct />
+          <Button
+            variant={'outline'}
+            onClick={() => exportExcel(() => handleExport('xlsx'), 'productos.xlsx')}
+            className="flex items-center gap-2"
+          >
+            <DownloadIcon />
+            <span>Exportar</span>
+          </Button>
           <Button
             variant={'outline'}
             onClick={() => fetchData(page, search, limit, categoryId)}
