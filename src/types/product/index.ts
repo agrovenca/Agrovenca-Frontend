@@ -34,5 +34,5 @@ export interface Product {
 }
 
 export interface ProductFilterParams extends BaseFilterParams {
-  categoryId: string
+  categoryId?: string
 }

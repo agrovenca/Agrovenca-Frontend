@@ -7,15 +7,16 @@ import Register from './pages/auth/Register'
 import Profile from './pages/account/user/Profile'
 import AccountLayout from './layouts/AccountLayout'
 import ChangePassword from './pages/account/user/ChangePassword'
-import SettingsLayout from './layouts/SettingsLayout'
-import CategoriesSettingsPage from './pages/settings/categories'
-import UnitiesSettingsPage from './pages/settings/unities'
-import UsersSettingsPage from './pages/settings/users'
+import DashboardLayout from './layouts/DashboardLayout'
+import CategoriesDashboardPage from './pages/dashboard/categories'
+import UnitiesDashboardPage from './pages/dashboard/unities'
+import UsersDashboardPage from './pages/dashboard/users'
 import ForgotPasswordPage from './pages/auth/ForgotPassword'
-import CouponsSettingsPage from './pages/settings/coupons'
-import ProductsSettingsPage from './pages/settings/products'
+import CouponsDashboardPage from './pages/dashboard/coupons'
+import ProductsDashboardPage from './pages/dashboard/products'
 import ResetPasswordValidatePage from './pages/auth/ResetPasswordValidate'
 import ResetPasswordConfirmPage from './pages/auth/ResetPasswordConfirm'
+import ProductsPage from './pages/products'
 
 export const Router = createBrowserRouter([
   {
@@ -29,7 +30,7 @@ export const Router = createBrowserRouter([
       },
       {
         path: '/products',
-        element: <div>Products</div>,
+        element: <ProductsPage />,
       },
       {
         path: '/contacts',
@@ -85,27 +86,27 @@ export const Router = createBrowserRouter([
       },
       {
         path: '/settings',
-        element: <SettingsLayout />,
+        element: <DashboardLayout />,
         children: [
           {
             path: 'users',
-            element: <UsersSettingsPage />,
+            element: <UsersDashboardPage />,
           },
           {
             path: 'categories',
-            element: <CategoriesSettingsPage />,
+            element: <CategoriesDashboardPage />,
           },
           {
             path: 'unities',
-            element: <UnitiesSettingsPage />,
+            element: <UnitiesDashboardPage />,
           },
           {
             path: 'products',
-            element: <ProductsSettingsPage />,
+            element: <ProductsDashboardPage />,
           },
           {
             path: 'coupons',
-            element: <CouponsSettingsPage />,
+            element: <CouponsDashboardPage />,
           },
         ],
       },
