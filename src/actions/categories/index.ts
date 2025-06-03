@@ -3,7 +3,7 @@ import { CategorySchema } from '@/schemas/category'
 import axios from 'axios'
 import { z } from 'zod'
 
-export const getAll = async () => {
+export const getAllCategories = async () => {
   try {
     const res = await apiWithOutCredentials.get(`/categories`, {})
     return res

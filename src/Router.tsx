@@ -85,7 +85,7 @@ export const Router = createBrowserRouter([
         ],
       },
       {
-        path: '/settings',
+        path: '/dashboard',
         element: <DashboardLayout />,
         children: [
           {

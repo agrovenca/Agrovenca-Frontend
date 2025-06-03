@@ -1,4 +1,4 @@
-import { destroy, getAll } from '@/actions/unities'
+import { destroy, getAllUnities } from '@/actions/unities'
 import { Loader } from '@/components/ui/loader'
 import { useCallback, useEffect, useState } from 'react'
 import {
@@ -24,7 +24,7 @@ function UnitiesDashboardPage() {
 
   const fetchData = useCallback(async () => {
     setIsLoading(true)
-    const res = await getAll()
+    const res = await getAllUnities()
     if ('data' in res) {
       setUnities(res.data)
     } else {

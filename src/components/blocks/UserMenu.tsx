@@ -55,9 +55,9 @@ export default function UserMenu({ user }: Props) {
         ))}
         {(user.isMod || user.isAdmin) && (
           <DropdownMenuItem>
-            <Link to="/settings" className="flex gap-2 items-center">
+            <Link to="/dashboard" className="flex gap-2 items-center">
               <SettingsIcon />
-              <span>Configuración</span>
+              <span>Dashboard</span>
             </Link>
           </DropdownMenuItem>
         )}

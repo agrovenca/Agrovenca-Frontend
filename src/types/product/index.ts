@@ -34,5 +34,8 @@ export interface Product {
 }
 
 export interface ProductFilterParams extends BaseFilterParams {
-  categoryId?: string
+  categoriesIds?: string[]
+  unitiesIds?: string[]
+  priceRange?: number[]
+  inStockOnly?: boolean
 }

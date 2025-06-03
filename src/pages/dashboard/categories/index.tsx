@@ -1,4 +1,4 @@
-import { destroy, getAll } from '@/actions/categories'
+import { destroy, getAllCategories } from '@/actions/categories'
 import { useCallback, useEffect, useState } from 'react'
 import {
   Table,
@@ -25,7 +25,7 @@ function CategoriesDashboardPage() {
 
   const fetchData = useCallback(async () => {
     setIsLoading(true)
-    const res = await getAll()
+    const res = await getAllCategories()
     if ('data' in res) {
       setCategories(res.data)
     } else {

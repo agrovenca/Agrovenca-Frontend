@@ -3,8 +3,8 @@ import { Button } from '@/components/ui/button'
 import { DownloadIcon, RefreshCwIcon } from 'lucide-react'
 import { Loader } from '@/components/ui/loader'
 import CreateProduct from './Create'
-import { getAll as getCategories } from '@/actions/categories'
-import { getAll as getUnities } from '@/actions/unities'
+import { getAllCategories } from '@/actions/categories'
+import { getAllUnities } from '@/actions/unities'
 import { exportProducts, getProducts } from '@/actions/products'
 import { usePaginationStore } from '@/store/shared/usePaginationStore'
 import { useProductsStore } from '@/store/products/useProductsStore'
@@ -14,7 +14,6 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import ExtendedTooltip from '@/components/blocks/ExtendedTooltip'
 import ProductsTable from './ProductsTable'
-import ProductFilters from './ProductFilters'
 import { useExcelExport } from '@/hooks/useExcelExport'
 import { toast } from 'sonner'
 import { ProductFilterParams } from '@/types/product'
@@ -23,7 +22,7 @@ function ProductsDashboardPage() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [limit, setLimit] = useState(10)
-  const [categoryId, setCategoryId] = useState('')
+  const [categoriesIds, setCategoriesIds] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [dragAndDropActive, setDragAndDropActive] = useState(false)
 
@@ -56,8 +55,8 @@ function ProductsDashboardPage() {
     setIsLoading(true)
     try {
       const [categoriesResponse, unitiesResponse] = await Promise.all([
-        getCategories(),
-        getUnities(),
+        getAllCategories(),
+        getAllUnities(),
       ])
       setCategories(categoriesResponse.data)
       setUnities(unitiesResponse.data)
@@ -75,13 +74,6 @@ function ProductsDashboardPage() {
   useEffect(() => {
     getAssociatedData()
   }, [getAssociatedData])
-
-  const handleFilterSubmit = (params?: Omit<ProductFilterParams, 'page'>) => {
-    setPage(1)
-    setSearch(params?.search ?? '')
-    setLimit(params?.limit ?? 10)
-    setCategoryId(params?.categoryId ?? '')
-  }
 
   const handleDelete = async (productId: string) => {
     try {
@@ -116,14 +108,6 @@ function ProductsDashboardPage() {
   return (
     <>
       <div className="w-full flex justify-between gap-4 mb-4">
-        <div className="pt-4 flex-1">
-          <ProductFilters
-            initialSearch={search}
-            initialLimit={limit}
-            initialCategoryId={categoryId}
-            onSubmit={handleFilterSubmit}
-          />
-        </div>
         <div className="flex items-center gap-2">
           <CreateProduct />
           <Button
@@ -136,7 +120,7 @@ function ProductsDashboardPage() {
           </Button>
           <Button
             variant={'outline'}
-            onClick={() => fetchData({ page, search, limit, categoryId })}
+            onClick={() => fetchData({ page, search, limit, categoriesIds })}
             className="flex items-center gap-2"
           >
             <RefreshCwIcon />

@@ -9,6 +9,7 @@ import {
   Sheet,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -58,24 +59,24 @@ function Navbar() {
         <div className="flex items-center gap-4">
           {!user ? (
             <>
-              <Button asChild variant={'outline'}>
+              <Button asChild variant={'outline'} className="hidden sm:flex">
                 <Link
                   viewTransition
                   to="/auth/login"
                   className="text-sm font-medium text-muted-foreground hover:text-primary"
                 >
-                  <span style={{ viewTransitionName: 'loginTransitionTitle' }}>Login</span>
                   <LogIn />
+                  <span style={{ viewTransitionName: 'loginTransitionTitle' }}>Iniciar sesión</span>
                 </Link>
               </Button>
-              <Button asChild variant={'default'}>
+              <Button asChild variant={'default'} className="hidden sm:flex">
                 <Link
                   viewTransition
                   to="/auth/register"
                   className="text-sm font-medium text-muted-foreground hover:text-primary"
                 >
-                  <span style={{ viewTransitionName: 'registerTransitionTitle' }}>Register</span>
                   <UserRound />
+                  <span style={{ viewTransitionName: 'registerTransitionTitle' }}>Registrarse</span>
                 </Link>
               </Button>
             </>
@@ -111,10 +112,38 @@ function Navbar() {
                       {item.name}
                     </NavLink>
                   ))}
-                  <div className="md:hidden px-3 py-2">
+                </div>
+                <SheetFooter>
+                  <div className="md:hidden py-2 ms-auto">
                     <ModeToggle />
                   </div>
-                </div>
+                  <div className="flex flex-col gap-4">
+                    <Button asChild variant={'outline'}>
+                      <Link
+                        viewTransition
+                        to="/auth/login"
+                        className="text-sm font-medium text-muted-foreground hover:text-primary"
+                      >
+                        <LogIn />
+                        <span style={{ viewTransitionName: 'loginTransitionTitle' }}>
+                          Iniciar sesión
+                        </span>
+                      </Link>
+                    </Button>
+                    <Button asChild variant={'default'}>
+                      <Link
+                        viewTransition
+                        to="/auth/register"
+                        className="text-sm font-medium text-muted-foreground hover:text-primary"
+                      >
+                        <UserRound />
+                        <span style={{ viewTransitionName: 'registerTransitionTitle' }}>
+                          Registrarse
+                        </span>
+                      </Link>
+                    </Button>
+                  </div>
+                </SheetFooter>
               </SheetContent>
             </Sheet>
           </div>

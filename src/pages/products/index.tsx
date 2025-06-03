@@ -8,26 +8,13 @@ import { useCallback, useEffect, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Filter, Grid, Heart, List, Search, ShoppingCart } from 'lucide-react'
+import { Grid, Heart, List, Search, ShoppingCart } from 'lucide-react'
 import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
-// import { useUnitiesStore } from '@/store/unities/useUnitiesStore'
-// import { useCategoriesStore } from '@/store/categories/useCategoriesStore'
+import { FiltersBar } from '../dashboard/products/Filters'
+import { useCategoriesStore } from '@/store/categories/useCategoriesStore'
+import { useUnitiesStore } from '@/store/unities/useUnitiesStore'
+import Pagination from '@/components/blocks/pagination'
 
 function ProductCard({ product }: { product: Product }) {
   const inStock = product.stock > 0
@@ -59,6 +46,10 @@ function ProductCard({ product }: { product: Product }) {
         </div>
 
         <div className="p-4">
+          <div className="flex items-start justify-between mb-2">
+            <h3 className="font-medium line-clamp-1">{product.name}</h3>
+          </div>
+
           <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{product.description}</p>
 
           <div className="flex items-center justify-between">
@@ -95,8 +86,11 @@ function ProductListItem({ product }: { product: Product }) {
   const productSecondPrice = Number(product.secondPrice ?? 0)
   const firstProductImage = product.images.find((image) => image.displayOrder === 1)?.s3Key
 
+  const categories = useCategoriesStore((state) => state.categories)
+  const unities = useUnitiesStore((state) => state.unities)
+
   return (
-    <Card className="overflow-hidden py-0">
+    <Card className="overflow-x-scroll overflow-y-hidden sm:overflow-hidden py-0">
       <CardContent className="p-0">
         <div className="flex gap-2">
           <div className="relative w-48 h-48 shrink-0">
@@ -116,15 +110,20 @@ function ProductListItem({ product }: { product: Product }) {
             <div className="flex items-start justify-between mb-2">
               <div>
                 <h3 className="text-xl font-semibold mb-1">{product.name}</h3>
-                <Badge variant="outline" className="mb-2">
-                  category
-                </Badge>
+                <div className="flex gap-2">
+                  <Badge variant="outline" className="mb-2">
+                    {categories.map((cat) => cat.id === product.categoryId && cat.name)}
+                  </Badge>
+                  <Badge variant="outline" className="mb-2">
+                    {unities.map((unity) => unity.id === product.unityId && unity.name)}
+                  </Badge>
+                </div>
               </div>
             </div>
 
             <p className="text-muted-foreground mb-4">{product.description}</p>
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-3">
                 {productSecondPrice && productSecondPrice > 0 ? (
                   <>
@@ -158,22 +157,20 @@ function ProductListItem({ product }: { product: Product }) {
 }
 
 function ProductsPage() {
+  const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
-  // const [limit, setLimit] = useState(10)
-  // const [categoryId, setCategoryId] = useState('')
-  // const [isLoading, setIsLoading] = useState(false)
+  const [limit, setLimit] = useState(1)
+  const [isLoading, setIsLoading] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
   const products = useProductsStore((state) => state.products)
   const setProducts = useProductsStore((state) => state.setProducts)
-  // const setUnities = useUnitiesStore((state) => state.setUnities)
-  // const setCategories = useCategoriesStore((state) => state.setCategories)
-  // const paginationData = usePaginationStore((state) => state.paginationData)
+  const paginationData = usePaginationStore((state) => state.paginationData)
   const setPaginationData = usePaginationStore((state) => state.setPaginationData)
 
   const fetchData = useCallback(
     async (params?: ProductFilterParams) => {
-      // setIsLoading(true)
+      setIsLoading(true)
       try {
         const { data } = await getProducts(params)
         setProducts(data.objects)
@@ -181,20 +178,20 @@ function ProductsPage() {
       } catch (error) {
         console.error('Error al obtener productos', error)
       } finally {
-        // setIsLoading(false)
+        setIsLoading(false)
       }
     },
     [setProducts, setPaginationData]
   )
 
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
+    fetchData({ limit, page })
+  }, [fetchData, limit, page])
 
   return (
     <div>
       <Navbar />
-      <section className="container mx-auto py-4">
+      <section className="container mx-auto py-4 px-2">
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">Products</h1>
           <p className="text-muted-foreground mt-2">
@@ -203,51 +200,18 @@ function ProductsPage() {
         </div>
 
         {/* Search and Filters Bar */}
-        <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-1 items-center gap-4">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search products..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-
-            {/* Mobile Filter Button */}
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="md:hidden">
-                  <Filter className="h-4 w-4" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left">
-                <SheetHeader>
-                  <SheetTitle>Filters</SheetTitle>
-                  <SheetDescription>
-                    Filter products by category, price, and availability
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="mt-6">{/* <FilterSidebar /> */}</div>
-              </SheetContent>
-            </Sheet>
+        <div className="flex  gap-4 mb-6 flex-row md:items-center md:justify-between">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search products..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10"
+            />
           </div>
 
           <div className="flex items-center gap-4">
-            <Select>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="featured">Featured</SelectItem>
-                <SelectItem value="name">Name A-Z</SelectItem>
-                <SelectItem value="price-low">Price: Low to High</SelectItem>
-                <SelectItem value="price-high">Price: High to Low</SelectItem>
-                <SelectItem value="rating">Highest Rated</SelectItem>
-              </SelectContent>
-            </Select>
-
             <div className="flex border rounded-md">
               <Button
                 variant={viewMode === 'grid' ? 'default' : 'ghost'}
@@ -269,41 +233,46 @@ function ProductsPage() {
           </div>
         </div>
 
-        <div className="flex gap-6">
+        <div className="flex gap-6 flex-col sm:flex-row">
           {/* Desktop Sidebar */}
-          <aside className="hidden md:block w-64 shrink-0">
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="font-semibold mb-4">Filters</h2>
-                {/* <FilterSidebar /> */}
-              </CardContent>
-            </Card>
-          </aside>
+          <FiltersBar fetchProducts={fetchData} />
 
           {/* Main Content */}
           <main className="flex-1">
             {/* Products Grid/List */}
-            {viewMode === 'grid' ? (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {products.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+            {isLoading ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {[...Array(8)].map((_, i) => (
+                  <Card key={i} className="animate-pulse h-[350px] bg-muted" />
                 ))}
               </div>
             ) : (
-              <div className="space-y-4">
-                {products.map((product) => (
-                  <ProductListItem key={product.id} product={product} />
-                ))}
-              </div>
+              <>
+                {viewMode === 'grid' ? (
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {products.map((product) => (
+                      <ProductCard key={product.id} product={product} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {products.map((product) => (
+                      <ProductListItem key={product.id} product={product} />
+                    ))}
+                  </div>
+                )}
+                {products.length === 0 && (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">No se encontraron productos</p>
+                  </div>
+                )}
+              </>
             )}
-            {/* No Results */}
-            {products.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">No products found matching your criteria.</p>
-                <Button variant="outline" className="mt-4">
-                  Clear Filters
-                </Button>
-              </div>
+            {paginationData && (
+              <Pagination
+                paginationData={paginationData}
+                onPageChange={(newPage) => setPage(newPage)}
+              />
             )}
           </main>
         </div>

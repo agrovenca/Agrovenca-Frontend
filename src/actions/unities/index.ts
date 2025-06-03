@@ -3,7 +3,7 @@ import { UnitySchema } from '@/schemas/unity'
 import axios from 'axios'
 import { z } from 'zod'
 
-export const getAll = async () => {
+export const getAllUnities = async () => {
   try {
     const res = await apiWithOutCredentials.get(`/unities`, {})
     return res
