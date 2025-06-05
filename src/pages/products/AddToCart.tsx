@@ -1,0 +1,85 @@
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { useCartStore } from '@/store/cart/useCartStore'
+
+import { Product } from '@/types/product'
+import { ShoppingCart } from 'lucide-react'
+import { useEffect, useState } from 'react'
+
+type Props = {
+  product: Product
+}
+
+function AddToCart({ product }: Props) {
+  const [quantity, setQuantity] = useState(1)
+  const [isOpen, setIsOpen] = useState(false)
+  const inStock = product.stock > 0
+  const isValid = quantity > product.stock
+
+  const addItem = useCartStore((state) => state.addItem)
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setIsOpen(false)
+    addItem({ product, productId: product.id, quantity })
+  }
+
+  useEffect(() => {
+    if (isOpen) {
+      setQuantity(1)
+    }
+  }, [isOpen])
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button
+          size="sm"
+          className="bg-green-600 hover:bg-green-700 cursor-pointer"
+          disabled={!inStock}
+        >
+          <ShoppingCart className="h-4 w-4 mr-1" />
+          Agregar
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Agregar este producto al carrito</DialogTitle>
+          <DialogDescription>Elija la cantidad para agregar al carrito</DialogDescription>
+        </DialogHeader>
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="flex flex-col gap-2">
+            <Input
+              type="number"
+              defaultValue={1}
+              max={product.stock}
+              placeholder="Cantidad a agregar"
+              onChange={(e) => setQuantity(Number(e.target.value))}
+            />
+            <p>
+              {quantity}/{product.stock}
+            </p>
+          </div>
+          <Button
+            className="w-full bg-blue-500 text-white hover:bg-blue-600"
+            disabled={isValid}
+            title={isValid ? 'Agregar al carrito' : 'Cantidad inválida'}
+            type="submit"
+          >
+            Agregar
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+export default AddToCart

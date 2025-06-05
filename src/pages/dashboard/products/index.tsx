@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { DownloadIcon, RefreshCwIcon } from 'lucide-react'
+import { DownloadIcon, RefreshCwIcon, Search } from 'lucide-react'
 import { Loader } from '@/components/ui/loader'
 import CreateProduct from './Create'
 import { getAllCategories } from '@/actions/categories'
@@ -17,12 +17,13 @@ import ProductsTable from './ProductsTable'
 import { useExcelExport } from '@/hooks/useExcelExport'
 import { toast } from 'sonner'
 import { ProductFilterParams } from '@/types/product'
+import { FiltersBar } from './Filters'
+import { Input } from '@/components/ui/input'
 
 function ProductsDashboardPage() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [limit, setLimit] = useState(10)
-  const [categoriesIds, setCategoriesIds] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [dragAndDropActive, setDragAndDropActive] = useState(false)
 
@@ -68,8 +69,8 @@ function ProductsDashboardPage() {
   }, [setUnities, setCategories])
 
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
+    fetchData({ limit, page })
+  }, [fetchData, limit, page])
 
   useEffect(() => {
     getAssociatedData()
@@ -78,7 +79,7 @@ function ProductsDashboardPage() {
   const handleDelete = async (productId: string) => {
     try {
       deleteProduct(productId)
-      await fetchData({ page, search, limit, categoryId })
+      await fetchData({ page, search, limit })
     } catch (error) {
       console.error('Error al eliminar el producto:', error)
     }
@@ -108,6 +109,15 @@ function ProductsDashboardPage() {
   return (
     <>
       <div className="w-full flex justify-between gap-4 mb-4">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Filtrar por nombre..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10"
+          />
+        </div>
         <div className="flex items-center gap-2">
           <CreateProduct />
           <Button
@@ -120,7 +130,7 @@ function ProductsDashboardPage() {
           </Button>
           <Button
             variant={'outline'}
-            onClick={() => fetchData({ page, search, limit, categoriesIds })}
+            onClick={() => fetchData({ page, search, limit })}
             className="flex items-center gap-2"
           >
             <RefreshCwIcon />
@@ -146,12 +156,23 @@ function ProductsDashboardPage() {
         </div>
       </div>
 
-      <ProductsTable
-        setPage={setPage}
-        isDraggable={dragAndDropActive}
-        setIsDraggable={setDragAndDropActive}
-        handleDelete={handleDelete}
-      />
+      <div className="flex gap-6 flex-col sm:flex-row">
+        <FiltersBar
+          limit={limit}
+          setSearch={setSearch}
+          search={search}
+          setLimit={setLimit}
+          recordsPerPage={[1, 2, 3]}
+          fetchProducts={fetchData}
+        />
+
+        <ProductsTable
+          setPage={setPage}
+          isDraggable={dragAndDropActive}
+          setIsDraggable={setDragAndDropActive}
+          handleDelete={handleDelete}
+        />
+      </div>
     </>
   )
 }

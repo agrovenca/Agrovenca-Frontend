@@ -186,7 +186,7 @@ function ProductsTable({ isDraggable, setPage, setIsDraggable, handleDelete }: P
   }
 
   return (
-    <>
+    <div className="flex-1">
       {isDraggable ? (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <Table className="my-4">
@@ -243,7 +243,7 @@ function ProductsTable({ isDraggable, setPage, setIsDraggable, handleDelete }: P
       {paginationData && (
         <Pagination paginationData={paginationData} onPageChange={(newPage) => setPage(newPage)} />
       )}
-    </>
+    </div>
   )
 }
 

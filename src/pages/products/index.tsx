@@ -3,24 +3,30 @@ import Navbar from '@/components/pages/HomeNavbar'
 import { useProductsStore } from '@/store/products/useProductsStore'
 import { usePaginationStore } from '@/store/shared/usePaginationStore'
 import { Product, ProductFilterParams } from '@/types/product'
-import { useCallback, useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useState } from 'react'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Grid, Heart, List, Search, ShoppingCart } from 'lucide-react'
+import { Grid, Heart, List, Search, ShoppingCart, XIcon } from 'lucide-react'
 import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
 import { Input } from '@/components/ui/input'
 import { FiltersBar } from '../dashboard/products/Filters'
 import { useCategoriesStore } from '@/store/categories/useCategoriesStore'
 import { useUnitiesStore } from '@/store/unities/useUnitiesStore'
 import Pagination from '@/components/blocks/pagination'
+import { useCartStore } from '@/store/cart/useCartStore'
+import AddToCart from './AddToCart'
 
-function ProductCard({ product }: { product: Product }) {
+const ProductCard = memo(function ProductCard({ product }: { product: Product }) {
   const inStock = product.stock > 0
   const productPrice = Number(product.price)
   const productSecondPrice = Number(product.secondPrice ?? 0)
   const firstProductImage = product.images.find((image) => image.displayOrder === 1)?.s3Key
+
+  const isProductInCart = useCartStore((state) =>
+    state.items.some((item) => item.productId === product.id)
+  )
 
   return (
     <Card className="group relative overflow-hidden transition-all hover:shadow-lg pt-0">
@@ -31,6 +37,7 @@ function ProductCard({ product }: { product: Product }) {
             alt={product.name}
             width={300}
             height={300}
+            loading="lazy"
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
           {!inStock && (
@@ -65,22 +72,26 @@ function ProductCard({ product }: { product: Product }) {
                 <span className="text-lg font-bold">${productPrice.toFixed(2)}</span>
               )}
             </div>
-            <Button
-              size="sm"
-              className="bg-green-600 hover:bg-green-700 cursor-pointer"
-              disabled={!inStock}
-            >
-              <ShoppingCart className="h-4 w-4 mr-1" />
-              Add
-            </Button>
+            {isProductInCart ? (
+              <Button
+                size="sm"
+                className="bg-red-500 hover:bg-red-600 cursor-pointer text-white"
+                disabled={!inStock}
+              >
+                <XIcon className="h-4 w-4 mr-1 font-bold" />
+                Remover
+              </Button>
+            ) : (
+              <AddToCart product={product} />
+            )}
           </div>
         </div>
       </CardContent>
     </Card>
   )
-}
+})
 
-function ProductListItem({ product }: { product: Product }) {
+const ProductListItem = memo(function ProductListItem({ product }: { product: Product }) {
   const inStock = product.stock > 0
   const productPrice = Number(product.price)
   const productSecondPrice = Number(product.secondPrice ?? 0)
@@ -88,23 +99,27 @@ function ProductListItem({ product }: { product: Product }) {
 
   const categories = useCategoriesStore((state) => state.categories)
   const unities = useUnitiesStore((state) => state.unities)
+  const isProductInCart = useCartStore((state) =>
+    state.items.some((item) => item.productId === product.id)
+  )
 
   return (
     <Card className="overflow-x-scroll overflow-y-hidden sm:overflow-hidden py-0">
       <CardContent className="p-0">
         <div className="flex gap-2">
-          <div className="relative w-48 h-48 shrink-0">
+          <figure className="relative w-48 h-48 shrink-0">
             <img
               src={product.images.length > 0 ? firstProductImage : ProductImagePlaceholder}
               alt={product.name}
-              className="max-w-[200px] object-cover"
+              className="w-full h-full object-cover"
+              loading="lazy"
             />
             {!inStock && (
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                 <Badge variant="secondary">Out of Stock</Badge>
               </div>
             )}
-          </div>
+          </figure>
 
           <div className="flex-1 p-6">
             <div className="flex items-start justify-between mb-2">
@@ -140,13 +155,24 @@ function ProductListItem({ product }: { product: Product }) {
                 <Button variant="outline" size="icon" className="cursor-pointer">
                   <Heart className="h-4 w-4" />
                 </Button>
-                <Button
-                  className="bg-green-600 hover:bg-green-700 cursor-pointer"
-                  disabled={!inStock}
-                >
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  Add to Cart
-                </Button>
+                {isProductInCart ? (
+                  <Button
+                    size="sm"
+                    className="bg-red-500 hover:bg-red-600 cursor-pointer text-white"
+                    disabled={!inStock}
+                  >
+                    <XIcon className="h-4 w-4 mr-2 font-bold" />
+                    Remover
+                  </Button>
+                ) : (
+                  <Button
+                    className="bg-green-600 hover:bg-green-700 cursor-pointer"
+                    disabled={!inStock}
+                  >
+                    <ShoppingCart className="h-4 w-4 mr-2" />
+                    Add to Cart
+                  </Button>
+                )}
               </div>
             </div>
           </div>
@@ -154,12 +180,12 @@ function ProductListItem({ product }: { product: Product }) {
       </CardContent>
     </Card>
   )
-}
+})
 
 function ProductsPage() {
+  const [limit, setLimit] = useState(1)
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
-  const [limit, setLimit] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
@@ -204,7 +230,7 @@ function ProductsPage() {
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search products..."
+              placeholder="Filtrar por nombre..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
@@ -235,7 +261,14 @@ function ProductsPage() {
 
         <div className="flex gap-6 flex-col sm:flex-row">
           {/* Desktop Sidebar */}
-          <FiltersBar fetchProducts={fetchData} />
+          <FiltersBar
+            limit={limit}
+            setSearch={setSearch}
+            search={search}
+            setLimit={setLimit}
+            recordsPerPage={[1, 2, 3]}
+            fetchProducts={fetchData}
+          />
 
           {/* Main Content */}
           <main className="flex-1">

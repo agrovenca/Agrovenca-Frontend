@@ -1,0 +1,108 @@
+import { Button } from '@/components/ui/button'
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
+import { useCartStore } from '@/store/cart/useCartStore'
+import { Product } from '@/types/product'
+import { EditIcon, ShoppingCartIcon, TrashIcon } from 'lucide-react'
+import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
+
+function CartPage() {
+  const items = useCartStore((state) => state.items)
+  const addItem = useCartStore((state) => state.addItem)
+  const updateItem = useCartStore((state) => state.updateItem)
+  const deleteItem = useCartStore((state) => state.deleteItem)
+
+  const getProductPrice = (product: Product) =>
+    product.secondPrice && product.secondPrice != 0 ? product.secondPrice : product.price
+  const productImage = (product: Product) => product.images[0]?.s3Key || ProductImagePlaceholder
+  const totalPrice = items
+    .map((i) => getProductPrice(i.product) * i.quantity)
+    .reduce((acc, price) => acc + price, 0)
+
+  return (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button size={'icon'} variant={'ghost'}>
+          <ShoppingCartIcon />
+        </Button>
+      </SheetTrigger>
+      <SheetContent>
+        <SheetHeader>
+          <SheetTitle>Carrito de compras</SheetTitle>
+          <SheetDescription>Productos que están en tu carrito de compras</SheetDescription>
+        </SheetHeader>
+        <section className="px-4 flex flex-col gap-2">
+          {items.length <= 0
+            ? 'No hay items en el carrito'
+            : items.map((item) => (
+                <div
+                  key={item.productId}
+                  className="flex gap-2 p-4 rounded-md bg-slate-200 dark:bg-gray-800"
+                >
+                  <figure className="w-12 h-12 overflow-hidden rounded-md">
+                    <img
+                      src={productImage(item.product)}
+                      alt="Imagen del producto"
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </figure>
+                  <div className="flex gap-2 justify-between flex-1">
+                    <div className="flex-1">
+                      <p>{item.product.name}</p>
+                      <p>
+                        <span>
+                          {item.quantity} x ${Number(getProductPrice(item.product)).toFixed(2)}
+                        </span>
+                        {' = '}
+                        <span>
+                          ${Number(getProductPrice(item.product) * item.quantity).toFixed(2)}
+                        </span>
+                      </p>
+                    </div>
+                    <div className="flex gap-2 flex-col">
+                      <button className="w-5 h-5 transition text-red-500 hover:text-red-600 cursor-pointer">
+                        <TrashIcon className="w-full h-full" />
+                      </button>
+                      <button className="w-5 h-5 transition text-blue-500 hover:text-blue-600 cursor-pointer">
+                        <EditIcon className="w-full h-full" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+        </section>
+        <div className="flex justify-center items-center">
+          <p>
+            <span className="font-bold">Total: </span>${totalPrice.toFixed(2)}
+          </p>
+        </div>
+        <SheetFooter>
+          <Button
+            variant={'outline'}
+            size={'lg'}
+            className="bg-blue-500 hover:bg-blue-600 text-white dark:bg-blue-500 dark:hover:bg-blue-600 w-full uppercase"
+          >
+            Continuar
+          </Button>
+          <Button
+            variant={'outline'}
+            size={'lg'}
+            className="bg-red-500 hover:bg-red-600 text-white dark:bg-red-500 dark:hover:bg-red-600 w-full uppercase"
+          >
+            Vaciar carrito
+          </Button>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  )
+}
+
+export default CartPage

@@ -4,7 +4,6 @@ import { Leaf, LogIn, Menu, UserRound } from 'lucide-react'
 import { useAuthStore } from '@/store/auth/useAuthStore'
 import UserMenu from '../blocks/UserMenu'
 import { ModeToggle } from '../mode-toggle'
-import CartBtn from '../blocks/CartBtn'
 import {
   Sheet,
   SheetContent,
@@ -14,6 +13,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
+import CartPage from '@/pages/cart'
 
 function Navbar() {
   const user = useAuthStore((state) => state.user)
@@ -82,7 +82,7 @@ function Navbar() {
             </>
           ) : (
             <>
-              <CartBtn />
+              <CartPage />
               <UserMenu user={user} />
             </>
           )}
