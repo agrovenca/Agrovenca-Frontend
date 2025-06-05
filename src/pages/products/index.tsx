@@ -8,7 +8,7 @@ import { memo, useCallback, useEffect, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Grid, Heart, List, Search, ShoppingCart, XIcon } from 'lucide-react'
+import { Grid, Heart, List, Search, XIcon } from 'lucide-react'
 import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
 import { Input } from '@/components/ui/input'
 import { FiltersBar } from '../dashboard/products/Filters'
@@ -16,7 +16,8 @@ import { useCategoriesStore } from '@/store/categories/useCategoriesStore'
 import { useUnitiesStore } from '@/store/unities/useUnitiesStore'
 import Pagination from '@/components/blocks/pagination'
 import { useCartStore } from '@/store/cart/useCartStore'
-import AddToCart from './AddToCart'
+import AddCartItem from './AddCartItem'
+import { Link } from 'react-router'
 
 const ProductCard = memo(function ProductCard({ product }: { product: Product }) {
   const inStock = product.stock > 0
@@ -24,6 +25,7 @@ const ProductCard = memo(function ProductCard({ product }: { product: Product })
   const productSecondPrice = Number(product.secondPrice ?? 0)
   const firstProductImage = product.images.find((image) => image.displayOrder === 1)?.s3Key
 
+  const deleteItem = useCartStore((state) => state.deleteItem)
   const isProductInCart = useCartStore((state) =>
     state.items.some((item) => item.productId === product.id)
   )
@@ -32,14 +34,16 @@ const ProductCard = memo(function ProductCard({ product }: { product: Product })
     <Card className="group relative overflow-hidden transition-all hover:shadow-lg pt-0">
       <CardContent className="p-0">
         <div className="relative aspect-square overflow-hidden">
-          <img
-            src={product.images.length > 0 ? firstProductImage : ProductImagePlaceholder}
-            alt={product.name}
-            width={300}
-            height={300}
-            loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
+          <Link to={`/products/${product.id}`}>
+            <figure className="w-[300px] h-[300px] overflow-hidden">
+              <img
+                src={product.images.length > 0 ? firstProductImage : ProductImagePlaceholder}
+                alt={product.name}
+                loading="lazy"
+                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+            </figure>
+          </Link>
           {!inStock && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
               <Badge variant="secondary">Out of Stock</Badge>
@@ -77,12 +81,13 @@ const ProductCard = memo(function ProductCard({ product }: { product: Product })
                 size="sm"
                 className="bg-red-500 hover:bg-red-600 cursor-pointer text-white"
                 disabled={!inStock}
+                onClick={() => deleteItem(product.id)}
               >
                 <XIcon className="h-4 w-4 mr-1 font-bold" />
                 Remover
               </Button>
             ) : (
-              <AddToCart product={product} />
+              <AddCartItem contentText={'Agregar'} size={'sm'} product={product} />
             )}
           </div>
         </div>
@@ -99,6 +104,7 @@ const ProductListItem = memo(function ProductListItem({ product }: { product: Pr
 
   const categories = useCategoriesStore((state) => state.categories)
   const unities = useUnitiesStore((state) => state.unities)
+  const deleteItem = useCartStore((state) => state.deleteItem)
   const isProductInCart = useCartStore((state) =>
     state.items.some((item) => item.productId === product.id)
   )
@@ -160,18 +166,17 @@ const ProductListItem = memo(function ProductListItem({ product }: { product: Pr
                     size="sm"
                     className="bg-red-500 hover:bg-red-600 cursor-pointer text-white"
                     disabled={!inStock}
+                    onClick={() => deleteItem(product.id)}
                   >
                     <XIcon className="h-4 w-4 mr-2 font-bold" />
                     Remover
                   </Button>
                 ) : (
-                  <Button
-                    className="bg-green-600 hover:bg-green-700 cursor-pointer"
-                    disabled={!inStock}
-                  >
-                    <ShoppingCart className="h-4 w-4 mr-2" />
-                    Add to Cart
-                  </Button>
+                  <AddCartItem
+                    contentText={'Agregar al carrito'}
+                    size={'default'}
+                    product={product}
+                  />
                 )}
               </div>
             </div>

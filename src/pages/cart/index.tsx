@@ -10,13 +10,13 @@ import {
 } from '@/components/ui/sheet'
 import { useCartStore } from '@/store/cart/useCartStore'
 import { Product } from '@/types/product'
-import { EditIcon, ShoppingCartIcon, TrashIcon } from 'lucide-react'
+import { ShoppingCartIcon, TrashIcon } from 'lucide-react'
 import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
+import UpdateCartItem from '../products/UpdateCartItem'
 
 function CartPage() {
   const items = useCartStore((state) => state.items)
-  const addItem = useCartStore((state) => state.addItem)
-  const updateItem = useCartStore((state) => state.updateItem)
+  const clearCart = useCartStore((state) => state.clearCart)
   const deleteItem = useCartStore((state) => state.deleteItem)
 
   const getProductPrice = (product: Product) =>
@@ -68,12 +68,13 @@ function CartPage() {
                       </p>
                     </div>
                     <div className="flex gap-2 flex-col">
-                      <button className="w-5 h-5 transition text-red-500 hover:text-red-600 cursor-pointer">
+                      <button
+                        className="w-5 h-5 transition text-red-500 hover:text-red-600 cursor-pointer"
+                        onClick={() => deleteItem(item.productId)}
+                      >
                         <TrashIcon className="w-full h-full" />
                       </button>
-                      <button className="w-5 h-5 transition text-blue-500 hover:text-blue-600 cursor-pointer">
-                        <EditIcon className="w-full h-full" />
-                      </button>
+                      <UpdateCartItem item={item} />
                     </div>
                   </div>
                 </div>
@@ -86,15 +87,18 @@ function CartPage() {
         </div>
         <SheetFooter>
           <Button
-            variant={'outline'}
             size={'lg'}
+            variant={'outline'}
+            disabled={items.length < 1}
             className="bg-blue-500 hover:bg-blue-600 text-white dark:bg-blue-500 dark:hover:bg-blue-600 w-full uppercase"
           >
             Continuar
           </Button>
           <Button
-            variant={'outline'}
             size={'lg'}
+            variant={'outline'}
+            onClick={clearCart}
+            disabled={items.length < 1}
             className="bg-red-500 hover:bg-red-600 text-white dark:bg-red-500 dark:hover:bg-red-600 w-full uppercase"
           >
             Vaciar carrito

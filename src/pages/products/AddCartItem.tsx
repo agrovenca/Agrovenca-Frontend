@@ -16,9 +16,11 @@ import { useEffect, useState } from 'react'
 
 type Props = {
   product: Product
+  contentText: string
+  size?: 'default' | 'sm' | 'lg' | 'icon' | null | undefined
 }
 
-function AddToCart({ product }: Props) {
+function AddCartItem({ product, contentText, size }: Props) {
   const [quantity, setQuantity] = useState(1)
   const [isOpen, setIsOpen] = useState(false)
   const inStock = product.stock > 0
@@ -42,12 +44,12 @@ function AddToCart({ product }: Props) {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button
-          size="sm"
+          size={size}
           className="bg-green-600 hover:bg-green-700 cursor-pointer"
           disabled={!inStock}
         >
           <ShoppingCart className="h-4 w-4 mr-1" />
-          Agregar
+          {contentText}
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -82,4 +84,4 @@ function AddToCart({ product }: Props) {
   )
 }
 
-export default AddToCart
+export default AddCartItem

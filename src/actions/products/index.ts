@@ -27,6 +27,18 @@ export const getProducts = async (
   }
 }
 
+export const getProduct = async ({ productId }: { productId: string }) => {
+  try {
+    const res = await apiWithOutCredentials.get(`/products/${productId}`)
+    return res
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      return error.response?.data || { error: 'An unknown error occurred' }
+    }
+    throw new Error('An unknown error occurred')
+  }
+}
+
 export const exportProducts = async (format: string) => {
   try {
     const res = await apiWithCredentials.get(`/products/export/${format}`, {

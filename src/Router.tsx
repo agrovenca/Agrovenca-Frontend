@@ -17,6 +17,7 @@ import ProductsDashboardPage from './pages/dashboard/products'
 import ResetPasswordValidatePage from './pages/auth/ResetPasswordValidate'
 import ResetPasswordConfirmPage from './pages/auth/ResetPasswordConfirm'
 import ProductsPage from './pages/products'
+import ProductDetail from './pages/products/Detail'
 
 export const Router = createBrowserRouter([
   {
@@ -31,6 +32,10 @@ export const Router = createBrowserRouter([
       {
         path: '/products',
         element: <ProductsPage />,
+      },
+      {
+        path: '/products/:productId',
+        element: <ProductDetail />,
       },
       {
         path: '/contacts',
