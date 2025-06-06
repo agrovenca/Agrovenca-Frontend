@@ -91,7 +91,7 @@ function AppSidebar({ user }: Props) {
                   isActive(location.pathname, '/settings') ? activeClassName : ''
                 }`}
               >
-                <Link to="/settings">
+                <Link to="/dashboard">
                   <SettingsIcon />
                   <span>Configuración</span>
                 </Link>

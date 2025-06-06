@@ -144,7 +144,7 @@ function FilterForm({
   isLoading: boolean
   setIsLoading: (state: boolean) => void
 } & Props) {
-  const [priceRange, setPriceRange] = useState([0, 1000])
+  const [priceRange, setPriceRange] = useState([0, 1700])
   const [showOnlyInStock, setShowOnlyInStock] = useState(false)
   const [categoriesIds, setCategoriesIds] = useState<string[]>([])
   const [unitiesIds, setUnitiesIds] = useState<string[]>([])
@@ -213,7 +213,7 @@ function FilterForm({
             onValueChange={setPriceRange}
             max={1000}
             min={0}
-            step={1}
+            step={10}
             className="w-full"
           />
           <div className="flex justify-between text-sm text-muted-foreground mt-2">

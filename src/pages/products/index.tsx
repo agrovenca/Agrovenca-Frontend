@@ -188,7 +188,7 @@ const ProductListItem = memo(function ProductListItem({ product }: { product: Pr
 })
 
 function ProductsPage() {
-  const [limit, setLimit] = useState(1)
+  const [limit, setLimit] = useState(12)
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [isLoading, setIsLoading] = useState(false)
