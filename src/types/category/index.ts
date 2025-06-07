@@ -8,4 +8,5 @@ export interface Category {
   user: User
   createdAt: string
   updatedAt: string
+  _count: { products: number }
 }

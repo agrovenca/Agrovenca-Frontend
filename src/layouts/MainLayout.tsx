@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/store/auth/useAuthStore'
 import { Loader } from '@/components/ui/loader'
 import { getCurrentUser } from '@/actions/auth/getCurrentUser'
+// import { useCartSyncAcrossTabs } from '@/hooks/useCartSyncAcrossTabs'
 
 export const MainLayout = () => {
   const setUser = useAuthStore((state) => state.setUser)
@@ -26,6 +27,8 @@ export const MainLayout = () => {
 
     checkAuth()
   }, [setUser])
+
+  // useCartSyncAcrossTabs()
 
   if (loading) {
     return (

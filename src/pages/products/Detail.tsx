@@ -17,6 +17,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Heart, Minus, Plus, RotateCcw, Share2, Shield, ShoppingCart, Truck } from 'lucide-react'
+import { useCartStore } from '@/store/cart/useCartStore'
 
 function ProductDetail() {
   const navigate = useNavigate()
@@ -78,6 +79,9 @@ function ProductDetail() {
   const productPriceToShow = Math.min(productPrice, productSecondPrice)
   const savingPrice = Number(productPrice - productSecondPrice).toFixed(2)
   const savingPercentage = Number(100 - (productSecondPrice * 100) / productPrice).toFixed(2)
+  const isProductInCart = useCartStore((state) =>
+    state.items.some((item) => item.productId === product?.id)
+  )
 
   const handleQuantityChange = (change: number) => {
     setQuantity(Math.max(1, Math.min(productStock, quantity + change)))
@@ -199,14 +203,25 @@ function ProductDetail() {
               </div>
 
               <div className="flex gap-3">
-                <Button
-                  size="lg"
-                  className="flex-1 bg-green-600 hover:bg-green-700"
-                  disabled={!inStock}
-                >
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  Agregar al carrito - ${(productPriceToShow * quantity).toFixed(2)}
-                </Button>
+                {isProductInCart ? (
+                  <Button
+                    size="lg"
+                    className="flex-1 bg-green-600 hover:bg-green-700"
+                    disabled={!inStock}
+                  >
+                    <ShoppingCart className="h-4 w-4 mr-2" />
+                    Remover del carrito
+                  </Button>
+                ) : (
+                  <Button
+                    size="lg"
+                    className="flex-1 bg-green-600 hover:bg-green-700"
+                    disabled={!inStock}
+                  >
+                    <ShoppingCart className="h-4 w-4 mr-2" />
+                    Agregar al carrito - ${(productPriceToShow * quantity).toFixed(2)}
+                  </Button>
+                )}
                 <Button variant="outline" size="lg" className={'text-red-500 border-red-500'}>
                   <Heart className={`h-4 w-4`} />
                 </Button>

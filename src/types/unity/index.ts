@@ -4,4 +4,5 @@ export interface Unity {
   description?: string
   createdAt: string
   updatedAt: string
+  _count: { products: number }
 }

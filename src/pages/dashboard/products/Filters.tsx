@@ -62,9 +62,12 @@ function CategoryList({
               />
               <Label
                 htmlFor={category.id}
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex gap-1 items-center"
               >
-                {category.name}
+                <span className="text-green-600 dark:text-green-400">
+                  ({category._count.products})
+                </span>{' '}
+                <span>{category.name}</span>
               </Label>
             </div>
           ))
@@ -108,9 +111,12 @@ function UnityList({
               />
               <Label
                 htmlFor={unity.id}
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex gap-1 items-center"
               >
-                {unity.name}
+                <span className="text-green-600 dark:text-green-400">
+                  ({unity._count.products})
+                </span>{' '}
+                <span>{unity.name}</span>
               </Label>
             </div>
           ))
@@ -306,7 +312,7 @@ export function FiltersBar({
 
   return (
     <>
-      <aside className="hidden md:block w-64 shrink-0">
+      <aside className="hidden md:block w-75 shrink-0">
         <Card className="p-6 gap-2">
           <CardTitle>
             <h2 className="font-semibold mb-4">Filtros</h2>
