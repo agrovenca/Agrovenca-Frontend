@@ -30,6 +30,8 @@ import { usePaginationStore } from '@/store/shared/usePaginationStore'
 import { toast } from 'sonner'
 import ProductImagesPage from './images'
 import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
+import { useEffect } from 'react'
+import { useAuthStore } from '@/store/auth/useAuthStore'
 
 const GetTableHeaders = () => {
   return (
@@ -132,7 +134,9 @@ type Props = {
 }
 
 function ProductsTable({ isDraggable, setPage, setIsDraggable, handleDelete }: Props) {
+  const user = useAuthStore((state) => state.user)
   const products = useProductsStore((state) => state.products)
+  const setUserId = useProductsStore((state) => state.setUserId)
   const setProducts = useProductsStore((state) => state.setProducts)
 
   const paginationData = usePaginationStore((state) => state.paginationData)
@@ -184,6 +188,10 @@ function ProductsTable({ isDraggable, setPage, setIsDraggable, handleDelete }: P
       }
     }
   }
+
+  useEffect(() => {
+    if (user) setUserId(user.id)
+  }, [setUserId, user])
 
   return (
     <div className="flex-1">

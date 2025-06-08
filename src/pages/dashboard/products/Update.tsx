@@ -22,7 +22,7 @@ import {
   SheetDescription,
 } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
-import { EditIcon } from 'lucide-react'
+import { BoldIcon, EditIcon, ItalicIcon, ListIcon } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { SubmitHandler, useForm } from 'react-hook-form'
@@ -48,6 +48,7 @@ type Props = {
 
 function UpdateProduct({ object }: Props) {
   const [charCount, setCharCount] = useState(object.description.length)
+  const [description, setDescription] = useState(object.description)
   const [isLoading, setIsLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
 
@@ -59,7 +60,7 @@ function UpdateProduct({ object }: Props) {
 
   const form = useForm<z.infer<typeof ProductUpdateSchema>>({
     resolver: zodResolver(ProductUpdateSchema),
-    defaultValues: { ...object },
+    defaultValues: object,
   })
 
   const onSubmit: SubmitHandler<z.infer<typeof ProductUpdateSchema>> = async (data) => {
@@ -85,6 +86,20 @@ function UpdateProduct({ object }: Props) {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleFormat = ({ format, text }: { format: 'bold' | 'italic' | 'list'; text: string }) => {
+    if (format === 'bold') {
+      text += ' *bold*'
+    }
+    if (format === 'italic') {
+      text += ' _cursive_'
+    }
+    if (format === 'list') {
+      text += '\n- list'
+    }
+    setDescription(text)
+    setCharCount(text.length)
   }
 
   useEffect(() => {
@@ -130,18 +145,56 @@ function UpdateProduct({ object }: Props) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Descripción</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Escribe una breve descripción"
-                        className="resize-none"
-                        maxLength={800}
-                        {...field}
-                        onChange={(e) => {
-                          setCharCount(e.target.value.length)
-                          field.onChange(e)
-                        }}
-                      />
-                    </FormControl>
+                    <div className="flex flex-col">
+                      <div className="p-2 rounded-t-lg border flex gap-2">
+                        <Button
+                          type="button"
+                          size={'icon'}
+                          variant={'outline'}
+                          title="Insertar negrita"
+                          className="cursor-pointer"
+                          onClick={() => handleFormat({ format: 'bold', text: field.value ?? '' })}
+                        >
+                          <BoldIcon />
+                        </Button>
+                        <Button
+                          type="button"
+                          size={'icon'}
+                          variant={'outline'}
+                          title="Insertar cursiva"
+                          className="cursor-pointer"
+                          onClick={() =>
+                            handleFormat({ format: 'italic', text: field.value ?? '' })
+                          }
+                        >
+                          <ItalicIcon />
+                        </Button>
+                        <Button
+                          type="button"
+                          size={'icon'}
+                          variant={'outline'}
+                          title="Insertar lista"
+                          className="cursor-pointer"
+                          onClick={() => handleFormat({ format: 'list', text: field.value ?? '' })}
+                        >
+                          <ListIcon />
+                        </Button>
+                      </div>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Escribe una breve descripción"
+                          className="resize-none"
+                          maxLength={800}
+                          {...field}
+                          value={description}
+                          onChange={(e) => {
+                            setCharCount(e.target.value.length)
+                            setDescription(e.target.value)
+                            field.onChange(e)
+                          }}
+                        />
+                      </FormControl>
+                    </div>
                     <p className="text-sm text-muted-foreground" id="description-count">
                       {charCount}/800
                     </p>
@@ -290,7 +343,7 @@ function UpdateProduct({ object }: Props) {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={isLoading || !form.formState.isValid}
+                  disabled={isLoading}
                   className={`${
                     isLoading || !form.formState.isValid ? 'cursor-not-allowed' : 'cursor-pointer'
                   } w-full uppercase`}

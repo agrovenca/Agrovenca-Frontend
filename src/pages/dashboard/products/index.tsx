@@ -19,6 +19,7 @@ import { toast } from 'sonner'
 import { ProductFilterParams } from '@/types/product'
 import { FiltersBar } from './Filters'
 import { Input } from '@/components/ui/input'
+import { useAuthStore } from '@/store/auth/useAuthStore'
 
 function ProductsDashboardPage() {
   const [page, setPage] = useState(1)
@@ -29,7 +30,9 @@ function ProductsDashboardPage() {
 
   const { exportExcel } = useExcelExport()
 
+  const user = useAuthStore((state) => state.user)
   const products = useProductsStore((state) => state.products)
+  const setUserId = useProductsStore((state) => state.setUserId)
   const setProducts = useProductsStore((state) => state.setProducts)
   const deleteProduct = useProductsStore((state) => state.deleteProduct)
   const setUnities = useUnitiesStore((state) => state.setUnities)
@@ -75,6 +78,10 @@ function ProductsDashboardPage() {
   useEffect(() => {
     getAssociatedData()
   }, [getAssociatedData])
+
+  useEffect(() => {
+    if (user) setUserId(user.id)
+  }, [setUserId, user])
 
   const handleDelete = async (productId: string) => {
     try {

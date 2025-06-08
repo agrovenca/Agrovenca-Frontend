@@ -13,6 +13,7 @@ import { Product } from '@/types/product'
 import { ShoppingCartIcon, TrashIcon } from 'lucide-react'
 import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
 import UpdateCartItem from '../products/UpdateCartItem'
+import { Link } from 'react-router'
 
 function CartPage() {
   const items = useCartStore((state) => state.items)
@@ -46,14 +47,19 @@ function CartPage() {
                   key={item.productId}
                   className="flex gap-2 p-4 rounded-md bg-slate-200 dark:bg-gray-800"
                 >
-                  <figure className="w-12 h-12 overflow-hidden rounded-md">
-                    <img
-                      src={productImage(item.product)}
-                      alt="Imagen del producto"
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  </figure>
+                  <Link to={`/products/${item.productId}`} viewTransition>
+                    <figure className="w-12 h-12 overflow-hidden rounded-md">
+                      <img
+                        style={{
+                          viewTransitionName: `ProductImage-${productImage(item.product)}`,
+                        }}
+                        src={productImage(item.product)}
+                        alt="Imagen del producto"
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    </figure>
+                  </Link>
                   <div className="flex gap-2 justify-between flex-1">
                     <div className="flex-1">
                       <p>{item.product.name}</p>

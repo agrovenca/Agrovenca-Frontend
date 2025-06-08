@@ -22,14 +22,14 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
-import { PlusIcon } from 'lucide-react'
+import { BoldIcon, ItalicIcon, ListIcon, PlusIcon } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import ErrorForm from '@/components/pages/ErrorForm'
 import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { ProductSchema } from '@/schemas/products'
@@ -40,13 +40,17 @@ import { create } from '@/actions/products'
 import { useProductsStore } from '@/store/products/useProductsStore'
 import { useCategoriesStore } from '@/store/categories/useCategoriesStore'
 import { useUnitiesStore } from '@/store/unities/useUnitiesStore'
+import { useAuthStore } from '@/store/auth/useAuthStore'
 
 function CreateProduct() {
   const [charCount, setCharCount] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
+  const [description, setDescription] = useState('')
 
+  const user = useAuthStore((state) => state.user)
   const products = useProductsStore((state) => state.products)
+  const setUserId = useProductsStore((state) => state.setUserId)
   const setProducts = useProductsStore((state) => state.setProducts)
   const categories = useCategoriesStore((state) => state.categories)
   const unities = useUnitiesStore((state) => state.unities)
@@ -93,6 +97,24 @@ function CreateProduct() {
     }
   }
 
+  const handleFormat = ({ format, text }: { format: 'bold' | 'italic' | 'list'; text: string }) => {
+    if (format === 'bold') {
+      text += ' *bold*'
+    }
+    if (format === 'italic') {
+      text += ' _cursive_'
+    }
+    if (format === 'list') {
+      text += '\n- list'
+    }
+    setDescription(text)
+    setCharCount(text.length)
+  }
+
+  useEffect(() => {
+    if (user) setUserId(user.id)
+  }, [setUserId, user])
+
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
@@ -130,20 +152,56 @@ function CreateProduct() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Descripción</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Escribe una breve descripción"
-                        className="resize-none"
-                        maxLength={800}
-                        {...field}
-                        onChange={(e) => {
-                          setCharCount(e.target.value.length)
-                          field.onChange(e)
-                        }}
-                      />
-                    </FormControl>
+                    <div className="flex flex-col">
+                      <div className="p-2 rounded-t-lg border flex gap-2">
+                        <Button
+                          type="button"
+                          size={'icon'}
+                          variant={'outline'}
+                          title="Insertar negrita"
+                          className="cursor-pointer"
+                          onClick={() => handleFormat({ format: 'bold', text: field.value })}
+                        >
+                          <BoldIcon />
+                        </Button>
+                        <Button
+                          type="button"
+                          size={'icon'}
+                          variant={'outline'}
+                          title="Insertar cursiva"
+                          className="cursor-pointer"
+                          onClick={() => handleFormat({ format: 'italic', text: field.value })}
+                        >
+                          <ItalicIcon />
+                        </Button>
+                        <Button
+                          type="button"
+                          size={'icon'}
+                          variant={'outline'}
+                          title="Insertar lista"
+                          className="cursor-pointer"
+                          onClick={() => handleFormat({ format: 'list', text: field.value })}
+                        >
+                          <ListIcon />
+                        </Button>
+                      </div>
+                      <FormControl className="rounded-none rounded-b-lg">
+                        <Textarea
+                          placeholder="Escribe una breve descripción"
+                          className="resize-none"
+                          maxLength={900}
+                          {...field}
+                          value={description}
+                          onChange={(e) => {
+                            setCharCount(e.target.value.length)
+                            setDescription(e.target.value)
+                            field.onChange(e)
+                          }}
+                        />
+                      </FormControl>
+                    </div>
                     <p className="text-sm text-muted-foreground" id="description-count">
-                      {charCount}/800
+                      {charCount}/900
                     </p>
                     <FormMessage />
                   </FormItem>

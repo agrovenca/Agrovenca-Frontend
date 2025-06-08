@@ -18,8 +18,9 @@ import Pagination from '@/components/blocks/pagination'
 import { useCartStore } from '@/store/cart/useCartStore'
 import AddCartItem from './AddCartItem'
 import { Link } from 'react-router'
+import { useAuthStore } from '@/store/auth/useAuthStore'
 
-const ProductCard = memo(function ProductCard({ product }: { product: Product }) {
+export const ProductCard = memo(function ProductCard({ product }: { product: Product }) {
   const inStock = product.stock > 0
   const productPrice = Number(product.price)
   const productSecondPrice = Number(product.secondPrice ?? 0)
@@ -31,12 +32,15 @@ const ProductCard = memo(function ProductCard({ product }: { product: Product })
   )
 
   return (
-    <Card className="group relative overflow-hidden transition-all hover:shadow-lg pt-0">
+    <Card className="group relative overflow-hidden transition-all hover:shadow-lg pt-0 w-full max-w-md">
       <CardContent className="p-0">
         <div className="relative aspect-square overflow-hidden">
-          <Link to={`/products/${product.id}`}>
-            <figure className="w-[300px] h-[300px] overflow-hidden">
+          <Link to={`/products/${product.id}`} viewTransition>
+            <figure className="w-full h-full overflow-hidden">
               <img
+                style={{
+                  viewTransitionName: `ProductImage-${firstProductImage}`,
+                }}
                 src={product.images.length > 0 ? firstProductImage : ProductImagePlaceholder}
                 alt={product.name}
                 loading="lazy"
@@ -113,19 +117,26 @@ const ProductListItem = memo(function ProductListItem({ product }: { product: Pr
     <Card className="overflow-x-scroll overflow-y-hidden sm:overflow-hidden py-0">
       <CardContent className="p-0">
         <div className="flex gap-2">
-          <figure className="relative w-48 h-48 shrink-0">
-            <img
-              src={product.images.length > 0 ? firstProductImage : ProductImagePlaceholder}
-              alt={product.name}
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
-            {!inStock && (
-              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                <Badge variant="secondary">Out of Stock</Badge>
-              </div>
-            )}
-          </figure>
+          <Link to={`/products/${product.id}`} viewTransition>
+            <figure className="relative w-48 h-48 shrink-0">
+              <img
+                style={{
+                  viewTransitionName: `ProductImage-${
+                    firstProductImage ?? ProductImagePlaceholder
+                  }`,
+                }}
+                src={firstProductImage ?? ProductImagePlaceholder}
+                alt={product.name}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+              {!inStock && (
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <Badge variant="secondary">Out of Stock</Badge>
+                </div>
+              )}
+            </figure>
+          </Link>
 
           <div className="flex-1 p-6">
             <div className="flex items-start justify-between mb-2">
@@ -194,7 +205,9 @@ function ProductsPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
+  const user = useAuthStore((state) => state.user)
   const products = useProductsStore((state) => state.products)
+  const setUserId = useProductsStore((state) => state.setUserId)
   const setProducts = useProductsStore((state) => state.setProducts)
   const paginationData = usePaginationStore((state) => state.paginationData)
   const setPaginationData = usePaginationStore((state) => state.setPaginationData)
@@ -214,6 +227,10 @@ function ProductsPage() {
     },
     [setProducts, setPaginationData]
   )
+
+  useEffect(() => {
+    if (user) setUserId(user.id)
+  }, [setUserId, user])
 
   useEffect(() => {
     fetchData({ limit, page })

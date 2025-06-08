@@ -60,3 +60,45 @@ export const formatDecimal = (value?: number | string): string => {
   const num = typeof value === 'number' ? value : Number(value)
   return isNaN(num) ? '0.00' : num.toFixed(2)
 }
+
+export type FormattedBlock =
+  | { type: 'paragraph'; content: string }
+  | { type: 'list-item'; content: string }
+
+// formatearTexto.ts
+export function parseFormattedText(text: string | undefined): FormattedBlock[] {
+  if (!text || text.length < 1) return []
+  const lines = text.split('\n')
+  const result: FormattedBlock[] = []
+
+  for (const line of lines) {
+    const cleaned = line.trim()
+
+    if (cleaned.startsWith('- ') || cleaned.startsWith('﹡ ')) {
+      result.push({
+        type: 'list-item',
+        content: applyInlineFormatting(cleaned.slice(2)),
+      })
+    } else if (cleaned) {
+      result.push({
+        type: 'paragraph',
+        content: applyInlineFormatting(cleaned),
+      })
+    }
+  }
+
+  return result
+}
+
+export function applyInlineFormatting(text: string): string {
+  return (
+    text
+      // Negrita tipo Markdown: **texto**
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<strong>$1</strong>') // <- *texto*
+      // Cursiva tipo Markdown: _texto_
+      .replace(/_(.+?)_/g, '<em>$1</em>')
+      // Estilo "*Etiqueta:* contenido" → "<strong>Etiqueta:</strong> contenido"
+      .replace(/^\*(.+?):\*/gm, '<strong>$1:</strong>')
+  )
+}

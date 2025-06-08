@@ -13,7 +13,7 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import ErrorForm from '@/components/pages/ErrorForm'
 import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { ProductImageSchema } from '@/schemas/products/images'
@@ -22,6 +22,7 @@ import { Loader } from '@/components/ui/loader'
 import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { useProductsStore } from '@/store/products/useProductsStore'
 import { ProductImage } from '@/types/product/images'
+import { useAuthStore } from '@/store/auth/useAuthStore'
 
 function RegisterProductImage({
   productId,
@@ -35,7 +36,9 @@ function RegisterProductImage({
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
+  const user = useAuthStore((state) => state.user)
   const products = useProductsStore((state) => state.products)
+  const setUserId = useProductsStore((state) => state.setUserId)
   const updateProduct = useProductsStore((state) => state.updateProduct)
   const errorStatus = useResponseStatusStore((state) => state.errorStatus)
   const setError = useResponseStatusStore((state) => state.setError)
@@ -89,6 +92,10 @@ function RegisterProductImage({
       setIsLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (user) setUserId(user.id)
+  }, [setUserId, user])
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
