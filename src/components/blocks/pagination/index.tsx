@@ -45,7 +45,7 @@ function Pagination({ paginationData, onPageChange }: Props) {
   const visiblePages = getVisiblePages(paginationData.page, paginationData.totalPages)
 
   return (
-    <div className="flex gap-4 items-center justify-center mt-4 p-4">
+    <div className="flex flex-wrap gap-4 items-center justify-center mt-4 p-4">
       <Button
         variant={'outline'}
         disabled={!paginationData.hasPreviousPage}

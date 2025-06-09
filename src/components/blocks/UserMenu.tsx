@@ -10,7 +10,7 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Link } from 'react-router'
 import LogoutBtn from './LogoutBtn'
-import { HeartIcon, LayersIcon, SettingsIcon, UserIcon } from 'lucide-react'
+import { LayersIcon, SettingsIcon, UserIcon } from 'lucide-react'
 
 type Props = {
   user: User
@@ -21,11 +21,6 @@ const navItems = [
     name: 'Perfil',
     link: '/account/profile',
     icon: <UserIcon />,
-  },
-  {
-    name: 'Guardados',
-    link: '',
-    icon: <HeartIcon />,
   },
   {
     name: 'Ordenes',

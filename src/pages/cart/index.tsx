@@ -30,7 +30,7 @@ function CartPage() {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button size={'icon'} variant={'ghost'}>
+        <Button size={'icon'} variant={'ghost'} title="Carrito de compras">
           <ShoppingCartIcon />
         </Button>
       </SheetTrigger>
@@ -53,10 +53,14 @@ function CartPage() {
                         style={{
                           viewTransitionName: `ProductImage-${productImage(item.product)}`,
                         }}
-                        src={productImage(item.product)}
-                        alt="Imagen del producto"
-                        className="w-full h-full object-cover"
                         loading="lazy"
+                        alt="Imagen del producto"
+                        src={productImage(item.product)}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null
+                          e.currentTarget.src = ProductImagePlaceholder
+                        }}
                       />
                     </figure>
                   </Link>

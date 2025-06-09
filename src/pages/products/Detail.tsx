@@ -11,7 +11,7 @@ import { Loader } from '@/components/ui/loader'
 
 import { toast } from 'sonner'
 import { Product } from '@/types/product'
-import { getProduct } from '@/actions/products'
+import { getProduct, getProducts } from '@/actions/products'
 import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -33,15 +33,12 @@ function ProductDetail() {
   const [quantity, setQuantity] = useState(1)
   const [api, setApi] = useState<CarouselApi>()
   const [product, setProduct] = useState<Product>()
+  const [recommended, setRecommended] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
   const user = useAuthStore((state) => state.user)
-  const products = useProductsStore((state) => state.products)
   const setUserId = useProductsStore((state) => state.setUserId)
-  const filteredProducts = products
-    .filter((p) => p.categoryId === product?.categoryId)
-    .filter((p) => p.id !== product?.id)
-    .slice(0, 8)
+  const filteredProducts = recommended.filter((p) => p.id !== product?.id)
   const addItem = useCartStore((state) => state.addItem)
   const deleteItem = useCartStore((state) => state.deleteItem)
 
@@ -77,8 +74,28 @@ function ProductDetail() {
     [navigate]
   )
 
+  const handleQuantityChange = (change: number) => {
+    setQuantity(Math.max(1, Math.min(productStock, quantity + change)))
+  }
+
+  const handleAddCartItem = async ({
+    product,
+    quantity,
+  }: {
+    product: Product
+    quantity: number
+  }) => {
+    addItem({ product, productId: product.id, quantity })
+    toast.success('Producto añadido al carrito correctamente')
+  }
+
+  const handleRemoveCartItem = async ({ productId }: { productId: string }) => {
+    deleteItem(productId)
+    toast.success('Producto eliminado del carrito correctamente')
+  }
+
   useEffect(() => {
-    if (!productId || productId.length < 1) {
+    if (!productId?.trim()) {
       navigate('/products')
     }
   }, [productId, navigate])
@@ -104,13 +121,20 @@ function ProductDetail() {
     if (user) setUserId(user.id)
   }, [setUserId, user])
 
-  const handleQuantityChange = (change: number) => {
-    setQuantity(Math.max(1, Math.min(productStock, quantity + change)))
-  }
+  useEffect(() => {
+    if (!product) return
 
-  const handleAddItem = async ({ product, quantity }: { product: Product; quantity: number }) => {
-    addItem({ product, productId: product.id, quantity })
-  }
+    const fetchRecommended = async () => {
+      try {
+        const res = await getProducts({ categoriesIds: [product.categoryId], limit: 9 })
+        setRecommended(res.data.objects)
+      } catch (error) {
+        console.error('Error al obtener productos recomendados', error)
+      }
+    }
+
+    fetchRecommended()
+  }, [product])
 
   if (isLoading || !product) {
     return (
@@ -125,9 +149,9 @@ function ProductDetail() {
     <div>
       <Navbar />
       <div className="container mx-auto py-4">
-        <section className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5  gap-4">
+        <section className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-6">
           <section className="p-4 rounded-xs col-span-1 sm:col-span-2 md:col-span-3">
-            {product.images.length < 1 ? (
+            {!product.images?.length ? (
               <figure className="w-full h-full overflow-hidden rounded-md">
                 <img
                   loading="lazy"
@@ -153,8 +177,10 @@ function ProductDetail() {
                       </CarouselItem>
                     ))}
                   </CarouselContent>
-                  <CarouselPrevious />
-                  <CarouselNext />
+                  <div className="flex gap-2 justify-center items-baseline mt-2">
+                    <CarouselPrevious className="relative left-0 top-0 translate-none" />
+                    <CarouselNext className="relative left-0 top-0 translate-none" />
+                  </div>
                 </Carousel>
                 <div className="text-muted-foreground py-2 text-center text-sm">
                   Imagen {current} de {count}
@@ -228,14 +254,14 @@ function ProductDetail() {
                   </div>
                 )}
 
-                <div className="flex gap-3">
+                <div className="flex gap-3 flex-wrap">
                   {itemInCart ? (
                     <Button
                       size="lg"
                       disabled={!inStock}
                       variant={'destructive'}
                       className="flex-1 cursor-pointer"
-                      onClick={() => deleteItem(product.id)}
+                      onClick={() => handleRemoveCartItem({ productId: product.id })}
                     >
                       <ShoppingCart className="h-4 w-4 mr-2" />
                       Remover del carrito
@@ -244,7 +270,7 @@ function ProductDetail() {
                     <Button
                       size="lg"
                       disabled={!inStock}
-                      onClick={() => handleAddItem({ product, quantity })}
+                      onClick={() => handleAddCartItem({ product, quantity })}
                       className="flex-1 bg-green-600 hover:bg-green-700"
                     >
                       <ShoppingCart className="h-4 w-4 mr-2" />
@@ -287,7 +313,7 @@ function ProductDetail() {
             </div>
           </section>
         </section>
-        <div>
+        <div className="p-4">
           {parsed.map((block, idx) => {
             if (block.type === 'paragraph') {
               return <p key={idx} dangerouslySetInnerHTML={{ __html: block.content }} />
@@ -311,20 +337,22 @@ function ProductDetail() {
           </div>
         )}
         {filteredProducts.length > 0 && (
-          <section className="my-6">
+          <section className="my-6 mx-auto">
             <h4 className="font-bold text-3xl mb-8 text-center">
               Productos recomendados ({filteredProducts.length})
             </h4>
-            <Carousel opts={{ align: 'start', loop: true }}>
+            <Carousel opts={{ align: 'start', loop: true }} className="px-4">
+              <div className="flex gap-2 justify-center items-baseline my-4">
+                <CarouselPrevious className="relative left-0 top-0 translate-none" />
+                <CarouselNext className="relative left-0 top-0 translate-none" />
+              </div>
               <CarouselContent>
                 {filteredProducts.map((product) => (
-                  <CarouselItem key={product.id} className="basis-1/4">
+                  <CarouselItem key={product.id} className="basis-4/4 sm:basis-1/4">
                     <ProductCard product={product} key={product.id} />
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <CarouselPrevious />
-              <CarouselNext />
             </Carousel>
           </section>
         )}

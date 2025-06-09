@@ -8,7 +8,7 @@ import { memo, useCallback, useEffect, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Grid, Heart, List, Search, XIcon } from 'lucide-react'
+import { Grid, HeartIcon, HeartOffIcon, List, Search, XIcon } from 'lucide-react'
 import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
 import { Input } from '@/components/ui/input'
 import { FiltersBar } from '../dashboard/products/Filters'
@@ -20,6 +20,7 @@ import AddCartItem from './AddCartItem'
 import { Link } from 'react-router'
 import { useAuthStore } from '@/store/auth/useAuthStore'
 import { useSavedStore } from '@/store/products/useSavedStore'
+import { toast } from 'sonner'
 
 export const ProductCard = memo(function ProductCard({ product }: { product: Product }) {
   const inStock = product.stock > 0
@@ -35,6 +36,21 @@ export const ProductCard = memo(function ProductCard({ product }: { product: Pro
   const removeSaved = useSavedStore((state) => state.removeProduct)
   const isProductSaved = useSavedStore((state) => state.products.some((p) => p.id === product.id))
 
+  const handleSaveItem = async ({ product }: { product: Product }) => {
+    saveProduct(product)
+    toast.success('Producto guardado en favoritos correctamente')
+  }
+
+  const handleUnSaveItem = async ({ productId }: { productId: string }) => {
+    removeSaved(productId)
+    toast.success('Producto eliminado de favoritos correctamente')
+  }
+
+  const handleRemoveCartItem = async ({ productId }: { productId: string }) => {
+    deleteItem(productId)
+    toast.success('Producto eliminado del carrito correctamente')
+  }
+
   return (
     <Card className="group relative overflow-hidden transition-all hover:shadow-lg pt-0 w-full max-w-md">
       <CardContent className="p-0">
@@ -45,9 +61,9 @@ export const ProductCard = memo(function ProductCard({ product }: { product: Pro
                 style={{
                   viewTransitionName: `ProductImage-${firstProductImage}`,
                 }}
-                src={product.images.length > 0 ? firstProductImage : ProductImagePlaceholder}
-                alt={product.name}
                 loading="lazy"
+                alt={product.name}
+                src={product.images.length > 0 ? firstProductImage : ProductImagePlaceholder}
                 className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
             </figure>
@@ -58,9 +74,25 @@ export const ProductCard = memo(function ProductCard({ product }: { product: Pro
             </div>
           )}
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button size="icon" variant="secondary" className="h-8 w-8 cursor-pointer">
-              <Heart className="h-4 w-4" />
-            </Button>
+            {isProductSaved ? (
+              <Button
+                size="icon"
+                variant="destructive"
+                className="h-8 w-8 cursor-pointer"
+                onClick={() => handleUnSaveItem({ productId: product.id })}
+              >
+                <HeartOffIcon className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                size="icon"
+                variant="secondary"
+                className="h-8 w-8 cursor-pointer"
+                onClick={() => handleSaveItem({ product })}
+              >
+                <HeartIcon className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         </div>
 
@@ -89,7 +121,7 @@ export const ProductCard = memo(function ProductCard({ product }: { product: Pro
                 size="sm"
                 className="bg-red-500 hover:bg-red-600 cursor-pointer text-white"
                 disabled={!inStock}
-                onClick={() => deleteItem(product.id)}
+                onClick={() => handleRemoveCartItem({ productId: product.id })}
               >
                 <XIcon className="h-4 w-4 mr-1 font-bold" />
                 Remover
@@ -120,6 +152,21 @@ const ProductListItem = memo(function ProductListItem({ product }: { product: Pr
   const removeSaved = useSavedStore((state) => state.removeProduct)
   const isProductSaved = useSavedStore((state) => state.products.some((p) => p.id === product.id))
 
+  const handleSaveItem = async ({ product }: { product: Product }) => {
+    saveProduct(product)
+    toast.success('Producto guardado en favoritos correctamente')
+  }
+
+  const handleUnSaveItem = async ({ productId }: { productId: string }) => {
+    removeSaved(productId)
+    toast.success('Producto eliminado de favoritos correctamente')
+  }
+
+  const handleRemoveCartItem = async ({ productId }: { productId: string }) => {
+    deleteItem(productId)
+    toast.success('Producto eliminado del carrito correctamente')
+  }
+
   return (
     <Card className="overflow-x-scroll overflow-y-hidden sm:overflow-hidden py-0">
       <CardContent className="p-0">
@@ -132,10 +179,10 @@ const ProductListItem = memo(function ProductListItem({ product }: { product: Pr
                     firstProductImage ?? ProductImagePlaceholder
                   }`,
                 }}
-                src={firstProductImage ?? ProductImagePlaceholder}
+                loading="lazy"
                 alt={product.name}
                 className="w-full h-full object-cover"
-                loading="lazy"
+                src={firstProductImage ?? ProductImagePlaceholder}
               />
               {!inStock && (
                 <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
@@ -176,15 +223,31 @@ const ProductListItem = memo(function ProductListItem({ product }: { product: Pr
                 )}
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" className="cursor-pointer">
-                  <Heart className="h-4 w-4" />
-                </Button>
+                {isProductSaved ? (
+                  <Button
+                    size="icon"
+                    variant="destructive"
+                    className="h-8 w-8 cursor-pointer"
+                    onClick={() => handleUnSaveItem({ productId: product.id })}
+                  >
+                    <HeartOffIcon className="h-4 w-4" />
+                  </Button>
+                ) : (
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className="h-8 w-8 cursor-pointer"
+                    onClick={() => handleSaveItem({ product })}
+                  >
+                    <HeartIcon className="h-4 w-4" />
+                  </Button>
+                )}
                 {isProductInCart ? (
                   <Button
                     size="sm"
                     className="bg-red-500 hover:bg-red-600 cursor-pointer text-white"
                     disabled={!inStock}
-                    onClick={() => deleteItem(product.id)}
+                    onClick={() => handleRemoveCartItem({ productId: product.id })}
                   >
                     <XIcon className="h-4 w-4 mr-2 font-bold" />
                     Remover

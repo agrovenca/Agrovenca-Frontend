@@ -13,6 +13,7 @@ import { useCartStore } from '@/store/cart/useCartStore'
 import { Product } from '@/types/product'
 import { ShoppingCart } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 type Props = {
   product: Product
@@ -32,6 +33,7 @@ function AddCartItem({ product, contentText, size }: Props) {
     e.preventDefault()
     setIsOpen(false)
     addItem({ product, productId: product.id, quantity })
+    toast.success('Producto añadido al carrito correctamente')
   }
 
   useEffect(() => {

@@ -14,6 +14,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet'
 import CartPage from '@/pages/cart'
+import SavedProductsPage from '@/pages/products/Saved'
 
 function Navbar() {
   const user = useAuthStore((state) => state.user)
@@ -82,7 +83,10 @@ function Navbar() {
             </>
           ) : (
             <>
-              <CartPage />
+              <div className="flex gap-2">
+                <CartPage />
+                <SavedProductsPage />
+              </div>
               <UserMenu user={user} />
             </>
           )}
