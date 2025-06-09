@@ -19,6 +19,7 @@ import { useCartStore } from '@/store/cart/useCartStore'
 import AddCartItem from './AddCartItem'
 import { Link } from 'react-router'
 import { useAuthStore } from '@/store/auth/useAuthStore'
+import { useSavedStore } from '@/store/products/useSavedStore'
 
 export const ProductCard = memo(function ProductCard({ product }: { product: Product }) {
   const inStock = product.stock > 0
@@ -30,6 +31,9 @@ export const ProductCard = memo(function ProductCard({ product }: { product: Pro
   const isProductInCart = useCartStore((state) =>
     state.items.some((item) => item.productId === product.id)
   )
+  const saveProduct = useSavedStore((state) => state.addProduct)
+  const removeSaved = useSavedStore((state) => state.removeProduct)
+  const isProductSaved = useSavedStore((state) => state.products.some((p) => p.id === product.id))
 
   return (
     <Card className="group relative overflow-hidden transition-all hover:shadow-lg pt-0 w-full max-w-md">
@@ -112,6 +116,9 @@ const ProductListItem = memo(function ProductListItem({ product }: { product: Pr
   const isProductInCart = useCartStore((state) =>
     state.items.some((item) => item.productId === product.id)
   )
+  const saveProduct = useSavedStore((state) => state.addProduct)
+  const removeSaved = useSavedStore((state) => state.removeProduct)
+  const isProductSaved = useSavedStore((state) => state.products.some((p) => p.id === product.id))
 
   return (
     <Card className="overflow-x-scroll overflow-y-hidden sm:overflow-hidden py-0">
