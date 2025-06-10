@@ -8,6 +8,7 @@ interface CartState {
   updateItem: (updatedItem: CartItem) => void
   deleteItem: (productId: string) => void
   clearCart: () => void
+  bulkUpdateItems: (updatedItems: CartItem[]) => void
 }
 
 export const useCartStore = create<CartState>()(
@@ -29,9 +30,13 @@ export const useCartStore = create<CartState>()(
           items: state.items.filter((item) => item.productId !== productId),
         })),
       clearCart: () => set(() => ({ items: [] })),
+      bulkUpdateItems: (updatedItems) =>
+        set(() => ({
+          items: updatedItems,
+        })),
     }),
     {
-      name: 'cart-storage', // clave en localStorage
+      name: 'cart-storage',
     }
   )
 )

@@ -13,12 +13,14 @@ import { CartItem } from '@/types/cart'
 
 import { EditIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 type Props = {
   item: CartItem
+  iconOnly?: boolean
 }
 
-function UpdateCartItem({ item }: Props) {
+function UpdateCartItem({ item, iconOnly = true }: Props) {
   const [quantity, setQuantity] = useState(item.quantity)
   const [isOpen, setIsOpen] = useState(false)
   const isValid = quantity > item.product.stock
@@ -29,6 +31,7 @@ function UpdateCartItem({ item }: Props) {
     e.preventDefault()
     setIsOpen(false)
     updateItem({ ...item, quantity })
+    toast.success('Item actualizado correctamente')
   }
 
   useEffect(() => {
@@ -40,9 +43,19 @@ function UpdateCartItem({ item }: Props) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <button className="w-5 h-5 transition text-blue-500 hover:text-blue-600 cursor-pointer">
-          <EditIcon className="w-full h-full" />
-        </button>
+        {iconOnly ? (
+          <button className="w-5 h-5 transition text-blue-500 hover:text-blue-600 cursor-pointer">
+            <EditIcon className="w-full h-full" />
+          </button>
+        ) : (
+          <Button
+            className="transition text-blue-500 hover:text-blue-600 cursor-pointer w-full"
+            variant={'outline'}
+          >
+            <EditIcon className="w-5 h-5" />
+            <span>Editar</span>
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

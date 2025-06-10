@@ -1,5 +1,6 @@
 import { apiWithCredentials, apiWithOutCredentials } from '@/actions/api'
 import { ProductSchema, ProductUpdateSchema } from '@/schemas/products'
+import { CartItem } from '@/types/cart'
 import { ProductFilterParams, ProductResponse } from '@/types/product'
 import axios from 'axios'
 import { z } from 'zod'
@@ -30,6 +31,18 @@ export const getProducts = async (
 export const getProduct = async ({ productId }: { productId: string }) => {
   try {
     const res = await apiWithOutCredentials.get(`/products/${productId}`)
+    return res
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      return error.response?.data || { error: 'An unknown error occurred' }
+    }
+    throw new Error('An unknown error occurred')
+  }
+}
+
+export const validateCart = async ({ items }: { items: Omit<CartItem, 'product'>[] }) => {
+  try {
+    const res = await apiWithOutCredentials.post(`/products/validateCart`, { items })
     return res
   } catch (error) {
     if (axios.isAxiosError(error)) {

@@ -18,6 +18,7 @@ import ResetPasswordValidatePage from './pages/auth/ResetPasswordValidate'
 import ResetPasswordConfirmPage from './pages/auth/ResetPasswordConfirm'
 import ProductsPage from './pages/products'
 import ProductDetail from './pages/products/Detail'
+import CheckOutPage from './pages/checkout'
 
 export const Router = createBrowserRouter([
   {
@@ -40,6 +41,10 @@ export const Router = createBrowserRouter([
       {
         path: '/contacts',
         element: <div>Contacts</div>,
+      },
+      {
+        path: '/checkout',
+        element: <CheckOutPage />,
       },
       {
         path: '/privacy-policy',

@@ -96,14 +96,25 @@ function CartPage() {
           </p>
         </div>
         <SheetFooter>
-          <Button
-            size={'lg'}
-            variant={'outline'}
-            disabled={items.length < 1}
-            className="bg-blue-500 hover:bg-blue-600 text-white dark:bg-blue-500 dark:hover:bg-blue-600 w-full uppercase"
-          >
-            Continuar
-          </Button>
+          {items.length < 1 ? (
+            <Button
+              disabled
+              size={'lg'}
+              variant={'outline'}
+              className="bg-blue-500 hover:bg-blue-600 text-white dark:bg-blue-500 dark:hover:bg-blue-600 w-full uppercase cursor-not-allowed"
+            >
+              Continuar
+            </Button>
+          ) : (
+            <Button
+              asChild
+              size={'lg'}
+              variant={'outline'}
+              className="bg-blue-500 hover:bg-blue-600 text-white dark:bg-blue-500 dark:hover:bg-blue-600 w-full uppercase cursor-pointer"
+            >
+              <Link to={'/checkout'}>Continuar</Link>
+            </Button>
+          )}
           <Button
             size={'lg'}
             variant={'outline'}
