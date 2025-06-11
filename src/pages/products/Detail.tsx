@@ -316,10 +316,22 @@ function ProductDetail() {
         <div className="p-4">
           {parsed.map((block, idx) => {
             if (block.type === 'paragraph') {
-              return <p key={idx} dangerouslySetInnerHTML={{ __html: block.content }} />
+              return (
+                <p
+                  key={idx}
+                  className="font-serif"
+                  dangerouslySetInnerHTML={{ __html: block.content }}
+                />
+              )
             }
             if (block.type === 'list-item') {
-              return <li key={idx} dangerouslySetInnerHTML={{ __html: block.content }} />
+              return (
+                <li
+                  key={idx}
+                  className="font-serif"
+                  dangerouslySetInnerHTML={{ __html: block.content }}
+                />
+              )
             }
             return null
           })}

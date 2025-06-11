@@ -153,17 +153,17 @@ function CheckOutPage() {
                               e.currentTarget.src = ProductImagePlaceholder
                             }}
                           />
-                          <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-green-600">
+                          <Badge className="absolute font-serif -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-green-600">
                             {item.quantity}
                           </Badge>
                         </div>
                         <div className="flex-1">
                           <p className="font-medium text-sm">{item.product.name}</p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-sm text-muted-foreground font-serif">
                             ${Number(getProductPrice(item.product)).toFixed(2)} cada uno
                           </p>
                         </div>
-                        <p className="font-medium">
+                        <p className="font-medium font-serif">
                           ${(getProductPrice(item.product) * item.quantity).toFixed(2)}
                         </p>
                       </div>
@@ -172,6 +172,7 @@ function CheckOutPage() {
                           <EllipsisIcon />
                         </PopoverTrigger>
                         <PopoverContent className="flex justify-center items-center gap-4 flex-col w-fit">
+                          <UpdateCartItem iconOnly={false} item={item} />
                           <Button
                             className="cursor-pointer w-full"
                             variant={'destructive'}
@@ -180,7 +181,6 @@ function CheckOutPage() {
                             <TrashIcon className="w-5 h-5" />
                             <span>Eliminar</span>
                           </Button>
-                          <UpdateCartItem iconOnly={false} item={item} />
                         </PopoverContent>
                       </Popover>
                     </div>
@@ -193,7 +193,7 @@ function CheckOutPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span className="font-serif">${subtotal.toFixed(2)}</span>
                   </div>
                   {/* <div className="flex justify-between">
                     <span>Shipping</span>
@@ -201,7 +201,7 @@ function CheckOutPage() {
                   </div> */}
                   <div className="flex justify-between">
                     <span>Impuesto ({TAX_VALUE * 100}%)</span>
-                    <span>${tax.toFixed(2)}</span>
+                    <span className="font-serif">${tax.toFixed(2)}</span>
                   </div>
                   {/* {appliedCoupon && (
                     <div className="flex justify-between text-green-600">
@@ -212,7 +212,7 @@ function CheckOutPage() {
                   <Separator />
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total</span>
-                    <span>${total.toFixed(2)}</span>
+                    <span className="font-serif">${total.toFixed(2)}</span>
                   </div>
                 </div>
 

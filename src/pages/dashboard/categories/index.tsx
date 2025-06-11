@@ -72,7 +72,7 @@ function CategoriesDashboardPage() {
         <TableBody>
           {categories.length > 0 ? (
             categories.map((category) => (
-              <TableRow key={category.id}>
+              <TableRow key={category.id} className="font-serif">
                 <TableCell className="font-medium">{category.name}</TableCell>
                 <TableCell className="italic">{truncateText(category.description, 25)}</TableCell>
                 <TableCell>{getLocalDateTime(category.createdAt, ['es-ve'])}</TableCell>

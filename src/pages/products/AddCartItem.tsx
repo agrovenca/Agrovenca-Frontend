@@ -47,7 +47,7 @@ function AddCartItem({ product, contentText, size }: Props) {
       <DialogTrigger asChild>
         <Button
           size={size}
-          className="bg-green-600 hover:bg-green-700 cursor-pointer"
+          className="bg-green-600 hover:bg-green-700 cursor-pointer font-serif"
           disabled={!inStock}
         >
           <ShoppingCart className="h-4 w-4 mr-1" />
@@ -57,7 +57,9 @@ function AddCartItem({ product, contentText, size }: Props) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Agregar este producto al carrito</DialogTitle>
-          <DialogDescription>Elija la cantidad para agregar al carrito</DialogDescription>
+          <DialogDescription className="font-serif">
+            Elija la cantidad para agregar al carrito
+          </DialogDescription>
         </DialogHeader>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="flex flex-col gap-2">

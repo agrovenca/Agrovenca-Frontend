@@ -101,25 +101,29 @@ export const ProductCard = memo(function ProductCard({ product }: { product: Pro
             <h3 className="font-medium line-clamp-1">{product.name}</h3>
           </div>
 
-          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{product.description}</p>
+          <p className="text-sm text-muted-foreground mb-3 line-clamp-2 font-serif">
+            {product.description}
+          </p>
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               {productSecondPrice && productSecondPrice > 0 ? (
                 <>
-                  <span className="text-lg font-bold">${productSecondPrice.toFixed(2)}</span>
-                  <span className="text-sm text-muted-foreground line-through">
+                  <span className="font-serif text-lg font-bold">
+                    ${productSecondPrice.toFixed(2)}
+                  </span>
+                  <span className="font-serif text-sm text-muted-foreground line-through">
                     ${productPrice.toFixed(2)}
                   </span>
                 </>
               ) : (
-                <span className="text-lg font-bold">${productPrice.toFixed(2)}</span>
+                <span className="font-serif text-lg font-bold">${productPrice.toFixed(2)}</span>
               )}
             </div>
             {isProductInCart ? (
               <Button
                 size="sm"
-                className="bg-red-500 hover:bg-red-600 cursor-pointer text-white"
+                className="bg-red-500 hover:bg-red-600 cursor-pointer text-white font-serif"
                 disabled={!inStock}
                 onClick={() => handleRemoveCartItem({ productId: product.id })}
               >

@@ -42,7 +42,7 @@ function CategoryList({
   const categories = useCategoriesStore((state) => state.categories)
   return (
     <div>
-      <h3 className="font-semibold mb-3">Categorías</h3>
+      <h3 className="font-semibold mb-3 font-sans">Categorías</h3>
       <div className="flex flex-col justify-start gap-2 ps-4">
         {isLoading ? (
           'Cargando categorías'
@@ -62,7 +62,7 @@ function CategoryList({
               />
               <Label
                 htmlFor={category.id}
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex gap-1 items-center"
+                className="text-sm font-serif font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex gap-1 items-center"
               >
                 <span className="text-green-600 dark:text-green-400">
                   ({category._count.products})
@@ -91,7 +91,7 @@ function UnityList({
   const unities = useUnitiesStore((state) => state.unities)
   return (
     <div>
-      <h3 className="font-semibold mb-3">Unidades</h3>
+      <h3 className="font-semibold mb-3 font-sans">Unidades</h3>
       <div className="flex flex-col justify-start gap-2 ps-4">
         {isLoading ? (
           'Cargando unidades'
@@ -111,7 +111,7 @@ function UnityList({
               />
               <Label
                 htmlFor={unity.id}
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex gap-1 items-center"
+                className="text-sm font-serif font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex gap-1 items-center"
               >
                 <span className="text-green-600 dark:text-green-400">
                   ({unity._count.products})
@@ -196,7 +196,7 @@ function FilterForm({
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectLabel>Regístros por página</SelectLabel>
+            <SelectLabel className="font-sans">Regístros por página</SelectLabel>
             {recordsPerPage.map((n) => (
               <SelectItem value={n.toString()} key={n}>
                 {n}
@@ -222,7 +222,7 @@ function FilterForm({
             step={10}
             className="w-full"
           />
-          <div className="flex justify-between text-sm text-muted-foreground mt-2">
+          <div className="flex justify-between text-sm text-muted-foreground mt-2 font-serif">
             <span>${priceRange[0]}</span>
             <span>${priceRange[1]}</span>
           </div>
@@ -315,7 +315,7 @@ export function FiltersBar({
       <aside className="hidden md:block w-75 shrink-0">
         <Card className="p-6 gap-2">
           <CardTitle>
-            <h2 className="font-semibold mb-4">Filtros</h2>
+            <h2 className="font-semibold mb-4 font-sans">Filtros</h2>
           </CardTitle>
           <CardContent className="px-2">
             <FilterForm {...props} />

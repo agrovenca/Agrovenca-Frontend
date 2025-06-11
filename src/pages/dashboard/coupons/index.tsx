@@ -78,7 +78,7 @@ function CouponsDashboardPage() {
         <TableBody>
           {coupons.length > 0 ? (
             coupons.map((coupon) => (
-              <TableRow key={coupon.id}>
+              <TableRow key={coupon.id} className="font-serif">
                 <TableCell className="font-medium">{coupon.code}</TableCell>
                 <TableCell className="italic">{truncateText(coupon.description, 20)}</TableCell>
                 <TableCell>

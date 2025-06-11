@@ -5,7 +5,8 @@ function App() {
     <main className="">
       <Navbar />
       <section className="container mx-auto">
-        <p>Hola</p>
+        <p className="font-serif">Hola</p>
+        <p className="font-decorative">Hola</p>
       </section>
     </main>
   )

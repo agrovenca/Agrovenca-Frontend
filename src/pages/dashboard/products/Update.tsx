@@ -119,7 +119,7 @@ function UpdateProduct({ object }: Props) {
       <SheetContent className="overflow-auto sm:max-w-lg">
         <SheetHeader>
           <SheetTitle>Actualizar producto</SheetTitle>
-          <SheetDescription>
+          <SheetDescription className="font-serif">
             Actualiza la información del producto. Puedes cambiar el nombre, descripción, precio,
             stock, unidad y categoría.
           </SheetDescription>
@@ -357,10 +357,10 @@ function UpdateProduct({ object }: Props) {
           <section className="flex flex-col gap-2">
             <div className="p-4 bg-slate-100 dark:bg-gray-800 border rounded-lg">
               <h3 className="text-lg font-semibold mb-4 font-sans">Id de video</h3>
-              <p className="mb-2">
+              <p className="mb-2 font-serif">
                 El id de video es el que aparece en la url del video de youtube.
               </p>
-              <div>
+              <div className="font-serif">
                 <p className="text-sm text-muted-foreground">
                   Por ejemplo, si la url del video es:{' '}
                 </p>
@@ -370,11 +370,11 @@ function UpdateProduct({ object }: Props) {
             </div>
             <div className="p-4 bg-slate-100 dark:bg-gray-800 border rounded-lg">
               <h3 className="text-lg font-semibold mb-4 font-sans">Segundo precio</h3>
-              <p className="mb-2">
+              <p className="mb-2 font-serif">
                 El segundo precio es un precio opcional que puedes usar para mostrar un precio
                 diferente al precio normal.
               </p>
-              <div>
+              <div className="font-serif">
                 <p className="text-sm text-muted-foreground">
                   Por ejemplo, si el precio es <span className="font-semibold">10.00</span> y el
                   segundo precio es <span className="font-semibold">5.00</span>, el usuario verá el

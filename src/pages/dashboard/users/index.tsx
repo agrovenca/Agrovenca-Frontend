@@ -104,7 +104,7 @@ function UsersDashboardPage() {
         <TableBody>
           {data.length > 0 ? (
             data.map((user) => (
-              <TableRow key={user.id}>
+              <TableRow key={user.id} className="font-serif">
                 <TableCell className="font-medium">{user.name}</TableCell>
                 <TableCell className="flex items-center gap-2">
                   <span>{user.email}</span>

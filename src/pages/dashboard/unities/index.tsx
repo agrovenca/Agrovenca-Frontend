@@ -70,7 +70,7 @@ function UnitiesDashboardPage() {
         <TableBody>
           {unities.length > 0 ? (
             unities.map((unity) => (
-              <TableRow key={unity.id}>
+              <TableRow key={unity.id} className="font-serif">
                 <TableCell className="font-medium">{unity.name}</TableCell>
                 <TableCell className="italic">{truncateText(unity.description, 25)}</TableCell>
                 <TableCell>{getLocalDateTime(unity.createdAt, ['es-ve'])}</TableCell>
