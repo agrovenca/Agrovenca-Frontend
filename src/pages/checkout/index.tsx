@@ -65,7 +65,8 @@ function CheckOutPage() {
         if (res.status === 200) {
           const validatedItems: ValidatedCartItems[] = res.data.items
           const invalids = validatedItems.filter((i) => !i.valid)
-          const notAvailables = invalids.filter((i) => i.availableStock ?? 0 < 1)
+          const notAvailables = invalids.filter((i) => (i.availableStock ?? 0) < 1)
+
           setInvalidItems(
             invalids.map(({ productId, reason }) => ({ productId, reason: reason ?? '' }))
           )
