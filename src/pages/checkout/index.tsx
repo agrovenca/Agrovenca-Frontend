@@ -13,7 +13,6 @@ import { Link, useNavigate } from 'react-router'
 import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
 import { validateCart } from '@/actions/products'
 import { CartItem } from '@/types/cart'
-import { toast } from 'sonner'
 import UpdateCartItem from '../products/UpdateCartItem'
 import { Button } from '@/components/ui/button'
 
@@ -35,6 +34,7 @@ function CheckOutPage() {
   const [isLoading, _setIsLoading] = useState(false)
   const [invalidItems, setInvalidItems] = useState<InvalidCartItem[]>([])
   const cartItems = useCartStore((state) => state.items)
+  const updateItem = useCartStore((state) => state.updateItem)
   const deleteItem = useCartStore((state) => state.deleteItem)
 
   const getProductPrice = (product: Product) =>
@@ -62,21 +62,35 @@ function CheckOutPage() {
       try {
         const res = await validateCart({ items })
 
-        if (res.status === 200) {
-          const validatedItems: ValidatedCartItems[] = res.data.items
-          const invalids = validatedItems.filter((i) => !i.valid)
-          const notAvailables = invalids.filter((i) => (i.availableStock ?? 0) < 1)
+        if (res.status !== 200) return
 
-          setInvalidItems(
-            invalids.map(({ productId, reason }) => ({ productId, reason: reason ?? '' }))
-          )
-          if (invalids.length) {
-            invalids.forEach((item) => toast.error(item.reason))
+        const validatedItems: ValidatedCartItems[] = res.data.items
+        const invalids = validatedItems.filter((i) => !i.valid)
+
+        setInvalidItems(
+          invalids.map(({ productId, reason }) => ({
+            productId,
+            reason: reason ?? '',
+          }))
+        )
+
+        const updateMap = new Map<string, number>()
+
+        invalids.forEach((item) => {
+          const availableStock = item.availableStock ?? 0
+          if (availableStock > 0) {
+            updateMap.set(item.productId, availableStock)
+          } else {
+            deleteItem(item.productId)
           }
-          if (notAvailables.length) {
-            notAvailables.forEach((item) => deleteItem(item.productId))
+        })
+
+        cartItems.forEach((cartItem) => {
+          const newQty = updateMap.get(cartItem.productId)
+          if (newQty !== undefined && newQty !== cartItem.quantity) {
+            updateItem({ ...cartItem, quantity: newQty })
           }
-        }
+        })
       } catch (error) {
         console.log(error)
       }
@@ -122,14 +136,14 @@ function CheckOutPage() {
             {invalidItems.length > 0 && (
               <>
                 <div className="mb-4 p-3 border border-red-300 bg-red-50 rounded">
-                  <h4 className="font-semibold mb-2 text-red-600">Errores en tu carrito:</h4>
-                  <ul className="list-disc ml-5 text-sm text-red-700">
-                    {invalidItems.map((item) => (
-                      <li key={item.productId}>{item.reason}</li>
-                    ))}
-                  </ul>
+                  <div className="ml-5 text-sm text-red-700">
+                    <p>
+                      La cantidad de {invalidItems.length} fue decrementada por insuficiencia de
+                      stock
+                    </p>
+                  </div>
                 </div>
-                <Separator />
+                <Separator className="mb-4" />
               </>
             )}
 
@@ -158,32 +172,34 @@ function CheckOutPage() {
                             {item.quantity}
                           </Badge>
                         </div>
-                        <div className="flex-1">
+                        <div className="w-full flex-1">
                           <p className="font-medium text-sm">{item.product.name}</p>
                           <p className="text-sm text-muted-foreground font-serif">
                             ${Number(getProductPrice(item.product)).toFixed(2)} cada uno
                           </p>
                         </div>
+                      </div>
+                      <div className="ml-auto flex gap-2">
                         <p className="font-medium font-serif">
                           ${(getProductPrice(item.product) * item.quantity).toFixed(2)}
                         </p>
+                        <Popover>
+                          <PopoverTrigger className="">
+                            <EllipsisIcon />
+                          </PopoverTrigger>
+                          <PopoverContent className="flex justify-center items-center gap-4 flex-col w-fit">
+                            <UpdateCartItem iconOnly={false} item={item} />
+                            <Button
+                              className="cursor-pointer w-full"
+                              variant={'destructive'}
+                              onClick={() => deleteItem(item.productId)}
+                            >
+                              <TrashIcon className="w-5 h-5" />
+                              <span>Eliminar</span>
+                            </Button>
+                          </PopoverContent>
+                        </Popover>
                       </div>
-                      <Popover>
-                        <PopoverTrigger className="">
-                          <EllipsisIcon />
-                        </PopoverTrigger>
-                        <PopoverContent className="flex justify-center items-center gap-4 flex-col w-fit">
-                          <UpdateCartItem iconOnly={false} item={item} />
-                          <Button
-                            className="cursor-pointer w-full"
-                            variant={'destructive'}
-                            onClick={() => deleteItem(item.productId)}
-                          >
-                            <TrashIcon className="w-5 h-5" />
-                            <span>Eliminar</span>
-                          </Button>
-                        </PopoverContent>
-                      </Popover>
                     </div>
                   ))}
                 </div>
