@@ -65,7 +65,6 @@ export type FormattedBlock =
   | { type: 'paragraph'; content: string }
   | { type: 'list-item'; content: string }
 
-// formatearTexto.ts
 export function parseFormattedText(text: string | undefined): FormattedBlock[] {
   if (!text || text.length < 1) return []
   const lines = text.split('\n')
@@ -101,4 +100,28 @@ export function applyInlineFormatting(text: string): string {
       // Estilo "*Etiqueta:* contenido" → "<strong>Etiqueta:</strong> contenido"
       .replace(/^\*(.+?):\*/gm, '<strong>$1:</strong>')
   )
+}
+
+export function pluralize(
+  text: string,
+  value: string | number | object,
+  pluralSuffix: string,
+  singularSuffix = ''
+) {
+  let count: number
+
+  if (typeof value === 'number') {
+    count = value
+  } else if (typeof value === 'string' && !isNaN(Number(value))) {
+    count = Number(value)
+  } else if (Array.isArray(value)) {
+    count = value.length
+  } else if (value && typeof value === 'object') {
+    count = Object.keys(value).length
+  } else {
+    count = 0
+  }
+
+  const suffix = count === 1 ? singularSuffix : pluralSuffix
+  return ` ${text}${suffix} `
 }
