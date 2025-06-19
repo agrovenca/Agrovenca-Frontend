@@ -7,7 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 import { useCartStore } from '@/store/cart/useCartStore'
 import { Product } from '@/types/product'
-import { ArrowLeftIcon, EllipsisIcon, Leaf, LockIcon, TrashIcon } from 'lucide-react'
+import {
+  ArrowLeftIcon,
+  Building2,
+  CreditCard,
+  EllipsisIcon,
+  Leaf,
+  LockIcon,
+  Tag,
+  TrashIcon,
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
@@ -15,7 +24,7 @@ import { validateCart } from '@/actions/products'
 import { CartItem } from '@/types/cart'
 import UpdateCartItem from '../products/UpdateCartItem'
 import { Button } from '@/components/ui/button'
-import { pluralize } from '@/lib/utils'
+import { generateRandomHexString, pluralize } from '@/lib/utils'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Country, CountryStates, ShippingAddressSchema } from '@/schemas/products/shippingAddress'
@@ -37,6 +46,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { CouponApplySchema } from '@/schemas/coupons'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Label } from '@/components/ui/label'
 
 const TAX_VALUE = 0.12
 
@@ -56,9 +69,16 @@ function CheckOutPage() {
   const [charCount, setCharCount] = useState(0)
   const [isLoading, _setIsLoading] = useState(false)
   const [invalidItems, setInvalidItems] = useState<InvalidCartItem[]>([])
+  const [couponCode, setCouponCode] = useState('')
+  const [appliedCoupon, setAppliedCoupon] = useState(null)
+  const [couponError, setCouponError] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState('card')
+
   const cartItems = useCartStore((state) => state.items)
   const updateItem = useCartStore((state) => state.updateItem)
   const deleteItem = useCartStore((state) => state.deleteItem)
+
+  const orderNumber = generateRandomHexString() + '-' + cartItems.length.toString()
 
   const getProductPrice = (product: Product) =>
     product.secondPrice && product.secondPrice != 0 ? product.secondPrice : product.price
@@ -87,6 +107,25 @@ function CheckOutPage() {
   const stateOptions = country ? [...CountryStates[country]] : []
 
   const onSubmit: SubmitHandler<z.infer<typeof ShippingAddressSchema>> = (data) => {}
+
+  const couponForm = useForm<z.infer<typeof CouponApplySchema>>({
+    resolver: zodResolver(CouponApplySchema),
+    defaultValues: {
+      code: '',
+    },
+  })
+
+  const onSubmitCoupon: SubmitHandler<z.infer<typeof CouponApplySchema>> = (data) => {}
+
+  const applyCoupon = () => {
+    setCouponError('')
+  }
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null)
+    setCouponCode('')
+    setCouponError('')
+  }
 
   useEffect(() => {
     if (!cartItems) {
@@ -172,8 +211,12 @@ function CheckOutPage() {
           <ArrowLeftIcon className="h-4 w-4" />
           Volver a los productos
         </Link>
+        <h2 className="my-4 text-2xl text-center">
+          Número de orden <span className="text-yellow-500">{orderNumber}</span>
+        </h2>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
+            {/* Shipping Address */}
             <Card>
               <CardHeader className="relative">
                 <CardTitle className="flex items-center gap-2">
@@ -185,7 +228,7 @@ function CheckOutPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex flex-col">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2 items-start">
                       <FormField
                         control={form.control}
@@ -246,7 +289,7 @@ function CheckOutPage() {
                       name="phone"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Correo electrónico *</FormLabel>
+                          <FormLabel>Número de teléfono *</FormLabel>
                           <Input
                             id="phone"
                             type="text"
@@ -264,7 +307,7 @@ function CheckOutPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Dirección *</FormLabel>
-                          <FormControl className="rounded-none rounded-b-lg">
+                          <FormControl>
                             <Textarea
                               placeholder="Escribe una dirección, calles, avenidas, código postal..."
                               className="resize-none font-serif"
@@ -352,8 +395,130 @@ function CheckOutPage() {
                         )}
                       />
                     </div>
+                    <Button className="bg-blue-500 dark:hover:bg-blue-600 text-white font-serif ml-auto cursor-pointer">
+                      Guardar datos
+                    </Button>
                   </form>
                 </Form>
+              </CardContent>
+            </Card>
+            {/* Coupon Code */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-600 text-white text-sm font-bold">
+                    2
+                  </div>
+                  Código de cupón
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-md">
+                    <div className="flex items-center gap-2">
+                      <Tag className="h-4 w-4 text-green-600" />
+                      <div>
+                        <p className="font-medium text-green-800">code</p>
+                        <p className="text-sm text-green-600">description</p>
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      type="button"
+                      variant="ghost"
+                      onClick={removeCoupon}
+                      className="text-green-600 hover:text-green-700"
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ) : (
+                  <Form {...couponForm}>
+                    <form className="space-y-3">
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Ingresa un código de cupón"
+                          value={couponCode}
+                          onChange={(e) => setCouponCode(e.target.value)}
+                          className="flex-1 font-serif"
+                        />
+                        <Button
+                          type="submit"
+                          variant="outline"
+                          onClick={applyCoupon}
+                          disabled={!couponCode.trim()}
+                          className={
+                            'font-serif' + !couponCode.trim()
+                              ? 'cursor-pointer'
+                              : 'cursor-not-allowed'
+                          }
+                        >
+                          Aplicar
+                        </Button>
+                      </div>
+                      {couponError && (
+                        <Alert variant="destructive">
+                          <AlertDescription>{couponError}</AlertDescription>
+                        </Alert>
+                      )}
+                    </form>
+                  </Form>
+                )}
+              </CardContent>
+            </Card>
+            {/* Payment Method */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-600 text-white text-sm font-bold">
+                    3
+                  </div>
+                  Método de pago
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
+                  <div className="flex items-center space-x-2 p-3 border rounded-md font-serif">
+                    <RadioGroupItem value="card" id="card" />
+                    <Label htmlFor="card" className="flex items-center gap-2 cursor-pointer flex-1">
+                      <CreditCard className="h-4 w-4" />
+                      Tarjeta de Débito/Crédito
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2 p-3 border rounded-md font-serif">
+                    <RadioGroupItem value="transfer" id="transfer" />
+                    <Label
+                      htmlFor="transfer"
+                      className="flex items-center gap-2 cursor-pointer flex-1"
+                    >
+                      <Building2 className="h-4 w-4" />
+                      Transferencia bancaria
+                    </Label>
+                  </div>
+                </RadioGroup>
+                {paymentMethod === 'transfer' && (
+                  <div className="p-4 border rounded-md bg-muted/50">
+                    <h4 className="font-medium mb-2">Bank Transfer Details</h4>
+                    <div className="space-y-2 text-sm font-serif">
+                      <p>
+                        <strong>Nombre de banco:</strong> AgriMarket Bank
+                      </p>
+                      <p>
+                        <strong>Nombre de la cuenta:</strong> AgriMarket LLC
+                      </p>
+                      <p>
+                        <strong>Número de cuenta:</strong> 1234567890
+                      </p>
+                      <p>
+                        <strong>RIF:</strong> 987654321
+                      </p>
+                      <p className="text-muted-foreground mt-3">
+                        Por favor incluye el número de tu órden en la referencia de la tranferencia.
+                        Tu orden será procesada una vez que el pago sea confirmado.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

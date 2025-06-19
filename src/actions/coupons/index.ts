@@ -1,5 +1,5 @@
 import { apiWithCredentials, apiWithOutCredentials } from '@/actions/api'
-import { CouponSchema, CouponUpdateSchema } from '@/schemas/coupons'
+import { CouponCreateSchema, CouponUpdateSchema } from '@/schemas/coupons'
 import axios from 'axios'
 import { z } from 'zod'
 
@@ -15,7 +15,7 @@ export const getAll = async () => {
   }
 }
 
-export const create = async (data: z.infer<typeof CouponSchema>) => {
+export const create = async (data: z.infer<typeof CouponCreateSchema>) => {
   try {
     const res = await apiWithCredentials.post(`/coupons`, data, {})
     return res

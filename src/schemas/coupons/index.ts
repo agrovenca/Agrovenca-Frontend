@@ -1,7 +1,7 @@
 import { CouponTypes } from '@/types/coupon'
 import { z } from 'zod'
 
-export const CouponSchema = z.object({
+export const CouponCreateSchema = z.object({
   code: z
     .string()
     .min(2, { message: 'Código es requerido' })
@@ -14,4 +14,11 @@ export const CouponSchema = z.object({
   expiresAt: z.date().min(new Date(), { message: 'No puede ser menor a hoy' }).optional(),
 })
 
-export const CouponUpdateSchema = CouponSchema.omit({ code: true }).partial()
+export const CouponUpdateSchema = CouponCreateSchema.omit({ code: true }).partial()
+
+export const CouponApplySchema = z.object({
+  code: z
+    .string()
+    .min(2, { message: 'Código es requerido' })
+    .max(50, { message: 'No pueden ser más de 50 caracteres' }),
+})

@@ -27,7 +27,7 @@ import { toast } from 'sonner'
 import { useState } from 'react'
 import ErrorForm from '@/components/pages/ErrorForm'
 import { useResponseStatusStore } from '@/store/api/useResponseStatus'
-import { CouponSchema } from '@/schemas/coupons'
+import { CouponCreateSchema } from '@/schemas/coupons'
 import { create } from '@/actions/coupons'
 import { CouponTypes } from '@/types/coupon'
 import { Loader } from '@/components/ui/loader'
@@ -55,8 +55,8 @@ function CreateCoupon() {
   const errorStatus = useResponseStatusStore((state) => state.errorStatus)
   const setError = useResponseStatusStore((state) => state.setError)
 
-  const form = useForm<z.infer<typeof CouponSchema>>({
-    resolver: zodResolver(CouponSchema),
+  const form = useForm<z.infer<typeof CouponCreateSchema>>({
+    resolver: zodResolver(CouponCreateSchema),
     defaultValues: {
       code: '',
       description: undefined,
@@ -68,7 +68,7 @@ function CreateCoupon() {
     },
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof CouponSchema>> = async (data) => {
+  const onSubmit: SubmitHandler<z.infer<typeof CouponCreateSchema>> = async (data) => {
     setIsLoading(true)
     try {
       const res = await create(data)

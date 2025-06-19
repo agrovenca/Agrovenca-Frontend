@@ -83,13 +83,13 @@ function Navbar() {
             </>
           ) : (
             <>
-              <div className="flex gap-2">
-                <CartPage />
-                <SavedProductsPage />
-              </div>
               <UserMenu user={user} />
             </>
           )}
+          <div className="flex gap-2">
+            <CartPage />
+            <SavedProductsPage />
+          </div>
           <div className="hidden md:block">
             <ModeToggle />
           </div>
