@@ -1,58 +1,113 @@
-import { getShippingAddresses } from '@/actions/shippingData'
-import { useAuthStore } from '@/store/auth/useAuthStore'
-import { type ShippingAddress } from '@/types/shippingAddress'
-import { useCallback, useEffect, useState } from 'react'
-import FormCreate from './FormCreate'
+import { useEffect, useState } from 'react'
 import CreateShippingAddress from './Create'
+import { useAuthStore } from '@/store/auth/useAuthStore'
 import { useShippindAddressStore } from '@/store/shippingAddresses'
-import { Label } from '@/components/ui/label'
+import { getShippingAddresses } from '@/actions/shippingData'
+import { type ShippingAddress } from '@/types/shippingAddress'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import z from 'zod'
+import { useForm } from 'react-hook-form'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Button } from '@/components/ui/button'
+import { EditIcon, TrashIcon } from 'lucide-react'
 
 function ListAddresses() {
+  const user = useAuthStore((state) => state.user)
   const addresses = useShippindAddressStore((state) => state.addresses)
-  const [selected, setSelected] = useState<string | null>(null) // Id of the selected address
 
-  return addresses.length ? (
-    <>
-      <section className="flex gap-2 justify-between">
-        {addresses.map((address) => (
-          <RadioGroup
-            defaultValue="option-one"
-            key={address.pk}
-            className="cursor-pointer"
-            onValueChange={(e) => {
-              setSelected(e)
-              return e
-            }}
-          >
-            <Label
-              htmlFor={`option-${address.pk}`}
-              className="border p-4 mb-4 rounded-lg transition hover:scale-[1.01] font-serif flex gap-2"
-            >
-              <RadioGroupItem value={address.pk} id={`option-${address.pk}`} className="m-0" />
-              <div className="space-y-2">
-                <h3>{address.alias}</h3>
-                <p>
-                  {address.name} {address.lastName}
-                </p>
-                <p>{address.email}</p>
-                <p>{address.phone}</p>
-                <p>{address.address_line_1}</p>
-                <p>
-                  {address.city}, {address.state}, {address.country}
-                </p>
-              </div>
-            </Label>
-          </RadioGroup>
-        ))}
-      </section>
-      {selected &&
-        {
-          /* Show button for reset selected option */
-        }}
-    </>
+  const addressesPk = addresses.map((address) => address.pk)
+  const getAddressByPk = (pk: string) => addresses.find((address) => address.pk === pk)
+
+  const FormSchema = z.object({
+    address: z.string().refine((val) => addressesPk.includes(val), {
+      message: 'You need to select a valid notification type.',
+    }),
+  })
+
+  const form = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
+  })
+
+  return addresses.length && user ? (
+    <Form {...form}>
+      <form className="flex gap-2 justify-evenly">
+        <FormField
+          control={form.control}
+          name="address"
+          render={({ field }) => (
+            <FormItem className="space-y-3">
+              <FormLabel>
+                Enviar productos a{' '}
+                <span className="font-bold">{getAddressByPk(field.value)?.alias}</span>
+              </FormLabel>
+              <FormControl>
+                <RadioGroup
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  className="flex gap-2 justify-evenly"
+                >
+                  {addresses.length &&
+                    addresses.map((address) => (
+                      <FormItem
+                        className="flex flex-col max-w-md w-full items-center gap-3 border p-4 mb-4 rounded-lg transition hover:scale-[1.01] font-serif"
+                        key={address.pk}
+                      >
+                        <div className="flex items-start gap-3">
+                          <FormControl>
+                            <RadioGroupItem value={address.pk} className="cursor-pointer" />
+                          </FormControl>
+                          <FormLabel className="font-normal cursor-pointer">
+                            <div className="space-y-2">
+                              <h3 className="font-sans font-bold text-[1.1rem]">{address.alias}</h3>
+                              <p className="font-semibold">
+                                {address.name} {address.lastName}
+                              </p>
+                              <p>{address.email}</p>
+                              <p>{address.phone}</p>
+                              <p className="italic text-wrap">{address.address_line_1}</p>
+                              <p>
+                                {address.city}, {address.state}, {address.country}
+                              </p>
+                            </div>
+                          </FormLabel>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size={'sm'} className="cursor-pointer">
+                            <EditIcon className="w-5 h-5" />
+                          </Button>
+                          <Button variant="destructive" size={'sm'} className="cursor-pointer">
+                            <TrashIcon className="w-5 h-5" />
+                          </Button>
+                        </div>
+                      </FormItem>
+                    ))}
+                </RadioGroup>
+              </FormControl>
+              <FormMessage />
+              <Button type="reset" onClick={() => form.reset()} disabled={!field.value}>
+                Limpiar selección
+              </Button>
+            </FormItem>
+          )}
+        />
+      </form>
+    </Form>
   ) : (
-    <p>No shipping addresses found.</p>
+    <>
+      {user ? (
+        <p>No shipping addresses found.</p>
+      ) : (
+        <p>Please log in to view your shipping addresses.</p>
+      )}
+    </>
   )
 }
 
@@ -61,12 +116,31 @@ function ShippingAddress() {
   const user = useAuthStore((state) => state.user)
   const setAddresses = useShippindAddressStore((state) => state.setAddresses)
 
-  const fetchData = useCallback(
-    async (userId: string) => {
+  // const fetchData = useCallback(
+  //   async (userId: string) => {
+  //     // Fetch shipping address data
+  //     setIsLoading(true)
+  //     try {
+  //       const res = await getShippingAddresses(userId)
+  //       if (res.status !== 200) {
+  //         throw new Error('Failed to fetch shipping addresses')
+  //       }
+  //       setAddresses(res.data)
+  //     } catch (error) {
+  //       console.error(error)
+  //     } finally {
+  //       setIsLoading(false)
+  //     }
+  //   },
+  //   [setAddresses]
+  // )
+
+  useEffect(() => {
+    const fetchData = async () => {
       // Fetch shipping address data
       setIsLoading(true)
       try {
-        const res = await getShippingAddresses(userId)
+        const res = await getShippingAddresses()
         if (res.status !== 200) {
           throw new Error('Failed to fetch shipping addresses')
         }
@@ -76,15 +150,12 @@ function ShippingAddress() {
       } finally {
         setIsLoading(false)
       }
-    },
-    [setAddresses]
-  )
-
-  useEffect(() => {
-    if (user) {
-      fetchData(user.id)
     }
-  }, [fetchData, user])
+
+    if (user) {
+      fetchData()
+    }
+  }, [user, setAddresses])
 
   if (isLoading) {
     return <div>Loading...</div>
@@ -94,7 +165,7 @@ function ShippingAddress() {
     <div>
       {user ? (
         <>
-          <section className="flex flex-wrap gap-2 items-center">
+          <section className="flex flex-wrap gap-2 items-center mb-2">
             <h1>Direcciones de envío</h1>
             <CreateShippingAddress />
           </section>
@@ -103,7 +174,6 @@ function ShippingAddress() {
       ) : (
         <>
           <ListAddresses />
-          <FormCreate />
         </>
       )}
     </div>

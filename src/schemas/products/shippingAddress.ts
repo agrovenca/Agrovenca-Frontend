@@ -41,6 +41,7 @@ export type StateByCountry = StateForCountry<'Venezuela'>
 
 export const ShippingAddressSchema = z
   .object({
+    alias: z.string().min(2, { message: 'Alias es requerido' }).max(50),
     name: z.string().min(2, { message: 'Nombre es requerido' }).max(150),
     lastName: z.string().min(2, { message: 'Apellido es requerido' }).max(150),
     email: z.string().email({ message: 'Correo electrónico requerido' }),

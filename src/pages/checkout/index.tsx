@@ -17,7 +17,7 @@ import {
   Tag,
   TrashIcon,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
 import { validateCart } from '@/actions/products'
@@ -62,7 +62,9 @@ function CheckOutPage() {
   const updateItem = useCartStore((state) => state.updateItem)
   const deleteItem = useCartStore((state) => state.deleteItem)
 
-  const orderNumber = generateRandomHexString() + '-' + cartItems.length.toString()
+  const orderNumber = useMemo(() => {
+    return generateRandomHexString() + '-' + cartItems.length.toString()
+  }, [cartItems.length])
 
   const getProductPrice = (product: Product) =>
     product.secondPrice && product.secondPrice != 0 ? product.secondPrice : product.price

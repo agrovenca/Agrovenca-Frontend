@@ -14,8 +14,10 @@ import { ShoppingCartIcon, TrashIcon } from 'lucide-react'
 import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
 import UpdateCartItem from '../products/UpdateCartItem'
 import { Link } from 'react-router'
+import { useAuthStore } from '@/store/auth/useAuthStore'
 
 function CartPage() {
+  const user = useAuthStore((state) => state.user)
   const items = useCartStore((state) => state.items)
   const clearCart = useCartStore((state) => state.clearCart)
   const deleteItem = useCartStore((state) => state.deleteItem)
@@ -96,7 +98,7 @@ function CartPage() {
           </p>
         </div>
         <SheetFooter>
-          {items.length < 1 ? (
+          {items.length < 1 || !user ? (
             <Button
               disabled
               size={'lg'}
