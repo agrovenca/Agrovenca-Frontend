@@ -19,9 +19,10 @@ type Props = {
   product: Product
   contentText: string
   size?: 'default' | 'sm' | 'lg' | 'icon' | null | undefined
+  className?: string
 }
 
-function AddCartItem({ product, contentText, size }: Props) {
+function AddCartItem({ product, contentText, size, className = '' }: Props) {
   const [quantity, setQuantity] = useState(1)
   const [isOpen, setIsOpen] = useState(false)
   const inStock = product.stock > 0
@@ -47,7 +48,7 @@ function AddCartItem({ product, contentText, size }: Props) {
       <DialogTrigger asChild>
         <Button
           size={size}
-          className="bg-green-600 hover:bg-green-700 cursor-pointer font-serif"
+          className={`bg-green-600 hover:bg-green-700 cursor-pointer font-serif ${className}`}
           disabled={!inStock}
         >
           <ShoppingCart className="h-4 w-4 mr-1" />
