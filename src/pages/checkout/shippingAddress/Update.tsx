@@ -6,8 +6,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { PlusIcon } from 'lucide-react'
-import { useState } from 'react'
 import {
   Form,
   FormControl,
@@ -16,7 +14,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -26,80 +23,97 @@ import {
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { SubmitHandler, useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { AddressCreateSchema, Country, CountryStates } from '@/schemas/products/shippingAddress'
-import z from 'zod'
-
-import { useAuthStore } from '@/store/auth/useAuthStore'
-import { useShippingAddressStore } from '@/store/shippingAddresses/useAddressesStore'
-import { createAddress } from '@/actions/shippingData'
 import { Loader } from '@/components/ui/loader'
+import { Textarea } from '@/components/ui/textarea'
+import ErrorForm from '@/components/pages/ErrorForm'
+import { EditIcon } from 'lucide-react'
+import { z } from 'zod'
+import { toast } from 'sonner'
+import { useCallback, useEffect, useState } from 'react'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { SubmitHandler, useForm } from 'react-hook-form'
+import { useResponseStatusStore } from '@/store/api/useResponseStatus'
+import { ShippingAddress } from '@/types/shippingAddress'
+import {
+  AddressUpdateSchema,
+  CountryStates,
+  type Country,
+} from '@/schemas/products/shippingAddress'
+import { updateAddress } from '@/actions/shippingData'
+import { useShippingAddressStore } from '@/store/shippingAddresses/useAddressesStore'
 
-function CreateShippingAddress() {
+type Props = {
+  address: ShippingAddress
+}
+
+function Update({ address }: Props) {
   const [isOpen, setIsOpen] = useState(false)
-  const [charCount, setCharCount] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
+  const [charCount, setCharCount] = useState(address.address_line_1?.length || 0)
 
-  const user = useAuthStore((state) => state.user)
-  const addAddress = useShippingAddressStore((state) => state.addAddress)
+  const updateAddressStore = useShippingAddressStore((state) => state.updateAddress)
+  const errorStatus = useResponseStatusStore((state) => state.errorStatus)
+  const setError = useResponseStatusStore((state) => state.setError)
 
-  const form = useForm<z.infer<typeof AddressCreateSchema>>({
-    resolver: zodResolver(AddressCreateSchema),
-    defaultValues: {
-      alias: '',
-      name: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      address_line_1: '',
-      country: 'Venezuela',
-      state: '',
-      city: '',
-    },
+  const form = useForm<z.infer<typeof AddressUpdateSchema>>({
+    resolver: zodResolver(AddressUpdateSchema),
+    defaultValues: { ...address, country: address.country as Country },
   })
 
   const country = form.watch('country') as Country
   const stateOptions = country ? [...CountryStates[country]] : []
 
-  const onSubmit: SubmitHandler<z.infer<typeof AddressCreateSchema>> = async (data) => {
-    if (!user) {
-      return
-    }
+  const onReset = useCallback(() => {
+    form.reset({ ...address, country: address.country as Country, state: address.state || '' })
+    setCharCount(address.address_line_1?.length || 0)
+  }, [address, form])
 
-    // If user is logged in, submit the form data
+  const onSubmit: SubmitHandler<z.infer<typeof AddressUpdateSchema>> = async (data) => {
     setIsLoading(true)
     try {
-      const res = await createAddress({ data })
-      if (res.status !== 201) {
-        throw new Error('Failed to create shipping address')
+      const res = await updateAddress({ pk: address.pk, data })
+
+      if (res.error) {
+        setError(res.error)
       }
-      addAddress(res.data.address)
-      console.log('Shipping address created successfully:', res.data)
-    } catch (error) {
-      console.error('Error creating shipping address:', error)
+
+      if (res.status === 200) {
+        const { message, address: updatedAddress } = res.data
+        toast.success(message)
+
+        updateAddressStore(updatedAddress)
+        onReset()
+        setCharCount(0)
+        setIsOpen(false)
+      }
+    } catch (_error) {
+      toast.error('Ocurrió un error. Por favor intenta de nuevo.')
     } finally {
       setIsLoading(false)
-      form.reset()
-      setIsOpen(false)
     }
   }
+
+  useEffect(() => {
+    if (isOpen) {
+      onReset()
+      setCharCount(address.address_line_1?.length || 0)
+    }
+  }, [isOpen, address, form, onReset])
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="ms-auto bg-blue-500 text-white dark:hover:bg-blue-600 cursor-pointer flex gap-2 items-center">
-          <PlusIcon />
-          <span>Añadir dirección</span>
+        <Button variant="outline" size={'icon'} className="cursor-pointer text-blue-500">
+          <EditIcon className="w-5 h-5" />
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Crear una dirección de envío</DialogTitle>
-          <DialogDescription>Estás a punto de crear una nueva dirección de envío</DialogDescription>
+          <DialogTitle>Actualizar una dirección de envío</DialogTitle>
+          <DialogDescription>Estás a punto de actualizar esta dirección de envío</DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex flex-col">
+          <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               control={form.control}
               name="alias"
@@ -249,6 +263,7 @@ function CreateShippingAddress() {
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
+                      value={field.value}
                       disabled={!country}
                     >
                       <FormControl id="state">
@@ -286,13 +301,29 @@ function CreateShippingAddress() {
                 )}
               />
             </div>
-            <Button
-              disabled={!form.formState.isValid || isLoading}
-              type="submit"
-              className="bg-blue-500 dark:hover:bg-blue-600 text-white font-serif ml-auto cursor-pointer"
-            >
-              {isLoading ? <Loader size="sm" variant="spinner" /> : 'Guardar datos'}
-            </Button>
+
+            {errorStatus.error && <ErrorForm message={errorStatus.message} />}
+
+            <div className="flex items-center gap-2 justify-end">
+              <Button
+                type="reset"
+                variant={'secondary'}
+                disabled={isLoading}
+                className="cursor-pointer"
+                onClick={onReset}
+              >
+                Restablecer
+              </Button>
+              <Button
+                type="submit"
+                disabled={isLoading || !form.formState.isValid}
+                className={
+                  isLoading || !form.formState.isValid ? 'cursor-not-allowed' : 'cursor-pointer'
+                }
+              >
+                {isLoading ? <Loader size="sm" variant="spinner" /> : 'Guardar'}
+              </Button>
+            </div>
           </form>
         </Form>
       </DialogContent>
@@ -300,4 +331,4 @@ function CreateShippingAddress() {
   )
 }
 
-export default CreateShippingAddress
+export default Update

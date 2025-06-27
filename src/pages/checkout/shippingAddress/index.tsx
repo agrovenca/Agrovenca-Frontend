@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import CreateShippingAddress from './Create'
 import { useAuthStore } from '@/store/auth/useAuthStore'
-import { useShippindAddressStore } from '@/store/shippingAddresses'
+import { useShippingAddressStore } from '@/store/shippingAddresses/useAddressesStore'
 import { getShippingAddresses } from '@/actions/shippingData'
 import { type ShippingAddress } from '@/types/shippingAddress'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
@@ -18,10 +18,11 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { EditIcon, TrashIcon } from 'lucide-react'
+import Update from './Update'
 
 function ListAddresses() {
   const user = useAuthStore((state) => state.user)
-  const addresses = useShippindAddressStore((state) => state.addresses)
+  const addresses = useShippingAddressStore((state) => state.addresses)
 
   const addressesPk = addresses.map((address) => address.pk)
   const getAddressByPk = (pk: string) => addresses.find((address) => address.pk === pk)
@@ -34,6 +35,9 @@ function ListAddresses() {
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
+    defaultValues: {
+      address: '',
+    },
   })
 
   return addresses.length && user ? (
@@ -52,6 +56,7 @@ function ListAddresses() {
                 <RadioGroup
                   onValueChange={field.onChange}
                   defaultValue={field.value}
+                  value={field.value}
                   className="flex gap-2 justify-evenly"
                 >
                   {addresses.length &&
@@ -60,7 +65,7 @@ function ListAddresses() {
                         className="flex flex-col max-w-md w-full items-center gap-3 border p-4 mb-4 rounded-lg transition hover:scale-[1.01] font-serif"
                         key={address.pk}
                       >
-                        <div className="flex items-start gap-3">
+                        <div className="flex items-start gap-3 flex-1">
                           <FormControl>
                             <RadioGroupItem value={address.pk} className="cursor-pointer" />
                           </FormControl>
@@ -80,10 +85,8 @@ function ListAddresses() {
                           </FormLabel>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" size={'sm'} className="cursor-pointer">
-                            <EditIcon className="w-5 h-5" />
-                          </Button>
-                          <Button variant="destructive" size={'sm'} className="cursor-pointer">
+                          <Update address={address} />
+                          <Button variant="destructive" size={'icon'} className="cursor-pointer">
                             <TrashIcon className="w-5 h-5" />
                           </Button>
                         </div>
@@ -92,9 +95,11 @@ function ListAddresses() {
                 </RadioGroup>
               </FormControl>
               <FormMessage />
-              <Button type="reset" onClick={() => form.reset()} disabled={!field.value}>
-                Limpiar selección
-              </Button>
+              {field.value && (
+                <Button type="reset" onClick={() => form.reset()} disabled={!field.value}>
+                  Limpiar selección
+                </Button>
+              )}
             </FormItem>
           )}
         />
@@ -114,7 +119,7 @@ function ListAddresses() {
 function ShippingAddress() {
   const [isLoading, setIsLoading] = useState(false)
   const user = useAuthStore((state) => state.user)
-  const setAddresses = useShippindAddressStore((state) => state.setAddresses)
+  const setAddresses = useShippingAddressStore((state) => state.setAddresses)
 
   // const fetchData = useCallback(
   //   async (userId: string) => {
