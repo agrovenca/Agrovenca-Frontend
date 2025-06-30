@@ -55,7 +55,9 @@ function ProductDetail() {
   const deleteItem = useCartStore((state) => state.deleteItem)
   const saveProduct = useSavedStore((state) => state.addProduct)
   const removeSaved = useSavedStore((state) => state.removeProduct)
-  //const isProductSaved = useSavedStore((state) => state.isProductSaved)
+  const isProductSaved = useSavedStore((state) =>
+    state.products.some((p) => p.id === product?.id || '')
+  )
 
   const productId = products.find((p) => p.slug === slug)?.id
   const productStock = product?.stock ?? 0
@@ -119,11 +121,6 @@ function ProductDetail() {
     removeSaved(productId)
     toast.success('Producto eliminado de favoritos correctamente')
   }
-
-  //const checkIsProductSaved = isProductSaved(product?.id || '')
-  const isProductSaved = useSavedStore((state) =>
-    state.products.some((p) => p.id === product?.id || '')
-  )
 
   useEffect(() => {
     if (!slug?.trim()) {
@@ -313,18 +310,18 @@ function ProductDetail() {
                       variant="outline"
                       size="lg"
                       className={'text-red-500 border-red-500'}
-                      onClick={() => handleSaveItem({ product })}
+                      onClick={() => handleUnSaveItem({ productId: product.id })}
                     >
-                      <HeartIcon className={`h-4 w-4`} />
+                      <HeartOffIcon className={`h-4 w-4`} />
                     </Button>
                   ) : (
                     <Button
                       variant="outline"
                       size="lg"
                       className={'text-red-500 border-red-500'}
-                      onClick={() => handleUnSaveItem({ productId: product.id })}
+                      onClick={() => handleSaveItem({ product })}
                     >
-                      <HeartOffIcon className={`h-4 w-4`} />
+                      <HeartIcon className={`h-4 w-4`} />
                     </Button>
                   )}
                   <Button variant="outline" size="lg">
