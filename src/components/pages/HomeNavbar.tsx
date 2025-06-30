@@ -59,32 +59,23 @@ function Navbar() {
         </nav>
         <div className="flex items-center gap-4">
           {!user ? (
-            <>
-              <Button asChild variant={'outline'} className="hidden sm:flex">
-                <Link
-                  viewTransition
-                  to="/auth/login"
-                  className="text-sm font-medium text-muted-foreground hover:text-primary"
-                >
-                  <LogIn />
-                  <span style={{ viewTransitionName: 'loginTransitionTitle' }}>Iniciar sesión</span>
-                </Link>
-              </Button>
-              <Button asChild variant={'default'} className="hidden sm:flex">
-                <Link
-                  viewTransition
-                  to="/auth/register"
-                  className="text-sm font-medium text-muted-foreground hover:text-primary"
-                >
-                  <UserRound />
-                  <span style={{ viewTransitionName: 'registerTransitionTitle' }}>Registrarse</span>
-                </Link>
-              </Button>
-            </>
+            <Button
+              asChild
+              variant={'outline'}
+              className="hidden sm:flex"
+              size={'icon'}
+              title="Iniciar sesión"
+            >
+              <Link
+                viewTransition
+                to="/auth/login"
+                className="text-sm font-medium text-muted-foreground hover:text-primary"
+              >
+                <UserRound />
+              </Link>
+            </Button>
           ) : (
-            <>
-              <UserMenu user={user} />
-            </>
+            <UserMenu user={user} />
           )}
           <div className="flex gap-2">
             <CartPage />

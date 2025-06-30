@@ -55,7 +55,7 @@ export const ProductCard = memo(function ProductCard({ product }: { product: Pro
     <Card className="group relative overflow-hidden transition-all hover:shadow-lg pt-0 w-full max-w-md">
       <CardContent className="p-0">
         <div className="relative aspect-square overflow-hidden">
-          <Link to={`/products/${product.id}`} viewTransition>
+          <Link to={`/products/${product.slug}`} viewTransition>
             <figure className="w-full h-full overflow-hidden">
               <img
                 style={{
@@ -175,7 +175,7 @@ const ProductListItem = memo(function ProductListItem({ product }: { product: Pr
     <Card className="overflow-x-scroll overflow-y-hidden sm:overflow-hidden py-0">
       <CardContent className="p-0">
         <div className="flex gap-2">
-          <Link to={`/products/${product.id}`} viewTransition>
+          <Link to={`/products/${product.slug}`} viewTransition>
             <figure className="relative w-48 h-48 shrink-0">
               <img
                 style={{

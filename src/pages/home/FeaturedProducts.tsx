@@ -32,7 +32,7 @@ function ProductCard({ product }: { product: Product }) {
 
   return (
     <div className="group relative overflow-hidden rounded-lg border bg-background p-2 flex flex-col transition-colors hover:border-primary h-full">
-      <Link to={`/products/${product.id}`} viewTransition>
+      <Link to={`/products/${product.slug}`} viewTransition>
         <figure className="aspect-square overflow-hidden rounded-md flex-1 h-[300px] w-full">
           <img
             src={firstProductImage}

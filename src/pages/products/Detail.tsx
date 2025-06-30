@@ -27,7 +27,7 @@ import { useAuthStore } from '@/store/auth/useAuthStore'
 
 function ProductDetail() {
   const navigate = useNavigate()
-  const { productId } = useParams()
+  const { slug } = useParams()
   const [count, setCount] = useState(0)
   const [current, setCurrent] = useState(0)
   const [quantity, setQuantity] = useState(1)
@@ -38,6 +38,7 @@ function ProductDetail() {
 
   const user = useAuthStore((state) => state.user)
   const setUserId = useProductsStore((state) => state.setUserId)
+  const products = useProductsStore((state) => state.products)
   const filteredProducts = recommended.filter((p) => p.id !== product?.id)
   const addItem = useCartStore((state) => state.addItem)
   const deleteItem = useCartStore((state) => state.deleteItem)
@@ -95,14 +96,15 @@ function ProductDetail() {
   }
 
   useEffect(() => {
-    if (!productId?.trim()) {
+    if (!slug?.trim()) {
       navigate('/products')
     }
-  }, [productId, navigate])
+  }, [slug, navigate])
 
   useEffect(() => {
-    fetchProduct(productId as string)
-  }, [productId, fetchProduct])
+    const productId = products.find((p) => p.slug === slug)?.id
+    fetchProduct(productId || '')
+  }, [slug, fetchProduct, products])
 
   useEffect(() => {
     if (!api) {
