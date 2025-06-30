@@ -16,7 +16,17 @@ import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { Heart, Minus, Plus, RotateCcw, Share2, Shield, ShoppingCart, Truck } from 'lucide-react'
+import {
+  HeartIcon,
+  HeartOffIcon,
+  Minus,
+  Plus,
+  RotateCcw,
+  Share2,
+  Shield,
+  ShoppingCart,
+  Truck,
+} from 'lucide-react'
 import { useCartStore } from '@/store/cart/useCartStore'
 import { parseFormattedText } from '@/lib/utils'
 import LiteYouTubeEmbed from 'react-lite-youtube-embed'
@@ -24,6 +34,7 @@ import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css'
 import { ProductCard } from '.'
 import { useProductsStore } from '@/store/products/useProductsStore'
 import { useAuthStore } from '@/store/auth/useAuthStore'
+import { useSavedStore } from '@/store/products/useSavedStore'
 
 function ProductDetail() {
   const navigate = useNavigate()
@@ -42,7 +53,11 @@ function ProductDetail() {
   const filteredProducts = recommended.filter((p) => p.id !== product?.id)
   const addItem = useCartStore((state) => state.addItem)
   const deleteItem = useCartStore((state) => state.deleteItem)
+  const saveProduct = useSavedStore((state) => state.addProduct)
+  const removeSaved = useSavedStore((state) => state.removeProduct)
+  //const isProductSaved = useSavedStore((state) => state.isProductSaved)
 
+  const productId = products.find((p) => p.slug === slug)?.id
   const productStock = product?.stock ?? 0
   const inStock = productStock > 0
   const productPrice = Number(product?.price)
@@ -95,6 +110,21 @@ function ProductDetail() {
     toast.success('Producto eliminado del carrito correctamente')
   }
 
+  const handleSaveItem = async ({ product }: { product: Product }) => {
+    saveProduct(product)
+    toast.success('Producto guardado en favoritos correctamente')
+  }
+
+  const handleUnSaveItem = async ({ productId }: { productId: string }) => {
+    removeSaved(productId)
+    toast.success('Producto eliminado de favoritos correctamente')
+  }
+
+  //const checkIsProductSaved = isProductSaved(product?.id || '')
+  const isProductSaved = useSavedStore((state) =>
+    state.products.some((p) => p.id === product?.id || '')
+  )
+
   useEffect(() => {
     if (!slug?.trim()) {
       navigate('/products')
@@ -102,9 +132,8 @@ function ProductDetail() {
   }, [slug, navigate])
 
   useEffect(() => {
-    const productId = products.find((p) => p.slug === slug)?.id
     fetchProduct(productId || '')
-  }, [slug, fetchProduct, products])
+  }, [slug, fetchProduct, productId])
 
   useEffect(() => {
     if (!api) {
@@ -279,9 +308,25 @@ function ProductDetail() {
                       Agregar al carrito - ${(productPriceToShow * quantity).toFixed(2)}
                     </Button>
                   )}
-                  <Button variant="outline" size="lg" className={'text-red-500 border-red-500'}>
-                    <Heart className={`h-4 w-4`} />
-                  </Button>
+                  {isProductSaved ? (
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className={'text-red-500 border-red-500'}
+                      onClick={() => handleSaveItem({ product })}
+                    >
+                      <HeartIcon className={`h-4 w-4`} />
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className={'text-red-500 border-red-500'}
+                      onClick={() => handleUnSaveItem({ productId: product.id })}
+                    >
+                      <HeartOffIcon className={`h-4 w-4`} />
+                    </Button>
+                  )}
                   <Button variant="outline" size="lg">
                     <Share2 className="h-4 w-4" />
                   </Button>
