@@ -44,3 +44,15 @@ export const updateAddress = async ({
     return { error: 'An unknown error occurred' }
   }
 }
+
+export const deleteAddress = async ({ pk }: { pk: string }) => {
+  try {
+    const res = await apiWithCredentials.delete(`/shippings/${pk}`)
+    return res
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      return error.response?.data || { error: 'An unknown error occurred' }
+    }
+    return { error: 'An unknown error occurred' }
+  }
+}

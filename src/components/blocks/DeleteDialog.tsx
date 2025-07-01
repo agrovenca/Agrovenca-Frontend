@@ -16,23 +16,24 @@ import { Loader } from '@/components/ui/loader'
 import { Checkbox } from '../ui/checkbox'
 
 type Props = {
+  action: () => Promise<any>
+  callback?: () => void
+  children?: React.ReactNode
   title?: string
   description?: string
   warningText?: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  action: () => Promise<any>
-  callback?: () => void
 }
 
 const defaultDescription = 'Estás a punto de eliminar este regístro'
 const defaultWarningText = 'Esta acción es irreversible. ¿Seguro que desea eliminar?'
 
 function DeleteDialog({
+  action,
+  callback,
+  children,
   title = 'Eliminar',
   description = defaultDescription,
   warningText = defaultWarningText,
-  action,
-  callback,
 }: Props) {
   const [isLoading, setIsLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
@@ -64,17 +65,21 @@ function DeleteDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button size={'icon'} variant={'ghost'} className="cursor-pointer text-red-500">
-          <TrashIcon />
-        </Button>
-      </DialogTrigger>
+      {children ? (
+        <DialogTrigger asChild>{children}</DialogTrigger>
+      ) : (
+        <DialogTrigger asChild>
+          <Button size={'icon'} variant={'ghost'} className="cursor-pointer text-red-500">
+            <TrashIcon />
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form className="space-y-4" onSubmit={handleSubmit} id="deleteForm">
           <div className="flex items-center space-x-2">
             <Checkbox id="confirmDeletion" required />
             <label
@@ -87,7 +92,7 @@ function DeleteDialog({
 
           {errorStatus.error && <ErrorForm message={errorStatus.message} />}
 
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading} form="deleteForm">
             {isLoading ? <Loader size="sm" variant="spinner" /> : 'Eliminar'}
           </Button>
         </form>

@@ -7,7 +7,9 @@ interface ShippingAddressState {
   addAddress: (address: ShippingAddress) => void
   setAddresses: (addresses: ShippingAddress[]) => void
   updateAddress: (updatedAddress: ShippingAddress) => void
-  removeAddress: (address: ShippingAddress) => void
+  removeAddress: (addressPk: string) => void
+  selectedAddress?: ShippingAddress['pk']
+  setSelectedAddress: (addressId?: ShippingAddress['pk']) => void
   clearAddresses: () => void
 }
 
@@ -17,7 +19,7 @@ export const useShippingAddressStore = create<ShippingAddressState>()(
       addresses: [],
       addAddress: (address) =>
         set((state) => ({
-          addresses: [...state.addresses, address],
+          addresses: [address, ...state.addresses],
         })),
       setAddresses: (addresses) => set(() => ({ addresses })),
       updateAddress: (updatedAddress) =>
@@ -26,10 +28,12 @@ export const useShippingAddressStore = create<ShippingAddressState>()(
             address.pk === updatedAddress.pk ? updatedAddress : address
           ),
         })),
-      removeAddress: (address) =>
+      removeAddress: (addressPk) =>
         set((state) => ({
-          addresses: state.addresses.filter((a) => a.pk !== address.pk),
+          addresses: state.addresses.filter((a) => a.pk !== addressPk),
         })),
+      selectedAddress: undefined,
+      setSelectedAddress: (addressId) => set(() => ({ selectedAddress: addressId })),
       clearAddresses: () => set(() => ({ addresses: [] })),
     }),
     {

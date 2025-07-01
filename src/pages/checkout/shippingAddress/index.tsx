@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import CreateShippingAddress from './Create'
 import { useAuthStore } from '@/store/auth/useAuthStore'
 import { useShippingAddressStore } from '@/store/shippingAddresses/useAddressesStore'
-import { getShippingAddresses } from '@/actions/shippingData'
+import { deleteAddress, getShippingAddresses } from '@/actions/shippingData'
 import { type ShippingAddress } from '@/types/shippingAddress'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import z from 'zod'
@@ -17,12 +17,16 @@ import {
 } from '@/components/ui/form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
-import { EditIcon, TrashIcon } from 'lucide-react'
 import Update from './Update'
+import DeleteDialog from '@/components/blocks/DeleteDialog'
+import { TrashIcon } from 'lucide-react'
+import { toast } from 'sonner'
 
 function ListAddresses() {
   const user = useAuthStore((state) => state.user)
   const addresses = useShippingAddressStore((state) => state.addresses)
+  const selectedAddress = useShippingAddressStore((state) => state.selectedAddress)
+  const setSelectedAddress = useShippingAddressStore((state) => state.setSelectedAddress)
 
   const addressesPk = addresses.map((address) => address.pk)
   const getAddressByPk = (pk: string) => addresses.find((address) => address.pk === pk)
@@ -36,13 +40,30 @@ function ListAddresses() {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      address: '',
+      address: selectedAddress,
     },
   })
 
+  const onSubmit = (data: z.infer<typeof FormSchema>) => {
+    setSelectedAddress(data.address)
+    form.reset({ address: data.address })
+    toast.success(
+      `Dirección de envío seleccionada: ${getAddressByPk(data.address)?.alias || 'Desconocida'}`
+    )
+  }
+
+  const onReset = () => {
+    setSelectedAddress(undefined)
+    form.reset({ address: '' })
+  }
+
   return addresses.length && user ? (
     <Form {...form}>
-      <form className="flex gap-2 justify-evenly">
+      <form
+        className="flex gap-2 justify-evenly"
+        onSubmit={form.handleSubmit(onSubmit)}
+        id="selectAddressForm"
+      >
         <FormField
           control={form.control}
           name="address"
@@ -54,9 +75,12 @@ function ListAddresses() {
               </FormLabel>
               <FormControl>
                 <RadioGroup
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
                   value={field.value}
+                  defaultValue={field.value}
+                  onValueChange={(val) => {
+                    setSelectedAddress(val)
+                    field.onChange(val)
+                  }}
                   className="flex gap-2 justify-evenly"
                 >
                   {addresses.length &&
@@ -84,21 +108,31 @@ function ListAddresses() {
                             </div>
                           </FormLabel>
                         </div>
-                        <div className="flex gap-2">
-                          <Update address={address} />
-                          <Button variant="destructive" size={'icon'} className="cursor-pointer">
-                            <TrashIcon className="w-5 h-5" />
-                          </Button>
-                        </div>
                       </FormItem>
                     ))}
                 </RadioGroup>
               </FormControl>
               <FormMessage />
               {field.value && (
-                <Button type="reset" onClick={() => form.reset()} disabled={!field.value}>
-                  Limpiar selección
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    type="reset"
+                    className="flex-1 uppercase"
+                    variant={'outline'}
+                    disabled={!field.value}
+                    onClick={() => onReset()}
+                  >
+                    Limpiar selección
+                  </Button>
+                  <Button
+                    type="submit"
+                    form="selectAddressForm"
+                    className="flex-1 uppercase"
+                    disabled={!field.value}
+                  >
+                    Confirmar selección
+                  </Button>
+                </div>
               )}
             </FormItem>
           )}
@@ -119,7 +153,11 @@ function ListAddresses() {
 function ShippingAddress() {
   const [isLoading, setIsLoading] = useState(false)
   const user = useAuthStore((state) => state.user)
+  const addresses = useShippingAddressStore((state) => state.addresses)
   const setAddresses = useShippingAddressStore((state) => state.setAddresses)
+  const selectedAddress = useShippingAddressStore((state) => state.selectedAddress)
+  const removeAddress = useShippingAddressStore((state) => state.removeAddress)
+  const [address, setAddress] = useState<ShippingAddress | null>(null)
 
   // const fetchData = useCallback(
   //   async (userId: string) => {
@@ -162,6 +200,10 @@ function ShippingAddress() {
     }
   }, [user, setAddresses])
 
+  useEffect(() => {
+    setAddress(addresses.find((address) => address.pk === selectedAddress) || null)
+  }, [addresses, selectedAddress])
+
   if (isLoading) {
     return <div>Loading...</div>
   }
@@ -170,9 +212,26 @@ function ShippingAddress() {
     <div>
       {user ? (
         <>
-          <section className="flex flex-wrap gap-2 items-center mb-2">
+          <section className="flex flex-wrap gap-2 items-center mb-2 justify-between">
             <h1>Direcciones de envío</h1>
-            <CreateShippingAddress />
+            <div className="flex gap-2 items-center flex-wrap">
+              <CreateShippingAddress />
+              {address && (
+                <>
+                  <Update address={address} />
+                  <DeleteDialog
+                    description="Estás a punto de eliminar esta dirección de envío"
+                    action={() => deleteAddress({ pk: address.pk })}
+                    callback={() => removeAddress(address.pk)}
+                  >
+                    <Button variant={'destructive'} className="cursor-pointer">
+                      <TrashIcon />
+                      <span>Eliminar</span>
+                    </Button>
+                  </DeleteDialog>
+                </>
+              )}
+            </div>
           </section>
           <ListAddresses />
         </>

@@ -103,8 +103,9 @@ function Update({ address }: Props) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size={'icon'} className="cursor-pointer text-blue-500">
+        <Button variant="outline" className="cursor-pointer text-blue-500">
           <EditIcon className="w-5 h-5" />
+          <span>Editar</span>
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -113,7 +114,11 @@ function Update({ address }: Props) {
           <DialogDescription>Estás a punto de actualizar esta dirección de envío</DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+          <form
+            className="space-y-4"
+            onSubmit={form.handleSubmit(onSubmit)}
+            id={`updateForm-${address.pk}`}
+          >
             <FormField
               control={form.control}
               name="alias"
@@ -317,6 +322,7 @@ function Update({ address }: Props) {
               <Button
                 type="submit"
                 disabled={isLoading || !form.formState.isValid}
+                form={`updateForm-${address.pk}`}
                 className={
                   isLoading || !form.formState.isValid ? 'cursor-not-allowed' : 'cursor-pointer'
                 }
