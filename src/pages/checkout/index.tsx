@@ -9,8 +9,7 @@ import { useCartStore } from '@/store/cart/useCartStore'
 import { Product } from '@/types/product'
 import {
   ArrowLeftIcon,
-  Building2,
-  CreditCard,
+  ChevronRightIcon,
   EllipsisIcon,
   Leaf,
   LockIcon,
@@ -32,9 +31,8 @@ import { Form } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CouponApplySchema } from '@/schemas/coupons'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Label } from '@/components/ui/label'
 import ShippingAddress from './shippingAddress'
+import { useShippingAddressStore } from '@/store/shippingAddresses/useAddressesStore'
 
 const TAX_VALUE = 0.12
 
@@ -56,11 +54,11 @@ function CheckOutPage() {
   const [couponCode, setCouponCode] = useState('')
   const [appliedCoupon, setAppliedCoupon] = useState(null)
   const [couponError, setCouponError] = useState('')
-  const [paymentMethod, setPaymentMethod] = useState('card')
 
   const cartItems = useCartStore((state) => state.items)
   const updateItem = useCartStore((state) => state.updateItem)
   const deleteItem = useCartStore((state) => state.deleteItem)
+  const selectedAddress = useShippingAddressStore((state) => state.selectedAddress)
 
   const orderNumber = useMemo(() => {
     return generateRandomHexString() + '-' + cartItems.length.toString()
@@ -261,61 +259,15 @@ function CheckOutPage() {
                 )}
               </CardContent>
             </Card>
-            {/* Payment Method */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-600 text-white text-sm font-bold">
-                    3
-                  </div>
-                  Método de pago
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
-                  <div className="flex items-center space-x-2 p-3 border rounded-md font-serif">
-                    <RadioGroupItem value="card" id="card" />
-                    <Label htmlFor="card" className="flex items-center gap-2 cursor-pointer flex-1">
-                      <CreditCard className="h-4 w-4" />
-                      Tarjeta de Débito/Crédito
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2 p-3 border rounded-md font-serif">
-                    <RadioGroupItem value="transfer" id="transfer" />
-                    <Label
-                      htmlFor="transfer"
-                      className="flex items-center gap-2 cursor-pointer flex-1"
-                    >
-                      <Building2 className="h-4 w-4" />
-                      Transferencia bancaria
-                    </Label>
-                  </div>
-                </RadioGroup>
-                {paymentMethod === 'transfer' && (
-                  <div className="p-4 border rounded-md bg-muted/50">
-                    <h4 className="font-medium mb-2">Bank Transfer Details</h4>
-                    <div className="space-y-2 text-sm font-serif">
-                      <p>
-                        <strong>Nombre de banco:</strong> AgriMarket Bank
-                      </p>
-                      <p>
-                        <strong>Nombre de la cuenta:</strong> AgriMarket LLC
-                      </p>
-                      <p>
-                        <strong>Número de cuenta:</strong> 1234567890
-                      </p>
-                      <p>
-                        <strong>RIF:</strong> 987654321
-                      </p>
-                      <p className="text-muted-foreground mt-3">
-                        Por favor incluye el número de tu órden en la referencia de la tranferencia.
-                        Tu orden será procesada una vez que el pago sea confirmado.
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <Button
+              disabled={cartItems.length === 0 || !selectedAddress}
+              className={`bg-blue-500 hover:bg-blue-600 text-white uppercase flex items-center gap-2 group py-6 justify-center w-full tracking-wider ${
+                cartItems.length === 0 || !selectedAddress ? 'cursor-not-allowed' : ''
+              }`}
+            >
+              <span>Generar orden</span>
+              <ChevronRightIcon className="transition-transform group-hover:translate-x-1" />
+            </Button>
           </div>
           <div className="lg:col-span-1">
             {invalidItems.length > 0 && (

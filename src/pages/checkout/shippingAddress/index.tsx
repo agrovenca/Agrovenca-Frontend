@@ -44,14 +44,6 @@ function ListAddresses() {
     },
   })
 
-  const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    setSelectedAddress(data.address)
-    form.reset({ address: data.address })
-    toast.success(
-      `Dirección de envío seleccionada: ${getAddressByPk(data.address)?.alias || 'Desconocida'}`
-    )
-  }
-
   const onReset = () => {
     setSelectedAddress(undefined)
     form.reset({ address: '' })
@@ -59,11 +51,7 @@ function ListAddresses() {
 
   return addresses.length && user ? (
     <Form {...form}>
-      <form
-        className="flex gap-2 justify-evenly"
-        onSubmit={form.handleSubmit(onSubmit)}
-        id="selectAddressForm"
-      >
+      <form className="flex gap-2 justify-evenly" id="selectAddressForm">
         <FormField
           control={form.control}
           name="address"
@@ -79,6 +67,7 @@ function ListAddresses() {
                   defaultValue={field.value}
                   onValueChange={(val) => {
                     setSelectedAddress(val)
+                    toast.success(`Dirección de envío seleccionada: ${getAddressByPk(val)?.alias}`)
                     field.onChange(val)
                   }}
                   className="flex gap-2 justify-evenly"
@@ -123,14 +112,6 @@ function ListAddresses() {
                     onClick={() => onReset()}
                   >
                     Limpiar selección
-                  </Button>
-                  <Button
-                    type="submit"
-                    form="selectAddressForm"
-                    className="flex-1 uppercase"
-                    disabled={!field.value}
-                  >
-                    Confirmar selección
                   </Button>
                 </div>
               )}
