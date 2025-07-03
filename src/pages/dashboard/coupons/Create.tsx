@@ -40,9 +40,9 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { Checkbox } from '@/components/ui/checkbox'
 import { cn } from '@/lib/utils'
 import { useCouponsStore } from '@/store/coupons/useCouponsStore'
+import { Checkbox } from '@/components/ui/checkbox'
 
 function CreateCoupon() {
   const [isLoading, setIsLoading] = useState(false)
@@ -64,6 +64,8 @@ function CreateCoupon() {
       active: true,
       type: CouponTypes.PERCENTAGE,
       usageLimit: 0,
+      minPurchase: undefined,
+      validCategories: [],
       expiresAt: undefined,
     },
   })
@@ -207,22 +209,6 @@ function CreateCoupon() {
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="active"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <FormControl>
-                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Estado</FormLabel>
-                    <FormDescription></FormDescription>
-                  </div>
-                </FormItem>
-              )}
-            />
-
             <div className="flex items-start gap-4 flex-col md:flex-row md:gap-0">
               <FormField
                 control={form.control}
@@ -282,6 +268,75 @@ function CreateCoupon() {
                     </Popover>
                     <FormDescription></FormDescription>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <h4 className="text-lg mb-0">Condiciones (opcionales)</h4>
+            <div className="p-4 rounded-lg border space-y-4">
+              <FormField
+                control={form.control}
+                name="minPurchase"
+                render={({ field }) => (
+                  <FormItem className="w-full flex-1">
+                    <FormLabel htmlFor="minPurchase">Monto mínimo</FormLabel>
+                    <FormControl>
+                      <Input
+                        id="minPurchase"
+                        type="number"
+                        className="w-full"
+                        placeholder="20, 40, 60..."
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      El monto mínimo que debe gastar un cliente para usar el cupón.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="validCategories"
+                render={({ field }) => (
+                  <FormItem className="w-full flex-1">
+                    <FormLabel>Categorías válidas</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className="w-full justify-start">
+                          {field.value && field.value.length > 0
+                            ? field.value.join(', ')
+                            : 'Selecciona categorías'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[200px]">
+                        <div className="flex flex-col gap-2">
+                          {['ropa', 'tecnologia', 'hogar', 'alimentos'].map((category) => (
+                            <div key={category} className="flex items-center gap-2">
+                              <Checkbox
+                                id={category}
+                                checked={field.value?.includes(category)}
+                                onCheckedChange={(checked) => {
+                                  const newValue = checked
+                                    ? [...(field.value || []), category]
+                                    : (field.value || []).filter((val) => val !== category)
+                                  field.onChange(newValue)
+                                }}
+                              />
+                              <label htmlFor={category} className="text-sm capitalize">
+                                {category}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                    <FormDescription>
+                      Selecciona las categorías donde el cupón será válido.
+                    </FormDescription>
                   </FormItem>
                 )}
               />

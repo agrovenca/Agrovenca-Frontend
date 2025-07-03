@@ -12,6 +12,8 @@ export interface CouponType {
   type: CouponTypes
   usageLimit?: number
   timesUsed: number
+  minPurchase?: number
+  validCategories?: string[]
   expiresAt?: string
   createdAt: string
   updatedAt: string

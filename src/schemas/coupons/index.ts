@@ -11,6 +11,11 @@ export const CouponCreateSchema = z.object({
   active: z.boolean(),
   type: z.nativeEnum(CouponTypes),
   usageLimit: z.coerce.number().gte(0, { message: 'No puede ser menor que 0' }).optional(),
+  minPurchase: z.coerce.number().gte(0, { message: 'No puede ser menor que 0' }).optional(),
+  validCategories: z
+    .array(z.string())
+    .max(10, { message: 'No pueden ser más de 10 categorías' })
+    .optional(),
   expiresAt: z.date().min(new Date(), { message: 'No puede ser menor a hoy' }).optional(),
 })
 
