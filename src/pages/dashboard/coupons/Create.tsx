@@ -24,7 +24,7 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import ErrorForm from '@/components/pages/ErrorForm'
 import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { CouponCreateSchema } from '@/schemas/coupons'
@@ -43,6 +43,8 @@ import {
 import { cn } from '@/lib/utils'
 import { useCouponsStore } from '@/store/coupons/useCouponsStore'
 import { Checkbox } from '@/components/ui/checkbox'
+import { useCategoriesStore } from '@/store/categories/useCategoriesStore'
+import { getAllCategories } from '@/actions/categories'
 
 function CreateCoupon() {
   const [isLoading, setIsLoading] = useState(false)
@@ -54,6 +56,9 @@ function CreateCoupon() {
   const setCoupons = useCouponsStore((state) => state.setCoupons)
   const errorStatus = useResponseStatusStore((state) => state.errorStatus)
   const setError = useResponseStatusStore((state) => state.setError)
+
+  const categories = useCategoriesStore((store) => store.categories)
+  const setCategories = useCategoriesStore((store) => store.setCategories)
 
   const form = useForm<z.infer<typeof CouponCreateSchema>>({
     resolver: zodResolver(CouponCreateSchema),
@@ -73,6 +78,7 @@ function CreateCoupon() {
   const onSubmit: SubmitHandler<z.infer<typeof CouponCreateSchema>> = async (data) => {
     setIsLoading(true)
     try {
+      console.log('Creating coupon with data:', data)
       const res = await create(data)
       if (res.error) {
         setError(res.error)
@@ -94,6 +100,32 @@ function CreateCoupon() {
       setIsLoading(false)
     }
   }
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      const res = await getAllCategories()
+      if (res.error) {
+        setError(res.error)
+        return
+      }
+      if (res.status === 200) {
+        setCategories(res.data)
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error)
+      setError('No se pudieron cargar las categorías. Por favor intenta de nuevo más tarde.')
+    }
+  }, [setCategories, setError])
+
+  useEffect(() => {
+    if (!categories || !categories.length) {
+      try {
+        fetchCategories()
+      } catch (error) {
+        console.error('Error fetching categories:', error)
+      }
+    }
+  }, [categories, fetchCategories])
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -262,7 +294,7 @@ function CreateCoupon() {
                           selected={field.value}
                           onSelect={field.onChange}
                           disabled={(date) => date < new Date()}
-                          initialFocus
+                          captionLayout={'dropdown'}
                         />
                       </PopoverContent>
                     </Popover>
@@ -307,26 +339,31 @@ function CreateCoupon() {
                       <PopoverTrigger asChild>
                         <Button variant="outline" className="w-full justify-start">
                           {field.value && field.value.length > 0
-                            ? field.value.join(', ')
+                            ? field.value
+                                .map((id) => {
+                                  const category = categories.find((cat) => cat.id === id)
+                                  return category ? category.name : ''
+                                })
+                                .join(', ')
                             : 'Selecciona categorías'}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-[200px]">
                         <div className="flex flex-col gap-2">
-                          {['ropa', 'tecnologia', 'hogar', 'alimentos'].map((category) => (
-                            <div key={category} className="flex items-center gap-2">
+                          {categories.map((category) => (
+                            <div key={category.id} className="flex items-center gap-2">
                               <Checkbox
-                                id={category}
-                                checked={field.value?.includes(category)}
+                                id={category.id}
+                                checked={field.value?.includes(category.id)}
                                 onCheckedChange={(checked) => {
                                   const newValue = checked
-                                    ? [...(field.value || []), category]
-                                    : (field.value || []).filter((val) => val !== category)
+                                    ? [...(field.value || []), category.id]
+                                    : (field.value || []).filter((val) => val !== category.id)
                                   field.onChange(newValue)
                                 }}
                               />
-                              <label htmlFor={category} className="text-sm capitalize">
-                                {category}
+                              <label htmlFor={category.id} className="text-sm capitalize">
+                                {category.name}
                               </label>
                             </div>
                           ))}

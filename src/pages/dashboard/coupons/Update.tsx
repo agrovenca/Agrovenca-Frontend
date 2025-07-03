@@ -35,7 +35,7 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import ErrorForm from '@/components/pages/ErrorForm'
 import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { CouponUpdateSchema } from '@/schemas/coupons'
@@ -43,6 +43,8 @@ import { CouponType } from '@/types/coupon'
 import { Loader } from '@/components/ui/loader'
 import { update } from '@/actions/coupons'
 import { useCouponsStore } from '@/store/coupons/useCouponsStore'
+import { useCategoriesStore } from '@/store/categories/useCategoriesStore'
+import { getAllCategories } from '@/actions/categories'
 
 type Props = {
   coupon: CouponType
@@ -56,6 +58,8 @@ function UpdateCoupon({ coupon }: Props) {
   const updateCoupon = useCouponsStore((state) => state.updateCoupon)
   const errorStatus = useResponseStatusStore((state) => state.errorStatus)
   const setError = useResponseStatusStore((state) => state.setError)
+  const categories = useCategoriesStore((store) => store.categories)
+  const setCategories = useCategoriesStore((store) => store.setCategories)
 
   const form = useForm<z.infer<typeof CouponUpdateSchema>>({
     resolver: zodResolver(CouponUpdateSchema),
@@ -90,6 +94,32 @@ function UpdateCoupon({ coupon }: Props) {
       setIsLoading(false)
     }
   }
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      const res = await getAllCategories()
+      if (res.error) {
+        setError(res.error)
+        return
+      }
+      if (res.status === 200) {
+        setCategories(res.data)
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error)
+      setError('No se pudieron cargar las categorías. Por favor intenta de nuevo más tarde.')
+    }
+  }, [setCategories, setError])
+
+  useEffect(() => {
+    if (!categories || !categories.length) {
+      try {
+        fetchCategories()
+      } catch (error) {
+        console.error('Error fetching categories:', error)
+      }
+    }
+  }, [categories, fetchCategories])
 
   useEffect(() => {
     const { description, expiresAt } = coupon
@@ -267,6 +297,80 @@ function UpdateCoupon({ coupon }: Props) {
                     </Popover>
                     <FormDescription></FormDescription>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <h4 className="text-lg mb-0">Condiciones (opcionales)</h4>
+            <div className="p-4 rounded-lg border space-y-4">
+              <FormField
+                control={form.control}
+                name="minPurchase"
+                render={({ field }) => (
+                  <FormItem className="w-full flex-1">
+                    <FormLabel htmlFor="minPurchase">Monto mínimo</FormLabel>
+                    <FormControl>
+                      <Input
+                        id="minPurchase"
+                        type="number"
+                        className="w-full"
+                        placeholder="20, 40, 60..."
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      El monto mínimo que debe gastar un cliente para usar el cupón.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="validCategories"
+                render={({ field }) => (
+                  <FormItem className="w-full flex-1">
+                    <FormLabel>Categorías válidas</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className="w-full justify-start">
+                          {field.value && field.value.length > 0
+                            ? field.value
+                                .map((id) => {
+                                  const category = categories.find((cat) => cat.id === id)
+                                  return category ? category.name : ''
+                                })
+                                .join(', ')
+                            : 'Selecciona categorías'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[200px]">
+                        <div className="flex flex-col gap-2">
+                          {categories.map((category) => (
+                            <div key={category.id} className="flex items-center gap-2">
+                              <Checkbox
+                                id={category.id}
+                                checked={field.value?.includes(category.id)}
+                                onCheckedChange={(checked) => {
+                                  const newValue = checked
+                                    ? [...(field.value || []), category.id]
+                                    : (field.value || []).filter((val) => val !== category.id)
+                                  field.onChange(newValue)
+                                }}
+                              />
+                              <label htmlFor={category.id} className="text-sm capitalize">
+                                {category.name}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                    <FormDescription>
+                      Selecciona las categorías donde el cupón será válido.
+                    </FormDescription>
                   </FormItem>
                 )}
               />
