@@ -18,3 +18,15 @@ export interface CouponType {
   createdAt: string
   updatedAt: string
 }
+
+export interface CouponApplyRequest {
+  couponCode: string
+  orderNumber: string
+  products: {
+    id: string
+    quantity: number
+    price: number
+    categoryId: string
+  }[]
+  subtotal: number
+}

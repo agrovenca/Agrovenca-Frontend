@@ -27,12 +27,22 @@ import { generateRandomHexString, pluralize } from '@/lib/utils'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Form } from '@/components/ui/form'
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormMessage,
+} from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CouponApplySchema } from '@/schemas/coupons'
 import ShippingAddress from './shippingAddress'
 import { useShippingAddressStore } from '@/store/shippingAddresses/useAddressesStore'
+import { getCoupon } from '@/actions/coupons'
+import { CouponType } from '@/types/coupon'
+import { toast } from 'sonner'
 
 const TAX_VALUE = 0.12
 
@@ -49,10 +59,9 @@ interface InvalidCartItem {
 
 function CheckOutPage() {
   const navigate = useNavigate()
-  const [isLoading, _setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [invalidItems, setInvalidItems] = useState<InvalidCartItem[]>([])
-  const [couponCode, setCouponCode] = useState('')
-  const [appliedCoupon, setAppliedCoupon] = useState(null)
+  const [appliedCoupon, setAppliedCoupon] = useState<CouponType | null>(null)
   const [couponError, setCouponError] = useState('')
 
   const cartItems = useCartStore((state) => state.items)
@@ -80,17 +89,72 @@ function CheckOutPage() {
     },
   })
 
-  const onSubmitCoupon: SubmitHandler<z.infer<typeof CouponApplySchema>> = (data) => {}
-
-  const applyCoupon = () => {
+  const validateCoupon = async ({ coupon }: { coupon: CouponType }) => {
     setCouponError('')
+
+    if (coupon.validCategories?.length) {
+      const validCategories = coupon.validCategories
+      const hasInvalidCategory = cartItems.some(
+        (item) => !validCategories.includes(item.product.categoryId)
+      )
+      if (hasInvalidCategory) {
+        setCouponError('El cupón no es válido para algunos productos en tu carrito.')
+        return false
+      }
+    }
+    if (coupon.minPurchase && subtotal < coupon.minPurchase) {
+      setCouponError(
+        `El cupón requiere una compra mínima de $${coupon.minPurchase.toFixed(
+          2
+        )} y tu subtotal es $${subtotal.toFixed(2)}.`
+      )
+      return false
+    }
+
+    return true
   }
 
-  const removeCoupon = () => {
-    setAppliedCoupon(null)
-    setCouponCode('')
-    setCouponError('')
+  const onSubmitCoupon: SubmitHandler<z.infer<typeof CouponApplySchema>> = async (data) => {
+    setIsLoading(true)
+    try {
+      // const toSend = {
+      //   products: cartItems.map((item) => ({
+      //     id: item.productId,
+      //     quantity: item.quantity,
+      //     price: getProductPrice(item.product),
+      //     categoryId: item.product.categoryId,
+      //   })),
+      //   subtotal: Number(subtotal.toFixed(2)),
+      //   couponCode: data.code,
+      //   orderNumber: orderNumber,
+      // }
+
+      const res = await getCoupon(data.code)
+      if (res.status !== 200) {
+        setCouponError(res.error || 'Error applying coupon')
+        return
+      }
+      const { coupon, message } = await res.data
+      const isValid = await validateCoupon({ coupon })
+
+      if (isValid) {
+        setAppliedCoupon(coupon)
+        toast.success(message)
+      }
+    } catch (error) {
+      console.error('Error applying coupon:', error)
+      setCouponError('Error applying coupon. Please try again later.')
+    } finally {
+      couponForm.reset({ code: '' })
+      setIsLoading(false)
+    }
   }
+
+  const removeCoupon = () => {}
+
+  // const applyCoupon = () => {
+  //   setCouponError('')
+  // }
 
   useEffect(() => {
     if (!cartItems) {
@@ -207,12 +271,16 @@ function CheckOutPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {appliedCoupon ? (
-                  <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-md">
+                  <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-md dark:bg-black dark:border-green-600">
                     <div className="flex items-center gap-2">
                       <Tag className="h-4 w-4 text-green-600" />
                       <div>
-                        <p className="font-medium text-green-800">code</p>
-                        <p className="text-sm text-green-600">description</p>
+                        <p className="font-medium text-green-800 dark:text-green-500">
+                          {appliedCoupon.code}
+                        </p>
+                        <p className="text-sm text-green-600 dark:text-green-400">
+                          {appliedCoupon.description}
+                        </p>
                       </div>
                     </div>
                     <Button
@@ -227,21 +295,34 @@ function CheckOutPage() {
                   </div>
                 ) : (
                   <Form {...couponForm}>
-                    <form className="space-y-3">
-                      <div className="flex gap-2">
-                        <Input
-                          placeholder="Ingresa un código de cupón"
-                          value={couponCode}
-                          onChange={(e) => setCouponCode(e.target.value)}
-                          className="flex-1 font-serif"
-                        />
+                    <form className="space-y-3" onSubmit={couponForm.handleSubmit(onSubmitCoupon)}>
+                      <div className="flex gap-2 items-start">
+                        <div className="flex-1">
+                          <FormField
+                            control={couponForm.control}
+                            name="code"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Input placeholder="Ingresa un código de cupón" {...field} />
+                                </FormControl>
+                                <FormDescription>
+                                  Ingresa el código de cupón para aplicar un descuento a tu orden.
+                                </FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
                         <Button
                           type="submit"
                           variant="outline"
-                          onClick={applyCoupon}
-                          disabled={!couponCode.trim()}
+                          disabled={
+                            !couponForm.formState.isValid || couponForm.formState.isSubmitting
+                          }
                           className={
-                            'font-serif' + !couponCode.trim()
+                            'font-serif' +
+                            (couponForm.formState.isValid && !couponForm.formState.isSubmitting)
                               ? 'cursor-pointer'
                               : 'cursor-not-allowed'
                           }

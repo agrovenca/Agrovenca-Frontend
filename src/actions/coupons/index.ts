@@ -1,11 +1,24 @@
 import { apiWithCredentials, apiWithOutCredentials } from '@/actions/api'
 import { CouponCreateSchema, CouponUpdateSchema } from '@/schemas/coupons'
+import { CouponApplyRequest } from '@/types/coupon'
 import axios from 'axios'
 import { z } from 'zod'
 
 export const getAll = async () => {
   try {
     const res = await apiWithOutCredentials.get(`/coupons`, {})
+    return res
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      return error.response?.data || { error: 'An unknown error occurred' }
+    }
+    return { error: 'An unknown error occurred' }
+  }
+}
+
+export const getCoupon = async (couponCode: string) => {
+  try {
+    const res = await apiWithCredentials.get(`/coupons/${couponCode}`, {})
     return res
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -42,6 +55,18 @@ export const update = async (id: string, data: z.infer<typeof CouponUpdateSchema
 export const destroy = async (id: string) => {
   try {
     const res = await apiWithCredentials.delete(`/coupons/${id}`, {})
+    return res
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      return error.response?.data || { error: 'An unknown error occurred' }
+    }
+    return { error: 'An unknown error occurred' }
+  }
+}
+
+export const applyCoupon = async (data: CouponApplyRequest) => {
+  try {
+    const res = await apiWithCredentials.post(`/coupons/apply/`, data)
     return res
   } catch (error) {
     if (axios.isAxiosError(error)) {
