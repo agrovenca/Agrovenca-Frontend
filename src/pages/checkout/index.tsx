@@ -1,6 +1,5 @@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Badge } from '@/components/ui/badge'
-import { Loader } from '@/components/ui/loader'
 import { ModeToggle } from '@/components/mode-toggle'
 import { Separator } from '@/components/ui/separator'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -41,8 +40,9 @@ import { CouponApplySchema } from '@/schemas/coupons'
 import ShippingAddress from './shippingAddress'
 import { useShippingAddressStore } from '@/store/shippingAddresses/useAddressesStore'
 import { getCoupon } from '@/actions/coupons'
-import { CouponType } from '@/types/coupon'
+import { CouponType, CouponTypes } from '@/types/coupon'
 import { toast } from 'sonner'
+import { useAppliedCouponStore } from '@/store/coupons/useCouponsStore'
 
 const TAX_VALUE = 0.12
 
@@ -61,8 +61,10 @@ function CheckOutPage() {
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
   const [invalidItems, setInvalidItems] = useState<InvalidCartItem[]>([])
-  const [appliedCoupon, setAppliedCoupon] = useState<CouponType | null>(null)
   const [couponError, setCouponError] = useState('')
+  const appliedCoupon = useAppliedCouponStore((state) => state.coupon)
+  const setAppliedCoupon = useAppliedCouponStore((state) => state.setCoupon)
+  const removeAppliedCoupon = useAppliedCouponStore((state) => state.removeCoupon)
 
   const cartItems = useCartStore((state) => state.items)
   const updateItem = useCartStore((state) => state.updateItem)
@@ -76,11 +78,6 @@ function CheckOutPage() {
   const getProductPrice = (product: Product) =>
     product.secondPrice && product.secondPrice != 0 ? product.secondPrice : product.price
   const productImage = (product: Product) => product.images[0]?.s3Key || ProductImagePlaceholder
-  const subtotal = cartItems
-    .map((i) => getProductPrice(i.product) * i.quantity)
-    .reduce((acc, price) => acc + price, 0)
-  const tax = subtotal * TAX_VALUE
-  const total = subtotal + tax
 
   const couponForm = useForm<z.infer<typeof CouponApplySchema>>({
     resolver: zodResolver(CouponApplySchema),
@@ -88,6 +85,39 @@ function CheckOutPage() {
       code: '',
     },
   })
+
+  const subtotal = cartItems
+    .map((i) => getProductPrice(i.product) * i.quantity)
+    .reduce((acc, price) => acc + price, 0)
+
+  const getCouponDiscount = (coupon: CouponType) => {
+    if (coupon.type === CouponTypes.PERCENTAGE) {
+      return subtotal * (coupon.discount / 100)
+    }
+    return coupon.discount || 0
+  }
+
+  const getDiscountType = (coupon: CouponType) => {
+    if (coupon.type === CouponTypes.PERCENTAGE) {
+      return `${coupon.discount}%`
+    }
+    return `$${coupon.discount.toFixed(2)}`
+  }
+
+  const getSubtotal = () => {
+    return subtotal - (appliedCoupon ? getCouponDiscount(appliedCoupon) : 0)
+  }
+
+  const getTax = () => {
+    const subtotal = getSubtotal()
+    return subtotal * TAX_VALUE
+  }
+
+  const getTotal = () => {
+    const subtotal = getSubtotal()
+    const tax = getTax()
+    return subtotal + tax
+  }
 
   const validateCoupon = async ({ coupon }: { coupon: CouponType }) => {
     setCouponError('')
@@ -102,11 +132,11 @@ function CheckOutPage() {
         return false
       }
     }
-    if (coupon.minPurchase && subtotal < coupon.minPurchase) {
+    if (coupon.minPurchase && getSubtotal() < coupon.minPurchase) {
       setCouponError(
         `El cupón requiere una compra mínima de $${coupon.minPurchase.toFixed(
           2
-        )} y tu subtotal es $${subtotal.toFixed(2)}.`
+        )} y tu subtotal es $${getSubtotal().toFixed(2)}.`
       )
       return false
     }
@@ -117,18 +147,6 @@ function CheckOutPage() {
   const onSubmitCoupon: SubmitHandler<z.infer<typeof CouponApplySchema>> = async (data) => {
     setIsLoading(true)
     try {
-      // const toSend = {
-      //   products: cartItems.map((item) => ({
-      //     id: item.productId,
-      //     quantity: item.quantity,
-      //     price: getProductPrice(item.product),
-      //     categoryId: item.product.categoryId,
-      //   })),
-      //   subtotal: Number(subtotal.toFixed(2)),
-      //   couponCode: data.code,
-      //   orderNumber: orderNumber,
-      // }
-
       const res = await getCoupon(data.code)
       if (res.status !== 200) {
         setCouponError(res.error || 'Error applying coupon')
@@ -150,11 +168,29 @@ function CheckOutPage() {
     }
   }
 
-  const removeCoupon = () => {}
+  const removeCoupon = () => {
+    removeAppliedCoupon()
+    setCouponError('')
+    toast.success('Cupón eliminado exitosamente.')
+  }
 
-  // const applyCoupon = () => {
-  //   setCouponError('')
-  // }
+  async function generateOrder() {
+    const orderData = {
+      orderNumber: orderNumber,
+      couponCode: appliedCoupon?.code,
+      shippingAddressId: selectedAddress,
+      products: cartItems.map((item) => ({
+        id: item.productId,
+        quantity: item.quantity,
+        price: getProductPrice(item.product),
+        categoryId: item.product.categoryId,
+      })),
+      subtotal: Number(getSubtotal().toFixed(2)),
+      discount: appliedCoupon ? getCouponDiscount(appliedCoupon) : 0,
+      tax: Number(getTax().toFixed(2)),
+      total: Number(getTotal().toFixed(2)),
+    }
+  }
 
   useEffect(() => {
     if (!cartItems) {
@@ -209,14 +245,6 @@ function CheckOutPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full w-full gap-2">
-        <Loader size="md" />
-        <span>Cargando...</span>
-      </div>
-    )
-  }
   return (
     <div>
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -288,9 +316,10 @@ function CheckOutPage() {
                       type="button"
                       variant="ghost"
                       onClick={removeCoupon}
-                      className="text-green-600 hover:text-green-700"
+                      disabled={isLoading}
+                      className="text-green-600 hover:text-green-700 font-serif"
                     >
-                      Remove
+                      Remover
                     </Button>
                   </div>
                 ) : (
@@ -431,35 +460,24 @@ function CheckOutPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span className="font-serif">${subtotal.toFixed(2)}</span>
+                    <span className="font-serif">${getSubtotal().toFixed(2)}</span>
                   </div>
-                  {/* <div className="flex justify-between">
-                    <span>Shipping</span>
-                    <span>{shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}</span>
-                  </div> */}
+                  {appliedCoupon && (
+                    <div className="flex justify-between text-green-600">
+                      <span>Descuento (-{getDiscountType(appliedCoupon)})</span>
+                      <span>-${getCouponDiscount(appliedCoupon).toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span>Impuesto ({TAX_VALUE * 100}%)</span>
-                    <span className="font-serif">${tax.toFixed(2)}</span>
+                    <span className="font-serif">${getTax().toFixed(2)}</span>
                   </div>
-                  {/* {appliedCoupon && (
-                    <div className="flex justify-between text-green-600">
-                      <span>Discount ({appliedCoupon.code})</span>
-                      <span>-${discount.toFixed(2)}</span>
-                    </div>
-                  )} */}
                   <Separator />
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total</span>
-                    <span className="font-serif">${total.toFixed(2)}</span>
+                    <span className="font-serif">${getTotal().toFixed(2)}</span>
                   </div>
                 </div>
-
-                {/* {shipping === 0 && (
-                  <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 p-2 rounded-md">
-                    <Check className="h-4 w-4" />
-                    <span>Free shipping on orders over $25!</span>
-                  </div>
-                )} */}
               </CardContent>
             </Card>
           </div>
