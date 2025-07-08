@@ -14,3 +14,15 @@ export const createOrder = async (data: z.infer<typeof OrderCreateSchema>) => {
     return { error: 'An unknown error occurred' }
   }
 }
+
+export const getOrders = async () => {
+  try {
+    const res = await apiWithCredentials.get(`/orders`, {})
+    return res
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      return error.response?.data || { error: 'An unknown error occurred' }
+    }
+    return { error: 'An unknown error occurred' }
+  }
+}
