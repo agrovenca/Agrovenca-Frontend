@@ -19,6 +19,7 @@ import ResetPasswordConfirmPage from './pages/auth/ResetPasswordConfirm'
 import ProductsPage from './pages/products'
 import ProductDetail from './pages/products/Detail'
 import CheckOutPage from './pages/checkout'
+import OrdersPage from './pages/orders'
 
 export const Router = createBrowserRouter([
   {
@@ -53,6 +54,10 @@ export const Router = createBrowserRouter([
       {
         path: '/terms-and-conditions',
         element: <div>Terms and Conditions</div>,
+      },
+      {
+        path: '/orders',
+        element: <OrdersPage />,
       },
       {
         path: '/auth',

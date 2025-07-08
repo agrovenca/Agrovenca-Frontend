@@ -22,7 +22,7 @@ import { validateCart } from '@/actions/products'
 import { CartItem } from '@/types/cart'
 import UpdateCartItem from '../products/UpdateCartItem'
 import { Button } from '@/components/ui/button'
-import { generateRandomHexString, pluralize } from '@/lib/utils'
+import { pluralize } from '@/lib/utils'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -43,6 +43,7 @@ import { getCoupon } from '@/actions/coupons'
 import { CouponType, CouponTypes } from '@/types/coupon'
 import { toast } from 'sonner'
 import { useAppliedCouponStore } from '@/store/coupons/useCouponsStore'
+import { createOrder } from '@/actions/orders'
 
 const TAX_VALUE = 0.12
 
@@ -57,6 +58,21 @@ interface InvalidCartItem {
   reason: string
 }
 
+const generateNewOrderId = () => {
+  // Year - Month - Day - Hour - Minute - Second - Milliseconds + Cart Item Count
+  const prefix = 'ORD-'
+  const now = new Date()
+  const year = now.getFullYear().toString()
+  const month = (now.getMonth() + 1).toString().padStart(2, '0')
+  const day = now.getDate().toString().padStart(2, '0')
+  const hour = now.getHours().toString().padStart(2, '0')
+  const minute = now.getMinutes().toString().padStart(2, '0')
+  const second = now.getSeconds().toString().padStart(2, '0')
+  const milliseconds = now.getMilliseconds().toString().padStart(3, '0')
+
+  return `${prefix}${year}${month}${day}${hour}${minute}${second}${milliseconds}`
+}
+
 function CheckOutPage() {
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
@@ -69,10 +85,12 @@ function CheckOutPage() {
   const cartItems = useCartStore((state) => state.items)
   const updateItem = useCartStore((state) => state.updateItem)
   const deleteItem = useCartStore((state) => state.deleteItem)
+  const clearCart = useCartStore((state) => state.clearCart)
   const selectedAddress = useShippingAddressStore((state) => state.selectedAddress)
+  const setSelectedAddress = useShippingAddressStore((state) => state.setSelectedAddress)
 
   const orderNumber = useMemo(() => {
-    return generateRandomHexString() + '-' + cartItems.length.toString()
+    return generateNewOrderId() + cartItems.length.toString().padStart(3, '0')
   }, [cartItems.length])
 
   const getProductPrice = (product: Product) =>
@@ -175,20 +193,42 @@ function CheckOutPage() {
   }
 
   async function generateOrder() {
+    if (!selectedAddress) {
+      toast.error('Por favor, selecciona una dirección de envío.')
+      return
+    }
     const orderData = {
-      orderNumber: orderNumber,
-      couponCode: appliedCoupon?.code,
+      id: orderNumber,
+      couponId: appliedCoupon?.id,
       shippingAddressId: selectedAddress,
       products: cartItems.map((item) => ({
         id: item.productId,
         quantity: item.quantity,
-        price: getProductPrice(item.product),
+        price: Number(getProductPrice(item.product)),
         categoryId: item.product.categoryId,
       })),
       subtotal: Number(getSubtotal().toFixed(2)),
       discount: appliedCoupon ? getCouponDiscount(appliedCoupon) : 0,
       tax: Number(getTax().toFixed(2)),
       total: Number(getTotal().toFixed(2)),
+    }
+
+    try {
+      const res = await createOrder(orderData)
+      if (res.status !== 201) {
+        toast.error(res.error || 'Error generating order')
+        return
+      }
+      const { message } = res.data
+      toast.success(message)
+      clearCart()
+      setSelectedAddress('')
+      removeAppliedCoupon()
+      navigate(`/orders/`)
+      return
+    } catch (error) {
+      console.error('Error generating order:', error)
+      toast.error('Error generating order. Please try again later.')
     }
   }
 
@@ -370,9 +410,13 @@ function CheckOutPage() {
               </CardContent>
             </Card>
             <Button
-              disabled={cartItems.length === 0 || !selectedAddress}
+              type="button"
+              onClick={generateOrder}
+              disabled={cartItems.length === 0 || !selectedAddress || isLoading}
               className={`bg-blue-500 hover:bg-blue-600 text-white uppercase flex items-center gap-2 group py-6 justify-center w-full tracking-wider ${
-                cartItems.length === 0 || !selectedAddress ? 'cursor-not-allowed' : ''
+                cartItems.length === 0 || !selectedAddress || isLoading
+                  ? 'cursor-not-allowed'
+                  : 'cursor-pointer'
               }`}
             >
               <span>Generar orden</span>

@@ -24,7 +24,7 @@ const navItems = [
   },
   {
     name: 'Ordenes',
-    link: '',
+    link: '/orders',
     icon: <LayersIcon />,
   },
 ]
