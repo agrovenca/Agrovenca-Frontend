@@ -35,6 +35,7 @@ import { ProductCard } from '.'
 import { useProductsStore } from '@/store/products/useProductsStore'
 import { useAuthStore } from '@/store/auth/useAuthStore'
 import { useSavedStore } from '@/store/products/useSavedStore'
+import Footer from '@/components/pages/Footer'
 
 function ProductDetail() {
   const navigate = useNavigate()
@@ -49,7 +50,6 @@ function ProductDetail() {
 
   const user = useAuthStore((state) => state.user)
   const setUserId = useProductsStore((state) => state.setUserId)
-  const products = useProductsStore((state) => state.products)
   const filteredProducts = recommended.filter((p) => p.id !== product?.id)
   const addItem = useCartStore((state) => state.addItem)
   const deleteItem = useCartStore((state) => state.deleteItem)
@@ -58,8 +58,8 @@ function ProductDetail() {
   const isProductSaved = useSavedStore((state) =>
     state.products.some((p) => p.id === product?.id || '')
   )
+  const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
 
-  const productId = products.find((p) => p.slug === slug)?.id
   const productStock = product?.stock ?? 0
   const inStock = productStock > 0
   const productPrice = Number(product?.price)
@@ -73,10 +73,10 @@ function ProductDetail() {
   const parsed = parseFormattedText(product?.description)
 
   const fetchProduct = useCallback(
-    async (id: string) => {
+    async (slug: string) => {
       setIsLoading(true)
       try {
-        const res = await getProduct({ productId: id })
+        const res = await getProduct({ slug })
         if (res.status === 404) {
           toast.error(res.error)
           navigate('/products')
@@ -91,6 +91,20 @@ function ProductDetail() {
     },
     [navigate]
   )
+
+  const fetchRecommended = useCallback(async () => {
+    if (!product?.categoryId) return
+
+    setIsLoading(true)
+    try {
+      const res = await getProducts({ categoriesIds: [product.categoryId], limit: 9 })
+      setRecommended(res.data.objects)
+    } catch (error) {
+      console.error('Error al obtener productos recomendados', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [product])
 
   const handleQuantityChange = (change: number) => {
     setQuantity(Math.max(1, Math.min(productStock, quantity + change)))
@@ -123,16 +137,6 @@ function ProductDetail() {
   }
 
   useEffect(() => {
-    if (!slug?.trim()) {
-      navigate('/products')
-    }
-  }, [slug, navigate])
-
-  useEffect(() => {
-    fetchProduct(productId || '')
-  }, [slug, fetchProduct, productId])
-
-  useEffect(() => {
     if (!api) {
       return
     }
@@ -150,19 +154,19 @@ function ProductDetail() {
   }, [setUserId, user])
 
   useEffect(() => {
-    if (!product) return
-
-    const fetchRecommended = async () => {
-      try {
-        const res = await getProducts({ categoriesIds: [product.categoryId], limit: 9 })
-        setRecommended(res.data.objects)
-      } catch (error) {
-        console.error('Error al obtener productos recomendados', error)
-      }
+    if (!slug?.trim()) {
+      navigate('/products')
+      return
     }
+    fetchProduct(slug.trim())
+  }, [slug, navigate, fetchProduct])
 
-    fetchRecommended()
-  }, [product])
+  // Carga los recomendados una vez que `product` ya fue cargado
+  useEffect(() => {
+    if (product) {
+      fetchRecommended()
+    }
+  }, [product, fetchRecommended])
 
   if (isLoading || !product) {
     return (
@@ -197,7 +201,7 @@ function ProductDetail() {
                         <figure className="w-full h-full overflow-hidden rounded-md">
                           <img
                             loading="lazy"
-                            src={image.s3Key}
+                            src={spaceBaseUrl + image.s3Key}
                             className="w-full h-full object-cover aspect-video"
                             alt={`Imagen número ${image.displayOrder} del producto`}
                           />
@@ -413,6 +417,7 @@ function ProductDetail() {
           </section>
         )}
       </div>
+      <Footer />
     </div>
   )
 }

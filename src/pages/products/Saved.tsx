@@ -13,6 +13,7 @@ import { HeartIcon, TrashIcon } from 'lucide-react'
 import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
 import { Link } from 'react-router'
 import { useSavedStore } from '@/store/products/useSavedStore'
+import { productImage } from '@/lib/utils'
 
 function SavedProductsPage() {
   const products = useSavedStore((state) => state.products)
@@ -21,7 +22,6 @@ function SavedProductsPage() {
 
   const getProductPrice = (product: Product) =>
     product.secondPrice ? product.secondPrice : product.price
-  const productImage = (product: Product) => product.images[0]?.s3Key || ProductImagePlaceholder
 
   return (
     <Sheet>
@@ -52,11 +52,11 @@ function SavedProductsPage() {
                     <figure className="w-12 h-12 overflow-hidden rounded-md">
                       <img
                         style={{
-                          viewTransitionName: `ProductImage-${productImage(product)}`,
+                          viewTransitionName: `ProductImage-${productImage(product.images)}`,
                         }}
                         loading="lazy"
                         alt="Imagen del producto"
-                        src={productImage(product)}
+                        src={productImage(product.images)}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           e.currentTarget.onerror = null

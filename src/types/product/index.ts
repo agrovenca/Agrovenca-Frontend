@@ -10,6 +10,7 @@ export interface ProductResponse {
   hasPreviousPage: boolean
   nextPage: number | null
   previousPage: number | null
+  spaceBaseUrl: string
 }
 
 export interface Product {

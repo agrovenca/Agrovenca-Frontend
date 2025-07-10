@@ -15,6 +15,7 @@ import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png
 import UpdateCartItem from '../products/UpdateCartItem'
 import { Link } from 'react-router'
 import { useAuthStore } from '@/store/auth/useAuthStore'
+import { productImage } from '@/lib/utils'
 
 function CartPage() {
   const user = useAuthStore((state) => state.user)
@@ -24,7 +25,6 @@ function CartPage() {
 
   const getProductPrice = (product: Product) =>
     product.secondPrice && product.secondPrice != 0 ? product.secondPrice : product.price
-  const productImage = (product: Product) => product.images[0]?.s3Key || ProductImagePlaceholder
   const totalPrice = items
     .map((i) => getProductPrice(i.product) * i.quantity)
     .reduce((acc, price) => acc + price, 0)
@@ -53,11 +53,11 @@ function CartPage() {
                     <figure className="w-12 h-12 overflow-hidden rounded-md">
                       <img
                         style={{
-                          viewTransitionName: `ProductImage-${productImage(item.product)}`,
+                          viewTransitionName: `ProductImage-${productImage(item.product.images)}`,
                         }}
                         loading="lazy"
                         alt="Imagen del producto"
-                        src={productImage(item.product)}
+                        src={productImage(item.product.images)}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           e.currentTarget.onerror = null

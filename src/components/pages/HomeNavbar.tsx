@@ -58,6 +58,13 @@ function Navbar() {
           ))}
         </nav>
         <div className="flex items-center gap-4">
+          <div className="flex gap-2">
+            <CartPage />
+            <SavedProductsPage />
+          </div>
+          <div className="hidden md:block">
+            <ModeToggle />
+          </div>
           {!user ? (
             <Button
               asChild
@@ -77,13 +84,6 @@ function Navbar() {
           ) : (
             <UserMenu user={user} />
           )}
-          <div className="flex gap-2">
-            <CartPage />
-            <SavedProductsPage />
-          </div>
-          <div className="hidden md:block">
-            <ModeToggle />
-          </div>
           <div className="md:hidden">
             <Sheet>
               <SheetTrigger asChild>

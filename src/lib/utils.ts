@@ -1,6 +1,10 @@
 import { User } from '@/types/auth/user'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
+import { ProductImage } from '@/types/product/images'
+
+const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -134,3 +138,6 @@ export function generateRandomHexString(length = 6) {
     .join('')
     .toUpperCase()
 }
+
+export const productImage = (productImage: ProductImage[]) =>
+  productImage.length ? spaceBaseUrl + productImage[0].s3Key : ProductImagePlaceholder

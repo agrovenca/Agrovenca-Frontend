@@ -28,9 +28,9 @@ export const getProducts = async (
   }
 }
 
-export const getProduct = async ({ productId }: { productId: string }) => {
+export const getProduct = async ({ slug }: { slug: string }) => {
   try {
-    const res = await apiWithOutCredentials.get(`/products/${productId}`)
+    const res = await apiWithOutCredentials.get(`/products/${slug}`)
     return res
   } catch (error) {
     if (axios.isAxiosError(error)) {

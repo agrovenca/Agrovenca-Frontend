@@ -21,6 +21,9 @@ import { Link } from 'react-router'
 import { useAuthStore } from '@/store/auth/useAuthStore'
 import { useSavedStore } from '@/store/products/useSavedStore'
 import { toast } from 'sonner'
+import Footer from '@/components/pages/Footer'
+
+const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
 
 export const ProductCard = memo(function ProductCard({ product }: { product: Product }) {
   const inStock = product.stock > 0
@@ -63,7 +66,11 @@ export const ProductCard = memo(function ProductCard({ product }: { product: Pro
                 }}
                 loading="lazy"
                 alt={product.name}
-                src={product.images.length > 0 ? firstProductImage : ProductImagePlaceholder}
+                src={
+                  product.images.length > 0
+                    ? spaceBaseUrl + firstProductImage
+                    : ProductImagePlaceholder
+                }
                 className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
             </figure>
@@ -186,7 +193,11 @@ const ProductListItem = memo(function ProductListItem({ product }: { product: Pr
                 loading="lazy"
                 alt={product.name}
                 className="w-full h-full object-cover"
-                src={firstProductImage ?? ProductImagePlaceholder}
+                src={
+                  product.images.length > 0
+                    ? spaceBaseUrl + firstProductImage
+                    : ProductImagePlaceholder
+                }
               />
               {!inStock && (
                 <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
@@ -406,6 +417,7 @@ function ProductsPage() {
           </main>
         </div>
       </section>
+      <Footer />
     </div>
   )
 }
