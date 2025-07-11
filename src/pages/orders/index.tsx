@@ -71,7 +71,7 @@ function OrdersPage() {
             <span>Cargando...</span>
           </div>
         ) : orders.length ? (
-          <>
+          <div className="space-y-4">
             {orders.map((order) => {
               const isExpanded = expandedOrders.includes(order.id)
               const OrderIcon = orderStatusConfig[order.status].icon
@@ -229,7 +229,7 @@ function OrdersPage() {
                 </Card>
               )
             })}
-          </>
+          </div>
         ) : (
           <p>No hay órdenes disponibles</p>
         )}
