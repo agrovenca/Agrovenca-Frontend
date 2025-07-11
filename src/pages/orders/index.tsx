@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Order, OrderItem, OrderStatus, orderStatusConfig } from '@/types/order'
 import { useCallback, useEffect, useState } from 'react'
 import { Separator } from '@/components/ui/separator'
-import { ChevronDown, ChevronUp, RotateCcw } from 'lucide-react'
+import { ChevronDown, ChevronUp, RotateCcw, UploadIcon } from 'lucide-react'
 import { getLocalDateTime, pluralize, productImage } from '@/lib/utils'
 
 function RenderOrderItem({ item }: { item: OrderItem }) {
@@ -217,6 +217,10 @@ function OrdersPage() {
                               Reordenar
                             </Button>
                           )}
+                          <Button variant="outline" size="sm">
+                            <UploadIcon className="h-4 w-4 mr-1" />
+                            Subir comprobante de pago
+                          </Button>
                           {order.status === OrderStatus.DELIVERED && (
                             <Button variant="outline" size="sm">
                               Descargar factura
