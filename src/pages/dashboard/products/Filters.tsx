@@ -134,7 +134,6 @@ type Props = {
   recordsPerPage: number[]
   setLimit: (limit: number) => void
   setSearch: (search: string) => void
-  fetchProducts: (params?: ProductFilterParams) => Promise<void>
 }
 
 function FilterForm({
@@ -145,7 +144,6 @@ function FilterForm({
   isLoading,
   setIsLoading,
   recordsPerPage,
-  fetchProducts,
 }: {
   isLoading: boolean
   setIsLoading: (state: boolean) => void
@@ -154,6 +152,8 @@ function FilterForm({
   const [showOnlyInStock, setShowOnlyInStock] = useState(false)
   const [categoriesIds, setCategoriesIds] = useState<string[]>([])
   const [unitiesIds, setUnitiesIds] = useState<string[]>([])
+
+  const fetchProducts = async (params?: ProductFilterParams) => Promise<void>
 
   const handleFilters = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -257,14 +257,7 @@ function FilterForm({
   )
 }
 
-export function FiltersBar({
-  limit,
-  search,
-  setSearch,
-  setLimit,
-  fetchProducts,
-  recordsPerPage,
-}: Props) {
+export function FiltersBar({ limit, search, setSearch, setLimit, recordsPerPage }: Props) {
   const [isLoading, setIsLoading] = useState(false)
   const props = {
     limit,
@@ -273,7 +266,6 @@ export function FiltersBar({
     setSearch,
     isLoading,
     setIsLoading,
-    fetchProducts,
     recordsPerPage,
   }
 
