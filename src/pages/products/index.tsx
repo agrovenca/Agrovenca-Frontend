@@ -22,6 +22,7 @@ import { useAuthStore } from '@/store/auth/useAuthStore'
 import { useSavedStore } from '@/store/products/useSavedStore'
 import { toast } from 'sonner'
 import Footer from '@/components/pages/Footer'
+import useProducts from '@/hooks/products/useProducts'
 
 const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
 
@@ -287,39 +288,37 @@ function ProductsPage() {
   const [limit, setLimit] = useState(12)
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
   const user = useAuthStore((state) => state.user)
-  const products = useProductsStore((state) => state.products)
   const setUserId = useProductsStore((state) => state.setUserId)
-  const setProducts = useProductsStore((state) => state.setProducts)
   const paginationData = usePaginationStore((state) => state.paginationData)
-  const setPaginationData = usePaginationStore((state) => state.setPaginationData)
 
-  const fetchData = useCallback(
-    async (params?: ProductFilterParams) => {
-      setIsLoading(true)
-      try {
-        const { data } = await getProducts(params)
-        setProducts(data.objects)
-        setPaginationData({ ...data })
-      } catch (error) {
-        console.error('Error al obtener productos', error)
-      } finally {
-        setIsLoading(false)
-      }
-    },
-    [setProducts, setPaginationData]
-  )
+  const { productsQuery } = useProducts({})
+
+  // const fetchData = useCallback(
+  //   async (params?: ProductFilterParams) => {
+  //     setIsLoading(true)
+  //     try {
+  //       const { data } = await getProducts(params)
+  //       setProducts(data.objects)
+  //       setPaginationData({ ...data })
+  //     } catch (error) {
+  //       console.error('Error al obtener productos', error)
+  //     } finally {
+  //       setIsLoading(false)
+  //     }
+  //   },
+  //   [setProducts, setPaginationData]
+  // )
 
   useEffect(() => {
     if (user) setUserId(user.id)
   }, [setUserId, user])
 
-  useEffect(() => {
-    fetchData({ limit, page })
-  }, [fetchData, limit, page])
+  // useEffect(() => {
+  //   fetchData({ limit, page })
+  // }, [fetchData, limit, page])
 
   return (
     <div>
@@ -374,13 +373,12 @@ function ProductsPage() {
             search={search}
             setLimit={setLimit}
             recordsPerPage={[1, 2, 3]}
-            fetchProducts={fetchData}
           />
 
           {/* Main Content */}
           <main className="flex-1">
             {/* Products Grid/List */}
-            {isLoading ? (
+            {productsQuery.isPending ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {[...Array(8)].map((_, i) => (
                   <Card key={i} className="animate-pulse h-[350px] bg-muted" />
@@ -390,18 +388,18 @@ function ProductsPage() {
               <>
                 {viewMode === 'grid' ? (
                   <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {products.map((product) => (
+                    {productsQuery.data?.objects.map((product) => (
                       <ProductCard key={product.id} product={product} />
                     ))}
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {products.map((product) => (
+                    {productsQuery.data?.objects.map((product) => (
                       <ProductListItem key={product.id} product={product} />
                     ))}
                   </div>
                 )}
-                {products.length === 0 && (
+                {productsQuery.data?.objects.length === 0 && (
                   <div className="text-center py-12">
                     <p className="text-muted-foreground">No se encontraron productos</p>
                   </div>

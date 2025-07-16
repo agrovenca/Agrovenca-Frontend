@@ -5,21 +5,19 @@ import { ProductFilterParams, ProductResponse } from '@/types/product'
 import axios from 'axios'
 import { z } from 'zod'
 
-export const getProducts = async (
-  params?: ProductFilterParams
-): Promise<{ data: ProductResponse }> => {
+export const getProducts = async (params?: ProductFilterParams): Promise<ProductResponse> => {
   const url = new URL(apiWithOutCredentials.defaults.baseURL?.toString() + '/products' || '')
 
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
-      if (value) {
+      if (value !== undefined && value !== null) {
         url.searchParams.append(key, value.toString())
       }
     })
   }
   try {
-    const res = await apiWithOutCredentials.get(url.toString())
-    return res
+    const res = await apiWithOutCredentials.get<ProductResponse>(url.toString())
+    return res.data
   } catch (error) {
     if (axios.isAxiosError(error)) {
       return error.response?.data || { error: 'An unknown error occurred' }
