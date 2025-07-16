@@ -2,21 +2,18 @@ import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 type Props = {
-  paginationData: {
-    page: number
-    totalItems: number
-    totalPages: number
-    hasNextPage: boolean
-    hasPreviousPage: boolean
-    nextPage: number | null
-    previousPage: number | null
-  }
-  onPageChange: (page: number) => void
+  hasPreviousPage: boolean
+  hasNextPage: boolean
+  currentPage: number
+  totalPages: number
+  setPrevPage: () => void
+  setNextPage: () => void
+  setPageNumber: (page: number) => void
 }
 
-const handleClick = (page: number, onPageChange: (page: number) => void) => {
+const handleClick = (callback: (page?: number) => void) => {
   window.scrollTo(0, 0)
-  onPageChange(page)
+  callback()
 }
 
 function getVisiblePages(current: number, total: number): (number | 'dots')[] {
@@ -41,17 +38,23 @@ function getVisiblePages(current: number, total: number): (number | 'dots')[] {
   return range.filter((v, i, self) => v !== 'dots' || self[i - 1] !== 'dots')
 }
 
-function Pagination({ paginationData, onPageChange }: Props) {
-  const visiblePages = getVisiblePages(paginationData.page, paginationData.totalPages)
+function Pagination({
+  hasPreviousPage,
+  hasNextPage,
+  currentPage,
+  totalPages,
+  setPrevPage,
+  setNextPage,
+  setPageNumber,
+}: Props) {
+  const visiblePages = getVisiblePages(currentPage, totalPages)
 
   return (
     <div className="flex flex-wrap gap-4 items-center justify-center mt-4 p-4">
       <Button
         variant={'outline'}
-        disabled={!paginationData.hasPreviousPage}
-        onClick={() => {
-          if (paginationData.previousPage) handleClick(paginationData.previousPage, onPageChange)
-        }}
+        disabled={!hasPreviousPage}
+        onClick={() => handleClick(setPrevPage)}
         className="flex items-center gap-2"
       >
         <ChevronLeft />
@@ -67,12 +70,10 @@ function Pagination({ paginationData, onPageChange }: Props) {
           ) : (
             <Button
               key={page}
-              variant={page === paginationData.page ? 'ghost' : 'default'}
-              disabled={page === paginationData.page}
-              className={
-                page === paginationData.page ? 'cursor-not-allowed border' : 'cursor-pointer'
-              }
-              onClick={() => handleClick(page, onPageChange)}
+              variant={page === currentPage ? 'ghost' : 'default'}
+              disabled={page === currentPage}
+              className={page === currentPage ? 'cursor-not-allowed border' : 'cursor-pointer'}
+              onClick={() => handleClick(() => setPageNumber(page))}
             >
               {page}
             </Button>
@@ -82,10 +83,8 @@ function Pagination({ paginationData, onPageChange }: Props) {
 
       <Button
         variant={'outline'}
-        disabled={!paginationData.hasNextPage}
-        onClick={() => {
-          if (paginationData.nextPage) handleClick(paginationData.nextPage, onPageChange)
-        }}
+        disabled={!hasNextPage}
+        onClick={() => handleClick(setNextPage)}
         className="flex items-center gap-2"
       >
         <span>Siguiente</span>

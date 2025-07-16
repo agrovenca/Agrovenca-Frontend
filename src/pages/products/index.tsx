@@ -1,9 +1,7 @@
-import { getProducts } from '@/actions/products'
 import Navbar from '@/components/pages/HomeNavbar'
 import { useProductsStore } from '@/store/products/useProductsStore'
-import { usePaginationStore } from '@/store/shared/usePaginationStore'
-import { Product, ProductFilterParams } from '@/types/product'
-import { memo, useCallback, useEffect, useState } from 'react'
+import { Product } from '@/types/product'
+import { memo, useEffect, useState } from 'react'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -286,15 +284,13 @@ const ProductListItem = memo(function ProductListItem({ product }: { product: Pr
 
 function ProductsPage() {
   const [limit, setLimit] = useState(12)
-  const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
   const user = useAuthStore((state) => state.user)
   const setUserId = useProductsStore((state) => state.setUserId)
-  const paginationData = usePaginationStore((state) => state.paginationData)
 
-  const { productsQuery } = useProducts({})
+  const { productsQuery, setNextPage, setPrevPage, setPageNumber } = useProducts({})
 
   // const fetchData = useCallback(
   //   async (params?: ProductFilterParams) => {
@@ -406,10 +402,16 @@ function ProductsPage() {
                 )}
               </>
             )}
-            {paginationData && (
+
+            {productsQuery.data && (
               <Pagination
-                paginationData={paginationData}
-                onPageChange={(newPage) => setPage(newPage)}
+                hasNextPage={productsQuery.data.hasNextPage}
+                hasPreviousPage={productsQuery.data.hasPreviousPage}
+                currentPage={productsQuery.data.page}
+                totalPages={productsQuery.data.totalPages}
+                setNextPage={setNextPage}
+                setPrevPage={setPrevPage}
+                setPageNumber={setPageNumber}
               />
             )}
           </main>

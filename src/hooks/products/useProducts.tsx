@@ -1,8 +1,8 @@
 import { getProducts } from '@/actions/products'
 import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 
 interface Options {
-  page?: number
   search?: string
   limit?: number
   categoriesIds?: string[]
@@ -12,14 +12,36 @@ interface Options {
 }
 
 function useProducts(options: Options) {
+  const [page, setPage] = useState(1)
+
   const productsQuery = useQuery({
-    queryKey: ['products', { ...options }],
-    queryFn: () => getProducts({ ...options }),
+    queryKey: ['products', { page }],
+    queryFn: () => getProducts({ page }),
     staleTime: 1000 * 60 * 10,
   })
 
+  const setPrevPage = () => {
+    if (page === 1) return
+
+    setPage(Number(productsQuery.data?.previousPage))
+  }
+
+  const setNextPage = () => {
+    if (!productsQuery.data?.hasNextPage) return
+
+    setPage(Number(productsQuery.data?.nextPage))
+  }
+
+  const setPageNumber = (page: number) => {
+    setPage(page)
+  }
+
   return {
     productsQuery,
+    page,
+    setPrevPage,
+    setNextPage,
+    setPageNumber,
   }
 }
 
