@@ -11,6 +11,8 @@ import { ChevronRight, XIcon } from 'lucide-react'
 import AddCartItem from '../products/AddCartItem'
 import { Separator } from '@/components/ui/separator'
 
+const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
+
 function ProductCard({ product }: { product: Product }) {
   const inStock = product.stock > 0
   const productPrice = Number(product.price)
@@ -35,7 +37,9 @@ function ProductCard({ product }: { product: Product }) {
       <Link to={`/products/${product.slug}`} viewTransition>
         <figure className="aspect-square overflow-hidden rounded-md flex-1 h-[300px] w-full">
           <img
-            src={firstProductImage}
+            src={
+              product.images.length > 0 ? spaceBaseUrl + firstProductImage : ProductImagePlaceholder
+            }
             alt={product.name}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
