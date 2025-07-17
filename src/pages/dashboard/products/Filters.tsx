@@ -21,108 +21,113 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
-import { useCategoriesStore } from '@/store/categories/useCategoriesStore'
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
 
-import { getAllCategories } from '@/actions/categories'
-import { getAllUnities } from '@/actions/unities'
-import { useUnitiesStore } from '@/store/unities/useUnitiesStore'
 import { ProductFilterParams } from '@/types/product'
 import { Filter } from 'lucide-react'
+import useCategories from '@/hooks/categories/useCategories'
+import { Loader } from '@/components/ui/loader'
+import useUnities from '@/hooks/unities/useUnities'
 
 function CategoryList({
-  isLoading,
   categoriesIds,
   setCategoriesIds,
 }: {
-  isLoading: boolean
   categoriesIds: string[]
   setCategoriesIds: React.Dispatch<React.SetStateAction<string[]>>
 }) {
-  const categories = useCategoriesStore((state) => state.categories)
+  const { categoriesQuery } = useCategories()
+
   return (
     <div>
       <h3 className="font-semibold mb-3 font-sans">Categorías</h3>
       <div className="flex flex-col justify-start gap-2 ps-4">
-        {isLoading ? (
-          'Cargando categorías'
-        ) : categories.length > 0 ? (
-          categories.map((category) => (
-            <div key={category.id} className="flex items-center space-x-2">
-              <Checkbox
-                id={category.id}
-                checked={categoriesIds.some((id) => id === category.id)}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    setCategoriesIds((prev) => [...prev, category.id])
-                  } else {
-                    setCategoriesIds((prev) => prev.filter((id) => id !== category.id))
-                  }
-                }}
-              />
-              <Label
-                htmlFor={category.id}
-                className="text-sm font-serif font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex gap-1 items-center"
-              >
-                <span className="text-green-600 dark:text-green-400">
-                  ({category._count.products})
-                </span>{' '}
-                <span>{category.name}</span>
-              </Label>
+        {(categoriesQuery.isPending || categoriesQuery.isFetching) && (
+          <div className="flex items-center justify-center h-full w-full gap-2">
+            <div className="flex items-center justify-center h-full w-full gap-2">
+              <Loader size="md" />
+              <span>Cargando...</span>
             </div>
-          ))
-        ) : (
-          <li>No hay Categorías</li>
+          </div>
         )}
+        {categoriesQuery.isSuccess && categoriesQuery.data.length
+          ? categoriesQuery.data.map((category) => (
+              <div key={category.id} className="flex items-center space-x-2">
+                <Checkbox
+                  id={category.id}
+                  checked={categoriesIds.some((id) => id === category.id)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setCategoriesIds((prev) => [...prev, category.id])
+                    } else {
+                      setCategoriesIds((prev) => prev.filter((id) => id !== category.id))
+                    }
+                  }}
+                />
+                <Label
+                  htmlFor={category.id}
+                  className="text-sm font-serif font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex gap-1 items-center"
+                >
+                  <span className="text-green-600 dark:text-green-400">
+                    ({category._count.products})
+                  </span>{' '}
+                  <span>{category.name}</span>
+                </Label>
+              </div>
+            ))
+          : 'No hay categorías'}
       </div>
     </div>
   )
 }
 
 function UnityList({
-  isLoading,
   unitiesIds,
   setUnitiesIds,
 }: {
-  isLoading: boolean
   unitiesIds: string[]
   setUnitiesIds: React.Dispatch<React.SetStateAction<string[]>>
 }) {
-  const unities = useUnitiesStore((state) => state.unities)
+  const { unitiesQuery } = useUnities()
+
   return (
     <div>
       <h3 className="font-semibold mb-3 font-sans">Unidades</h3>
       <div className="flex flex-col justify-start gap-2 ps-4">
-        {isLoading ? (
-          'Cargando unidades'
-        ) : unities.length > 0 ? (
-          unities.map((unity) => (
-            <div key={unity.id} className="flex items-center space-x-2">
-              <Checkbox
-                id={unity.id}
-                checked={unitiesIds.some((id) => id === unity.id)}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    setUnitiesIds((prev) => [...prev, unity.id])
-                  } else {
-                    setUnitiesIds((prev) => prev.filter((id) => id !== unity.id))
-                  }
-                }}
-              />
-              <Label
-                htmlFor={unity.id}
-                className="text-sm font-serif font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex gap-1 items-center"
-              >
-                <span className="text-green-600 dark:text-green-400">
-                  ({unity._count.products})
-                </span>{' '}
-                <span>{unity.name}</span>
-              </Label>
+        {(unitiesQuery.isPending || unitiesQuery.isFetching) && (
+          <div className="flex items-center justify-center h-full w-full gap-2">
+            <div className="flex items-center justify-center h-full w-full gap-2">
+              <Loader size="md" />
+              <span>Cargando...</span>
             </div>
-          ))
-        ) : (
-          <li>No hay unidades</li>
+          </div>
         )}
+        {unitiesQuery.isSuccess && unitiesQuery.data.length
+          ? unitiesQuery.data.map((unity) => (
+              <div key={unity.id} className="flex items-center space-x-2">
+                <Checkbox
+                  id={unity.id}
+                  checked={unitiesIds.some((id) => id === unity.id)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setUnitiesIds((prev) => [...prev, unity.id])
+                    } else {
+                      setUnitiesIds((prev) => prev.filter((id) => id !== unity.id))
+                    }
+                  }}
+                />
+                <Label
+                  htmlFor={unity.id}
+                  className="text-sm font-serif font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex gap-1 items-center"
+                >
+                  <span className="text-green-600 dark:text-green-400">
+                    ({unity._count.products})
+                  </span>{' '}
+                  <span>{unity.name}</span>
+                </Label>
+              </div>
+            ))
+          : 'No hay unidades'}
       </div>
     </div>
   )
@@ -141,7 +146,6 @@ function FilterForm({
   search,
   setLimit,
   setSearch,
-  isLoading,
   setIsLoading,
   recordsPerPage,
 }: {
@@ -205,12 +209,8 @@ function FilterForm({
           </SelectGroup>
         </SelectContent>
       </Select>
-      <CategoryList
-        isLoading={isLoading}
-        categoriesIds={categoriesIds}
-        setCategoriesIds={setCategoriesIds}
-      />
-      <UnityList isLoading={isLoading} unitiesIds={unitiesIds} setUnitiesIds={setUnitiesIds} />
+      <CategoryList categoriesIds={categoriesIds} setCategoriesIds={setCategoriesIds} />
+      <UnityList unitiesIds={unitiesIds} setUnitiesIds={setUnitiesIds} />
       <div>
         <h3 className="font-semibold mb-3">Rango de precio</h3>
         <div className="ps-4">
@@ -268,39 +268,6 @@ export function FiltersBar({ limit, search, setSearch, setLimit, recordsPerPage 
     setIsLoading,
     recordsPerPage,
   }
-
-  const setCategories = useCategoriesStore((state) => state.setCategories)
-  const setUnities = useUnitiesStore((state) => state.setUnities)
-
-  const fetchCategories = useCallback(async () => {
-    try {
-      const res = await getAllCategories()
-      setCategories(res.data)
-    } catch (error) {
-      console.error('Error al obtener las categorías', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [setCategories])
-
-  const fetchUnities = useCallback(async () => {
-    try {
-      const res = await getAllUnities()
-      setUnities(res.data)
-    } catch (error) {
-      console.error('Error al obtener las unidades', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [setUnities])
-
-  useEffect(() => {
-    fetchCategories()
-  }, [fetchCategories])
-
-  useEffect(() => {
-    fetchUnities()
-  }, [fetchUnities])
 
   return (
     <>

@@ -1,5 +1,4 @@
-import { destroy, getAllCategories } from '@/actions/categories'
-import { useCallback, useEffect, useState } from 'react'
+import { destroy } from '@/actions/categories'
 import {
   Table,
   TableBody,
@@ -16,42 +15,21 @@ import { getLocalDateTime, truncateText } from '@/lib/utils'
 import DeleteDialog from '@/components/blocks/DeleteDialog'
 import Update from './Update'
 import { Loader } from '@/components/ui/loader'
-import { useCategoriesStore } from '@/store/categories/useCategoriesStore'
+import useCategories from '@/hooks/categories/useCategories'
 
 function CategoriesDashboardPage() {
-  const categories = useCategoriesStore((state) => state.categories)
-  const setCategories = useCategoriesStore((state) => state.setCategories)
-  const [isLoading, setIsLoading] = useState(false)
+  const { categoriesQuery } = useCategories()
 
-  const fetchData = useCallback(async () => {
-    setIsLoading(true)
-    const res = await getAllCategories()
-    if ('data' in res) {
-      setCategories(res.data)
-    } else {
-      console.error('Error al obtener categorías:', res.error)
-    }
-    setIsLoading(false)
-  }, [setCategories])
-
-  useEffect(() => {
-    fetchData()
-  }, [fetchData])
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full w-full gap-2">
-        <Loader size="md" />
-        <span>Cargando...</span>
-      </div>
-    )
-  }
   return (
     <>
       <div className="w-full flex justify-between gap-4 mb-4">
         <div></div>
         <div className="flex items-center gap-2">
-          <Button variant={'outline'} onClick={fetchData} className="flex items-center gap-2">
+          <Button
+            variant={'outline'}
+            onClick={() => categoriesQuery.refetch()}
+            className="flex items-center gap-2"
+          >
             <RefreshCwIcon />
             <span>Recargar</span>
           </Button>
@@ -70,8 +48,18 @@ function CategoriesDashboardPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {categories.length > 0 ? (
-            categories.map((category) => (
+          {(categoriesQuery.isPending || categoriesQuery.isFetching) && (
+            <TableRow>
+              <TableCell colSpan={6} className="text-center">
+                <div className="flex items-center justify-center h-full w-full gap-2">
+                  <Loader size="md" />
+                  <span>Cargando...</span>
+                </div>
+              </TableCell>
+            </TableRow>
+          )}
+          {categoriesQuery.isSuccess && categoriesQuery.data.length ? (
+            categoriesQuery.data.map((category) => (
               <TableRow key={category.id} className="font-serif">
                 <TableCell className="font-medium">{category.name}</TableCell>
                 <TableCell className="italic">{truncateText(category.description, 25)}</TableCell>
@@ -85,14 +73,17 @@ function CategoriesDashboardPage() {
                 <TableCell className="text-right">
                   <div className="flex items-center gap-2">
                     <Update category={category} />
-                    <DeleteDialog action={() => destroy(category.id)} callback={fetchData} />
+                    <DeleteDialog
+                      action={() => destroy(category.id)}
+                      callback={categoriesQuery.refetch}
+                    />
                   </div>
                 </TableCell>
               </TableRow>
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={5} className="text-center">
+              <TableCell colSpan={6} className="text-center">
                 No existen categorías
               </TableCell>
             </TableRow>

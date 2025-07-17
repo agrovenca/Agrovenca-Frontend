@@ -1,17 +1,18 @@
 import { apiWithCredentials, apiWithOutCredentials } from '@/actions/api'
 import { UnitySchema } from '@/schemas/unity'
+import { Unity } from '@/types/unity'
 import axios from 'axios'
 import { z } from 'zod'
 
-export const getAllUnities = async () => {
+export const getAllUnities = async (): Promise<Unity[]> => {
   try {
-    const res = await apiWithOutCredentials.get(`/unities`, {})
-    return res
+    const { data } = await apiWithOutCredentials.get(`/unities`, {})
+    return data
   } catch (error) {
     if (axios.isAxiosError(error)) {
       return error.response?.data || { error: 'An unknown error occurred' }
     }
-    return { error: 'An unknown error occurred' }
+    throw new Error('An unknown error occurred')
   }
 }
 

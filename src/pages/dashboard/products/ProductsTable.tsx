@@ -26,12 +26,15 @@ import {
 } from '@dnd-kit/sortable'
 import { Button } from '@/components/ui/button'
 import { useProductsStore } from '@/store/products/useProductsStore'
-import { usePaginationStore } from '@/store/shared/usePaginationStore'
 import { toast } from 'sonner'
 import ProductImagesPage from './images'
 import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
 import { useEffect } from 'react'
 import { useAuthStore } from '@/store/auth/useAuthStore'
+import useProducts from '@/hooks/products/useProducts'
+import { Loader } from '@/components/ui/loader'
+
+const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
 
 const GetTableHeaders = () => {
   return (
@@ -58,6 +61,8 @@ const GetTableRow = ({
   isDraggable: boolean
   handleDelete: (productId: string) => Promise<void>
 }) => {
+  const firstProductImage = product.images.find((image) => image.displayOrder === 1)?.s3Key
+
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: product.id,
   })
@@ -77,9 +82,7 @@ const GetTableRow = ({
           <img
             className="w-full h-full object-cover"
             src={
-              product.images.length > 0
-                ? product.images.find((image) => image.displayOrder === 1)?.s3Key
-                : ProductImagePlaceholder
+              product.images.length > 0 ? spaceBaseUrl + firstProductImage : ProductImagePlaceholder
             }
             alt={`Imagen del producto ${product.name}`}
           />
@@ -128,18 +131,14 @@ const GetTableRow = ({
 
 type Props = {
   isDraggable: boolean
-  setPage: React.Dispatch<React.SetStateAction<number>>
   setIsDraggable: React.Dispatch<React.SetStateAction<boolean>>
-  handleDelete: (productId: string) => Promise<void>
 }
 
-function ProductsTable({ isDraggable, setPage, setIsDraggable, handleDelete }: Props) {
+function ProductsTable({ isDraggable, setIsDraggable }: Props) {
   const user = useAuthStore((state) => state.user)
-  const products = useProductsStore((state) => state.products)
   const setUserId = useProductsStore((state) => state.setUserId)
-  const setProducts = useProductsStore((state) => state.setProducts)
 
-  const paginationData = usePaginationStore((state) => state.paginationData)
+  const { productsQuery, setNextPage, setPrevPage, setPageNumber } = useProducts({})
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -162,10 +161,10 @@ function ProductsTable({ isDraggable, setPage, setIsDraggable, handleDelete }: P
     }
   }
 
-  async function handleDragEnd(event: DragEndEvent) {
+  async function handleDragEnd(event: DragEndEvent, products: Product[]) {
     const { active, over } = event
     if (active.id !== over?.id) {
-      const previousProducts = [...products]
+      //const previousProducts = [...products]
       const oldIndex = products.findIndex((item) => item.id === active.id)
       const newIndex = products.findIndex((item) => item.id === over?.id)
       const newItems = arrayMove(products, oldIndex, newIndex)
@@ -176,7 +175,7 @@ function ProductsTable({ isDraggable, setPage, setIsDraggable, handleDelete }: P
       }))
 
       // Optimistic update
-      setProducts(reordered)
+      //setProducts(reordered)
 
       try {
         await handleReorder(reordered.map((p) => ({ id: p.id, displayOrder: p.displayOrder })))
@@ -184,9 +183,18 @@ function ProductsTable({ isDraggable, setPage, setIsDraggable, handleDelete }: P
       } catch (error) {
         console.error('Error actualizando el orden:', error)
         toast.error('Error al actualizar el orden de los productos')
-        setProducts(previousProducts)
+        //setProducts(previousProducts)
       }
     }
+  }
+
+  const handleDelete = async (_productId: string) => {
+    //  try {
+    //    deleteProduct(productId)
+    //    await fetchData({ page, search, limit })
+    //  } catch (error) {
+    //    console.error('Error al eliminar el producto:', error)
+    //  }
   }
 
   useEffect(() => {
@@ -196,16 +204,30 @@ function ProductsTable({ isDraggable, setPage, setIsDraggable, handleDelete }: P
   return (
     <div className="flex-1">
       {isDraggable ? (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={(event) => handleDragEnd(event, productsQuery.data?.objects as Product[])}
+        >
           <Table className="my-4">
             <GetTableHeaders />
             <TableBody>
-              {products.length > 0 ? (
+              {(productsQuery.isPending || productsQuery.isFetching) && (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center">
+                    <div className="flex items-center justify-center h-full w-full gap-2">
+                      <Loader size="md" />
+                      <span>Cargando...</span>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+              {productsQuery.isSuccess && productsQuery.data.objects.length ? (
                 <SortableContext
-                  items={products.map((p) => p.id)}
+                  items={productsQuery.data.objects.map((p) => p.id)}
                   strategy={verticalListSortingStrategy}
                 >
-                  {products.map((product) => (
+                  {productsQuery.data.objects.map((product) => (
                     <GetTableRow
                       product={product}
                       key={product.id}
@@ -228,8 +250,8 @@ function ProductsTable({ isDraggable, setPage, setIsDraggable, handleDelete }: P
         <Table className="my-4">
           <GetTableHeaders />
           <TableBody>
-            {products.length > 0 ? (
-              products.map((product) => (
+            {productsQuery.isSuccess && productsQuery.data.objects.length ? (
+              productsQuery.data.objects.map((product) => (
                 <GetTableRow
                   product={product}
                   key={product.id}
@@ -248,8 +270,16 @@ function ProductsTable({ isDraggable, setPage, setIsDraggable, handleDelete }: P
         </Table>
       )}
 
-      {paginationData && (
-        <Pagination paginationData={paginationData} onPageChange={(newPage) => setPage(newPage)} />
+      {productsQuery.data && (
+        <Pagination
+          hasNextPage={productsQuery.data.hasNextPage}
+          hasPreviousPage={productsQuery.data.hasPreviousPage}
+          currentPage={productsQuery.data.page}
+          totalPages={productsQuery.data.totalPages}
+          setNextPage={setNextPage}
+          setPrevPage={setPrevPage}
+          setPageNumber={setPageNumber}
+        />
       )}
     </div>
   )

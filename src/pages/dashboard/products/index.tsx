@@ -1,96 +1,26 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { DownloadIcon, RefreshCwIcon, Search } from 'lucide-react'
-import { Loader } from '@/components/ui/loader'
 import CreateProduct from './Create'
-import { getAllCategories } from '@/actions/categories'
-import { getAllUnities } from '@/actions/unities'
-import { exportProducts, getProducts } from '@/actions/products'
-import { usePaginationStore } from '@/store/shared/usePaginationStore'
-import { useProductsStore } from '@/store/products/useProductsStore'
-import { useUnitiesStore } from '@/store/unities/useUnitiesStore'
-import { useCategoriesStore } from '@/store/categories/useCategoriesStore'
+import { exportProducts } from '@/actions/products'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import ExtendedTooltip from '@/components/blocks/ExtendedTooltip'
 import ProductsTable from './ProductsTable'
 import { useExcelExport } from '@/hooks/useExcelExport'
 import { toast } from 'sonner'
-import { ProductFilterParams } from '@/types/product'
 import { FiltersBar } from './Filters'
 import { Input } from '@/components/ui/input'
-import { useAuthStore } from '@/store/auth/useAuthStore'
+import useProducts from '@/hooks/products/useProducts'
 
 function ProductsDashboardPage() {
-  const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [limit, setLimit] = useState(10)
-  const [isLoading, setIsLoading] = useState(false)
   const [dragAndDropActive, setDragAndDropActive] = useState(false)
 
   const { exportExcel } = useExcelExport()
 
-  const user = useAuthStore((state) => state.user)
-  const products = useProductsStore((state) => state.products)
-  const setUserId = useProductsStore((state) => state.setUserId)
-  const setProducts = useProductsStore((state) => state.setProducts)
-  const deleteProduct = useProductsStore((state) => state.deleteProduct)
-  const setUnities = useUnitiesStore((state) => state.setUnities)
-  const setCategories = useCategoriesStore((state) => state.setCategories)
-  const setPaginationData = usePaginationStore((state) => state.setPaginationData)
-
-  const fetchData = useCallback(
-    async (params?: ProductFilterParams) => {
-      setIsLoading(true)
-      try {
-        const { data } = await getProducts(params)
-        setProducts(data.objects)
-        setPaginationData({ ...data })
-      } catch (error) {
-        console.error('Error al obtener productos', error)
-      } finally {
-        setIsLoading(false)
-      }
-    },
-    [setProducts, setPaginationData]
-  )
-
-  const getAssociatedData = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const [categoriesResponse, unitiesResponse] = await Promise.all([
-        getAllCategories(),
-        getAllUnities(),
-      ])
-      setCategories(categoriesResponse.data)
-      setUnities(unitiesResponse.data)
-    } catch (error) {
-      console.error('Error al obtener categorias y unidades', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [setUnities, setCategories])
-
-  useEffect(() => {
-    fetchData({ limit, page })
-  }, [fetchData, limit, page])
-
-  useEffect(() => {
-    getAssociatedData()
-  }, [getAssociatedData])
-
-  useEffect(() => {
-    if (user) setUserId(user.id)
-  }, [setUserId, user])
-
-  const handleDelete = async (productId: string) => {
-    try {
-      deleteProduct(productId)
-      await fetchData({ page, search, limit })
-    } catch (error) {
-      console.error('Error al eliminar el producto:', error)
-    }
-  }
+  const { productsQuery } = useProducts({})
 
   const handleExport = async (format: string) => {
     try {
@@ -102,15 +32,6 @@ function ProductsDashboardPage() {
     } catch (error) {
       console.error('Error al exportar los productos:', error)
     }
-  }
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full w-full gap-2">
-        <Loader size="md" />
-        <span>Cargando...</span>
-      </div>
-    )
   }
 
   return (
@@ -137,13 +58,13 @@ function ProductsDashboardPage() {
           </Button>
           <Button
             variant={'outline'}
-            onClick={() => fetchData({ page, search, limit })}
+            onClick={() => productsQuery.refetch()}
             className="flex items-center gap-2"
           >
             <RefreshCwIcon />
             <span>Recargar</span>
           </Button>
-          {products.length > 0 && (
+          {productsQuery.data && productsQuery.data.objects.length && (
             <ExtendedTooltip content={<p>Arrastra los productos y cambia su orden.</p>}>
               <Label
                 htmlFor="editableMode"
@@ -170,15 +91,9 @@ function ProductsDashboardPage() {
           search={search}
           setLimit={setLimit}
           recordsPerPage={[1, 2, 3]}
-          fetchProducts={fetchData}
         />
 
-        <ProductsTable
-          setPage={setPage}
-          isDraggable={dragAndDropActive}
-          setIsDraggable={setDragAndDropActive}
-          handleDelete={handleDelete}
-        />
+        <ProductsTable isDraggable={dragAndDropActive} setIsDraggable={setDragAndDropActive} />
       </div>
     </>
   )

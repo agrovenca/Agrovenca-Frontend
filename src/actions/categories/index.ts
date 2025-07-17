@@ -1,17 +1,18 @@
 import { apiWithCredentials, apiWithOutCredentials } from '@/actions/api'
 import { CategorySchema } from '@/schemas/category'
+import { Category } from '@/types/category'
 import axios from 'axios'
 import { z } from 'zod'
 
-export const getAllCategories = async () => {
+export const getAllCategories = async (): Promise<Category[]> => {
   try {
-    const res = await apiWithOutCredentials.get(`/categories`, {})
-    return res
+    const { data } = await apiWithOutCredentials.get(`/categories`, {})
+    return data
   } catch (error) {
     if (axios.isAxiosError(error)) {
       return error.response?.data || { error: 'An unknown error occurred' }
     }
-    return { error: 'An unknown error occurred' }
+    throw new Error('An unknown error occurred')
   }
 }
 
