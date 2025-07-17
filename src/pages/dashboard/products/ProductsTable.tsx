@@ -14,7 +14,7 @@ import UpdateProduct from './Update'
 import DeleteDialog from '@/components/blocks/DeleteDialog'
 import { ExternalLinkIcon } from 'lucide-react'
 import { DndContext, closestCenter } from '@dnd-kit/core'
-import { destroy, updateProductOrder } from '@/actions/products'
+import { destroy } from '@/actions/products'
 
 import { KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core'
 import {
@@ -33,6 +33,7 @@ import { useEffect } from 'react'
 import { useAuthStore } from '@/store/auth/useAuthStore'
 import useProducts from '@/hooks/products/useProducts'
 import { Loader } from '@/components/ui/loader'
+import useReorderProducts from '@/hooks/products/useReorderProducts'
 
 const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
 
@@ -138,7 +139,8 @@ function ProductsTable({ isDraggable, setIsDraggable }: Props) {
   const user = useAuthStore((state) => state.user)
   const setUserId = useProductsStore((state) => state.setUserId)
 
-  const { productsQuery, setNextPage, setPrevPage, setPageNumber } = useProducts({})
+  const { productsQuery, page, setNextPage, setPrevPage, setPageNumber } = useProducts({})
+  const { reorderMutation } = useReorderProducts({ page })
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -147,24 +149,9 @@ function ProductsTable({ isDraggable, setIsDraggable }: Props) {
     })
   )
 
-  const handleReorder = async (reorderedItems: { id: string; displayOrder: number }[]) => {
-    setIsDraggable(false)
-    try {
-      const res = await updateProductOrder(reorderedItems)
-      if (res.error) {
-        throw new Error(res.error)
-      }
-    } catch (_error) {
-      throw new Error('Error al actualizar el orden de los productos')
-    } finally {
-      setIsDraggable(true)
-    }
-  }
-
   async function handleDragEnd(event: DragEndEvent, products: Product[]) {
     const { active, over } = event
     if (active.id !== over?.id) {
-      //const previousProducts = [...products]
       const oldIndex = products.findIndex((item) => item.id === active.id)
       const newIndex = products.findIndex((item) => item.id === over?.id)
       const newItems = arrayMove(products, oldIndex, newIndex)
@@ -174,16 +161,13 @@ function ProductsTable({ isDraggable, setIsDraggable }: Props) {
         displayOrder: index + 1,
       }))
 
-      // Optimistic update
-      //setProducts(reordered)
-
       try {
-        await handleReorder(reordered.map((p) => ({ id: p.id, displayOrder: p.displayOrder })))
-        toast.success('Orden actualizado correctamente')
-      } catch (error) {
-        console.error('Error actualizando el orden:', error)
+        setIsDraggable(false)
+        reorderMutation.mutate(reordered.map((p) => ({ id: p.id, displayOrder: p.displayOrder })))
+      } catch (_error) {
         toast.error('Error al actualizar el orden de los productos')
-        //setProducts(previousProducts)
+      } finally {
+        setIsDraggable(true)
       }
     }
   }
@@ -212,7 +196,7 @@ function ProductsTable({ isDraggable, setIsDraggable }: Props) {
           <Table className="my-4">
             <GetTableHeaders />
             <TableBody>
-              {(productsQuery.isPending || productsQuery.isFetching) && (
+              {productsQuery.isPending && (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center">
                     <div className="flex items-center justify-center h-full w-full gap-2">
