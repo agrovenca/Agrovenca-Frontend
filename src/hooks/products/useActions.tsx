@@ -4,15 +4,18 @@ import { useCartStore } from '@/store/cart/useCartStore'
 import { useSavedStore } from '@/store/products/useSavedStore'
 import { Product } from '@/types/product'
 
-export function useProductActions(product: Product) {
+export function useProductActions(product?: Product) {
   const [quantity, setQuantity] = useState(1)
   const addItem = useCartStore((state) => state.addItem)
   const deleteItem = useCartStore((state) => state.deleteItem)
+  const savedProducts = useSavedStore((state) => state.products)
   const saveProduct = useSavedStore((state) => state.addProduct)
   const removeSaved = useSavedStore((state) => state.removeProduct)
 
+  const productStock = product?.stock ?? 1
+
   const handleQuantityChange = (change: number) => {
-    setQuantity(Math.max(1, Math.min(product.stock, quantity + change)))
+    setQuantity(Math.max(1, Math.min(productStock, quantity + change)))
   }
 
   const handleAddCartItem = async ({
@@ -41,8 +44,8 @@ export function useProductActions(product: Product) {
     toast.success('Producto eliminado de favoritos correctamente')
   }
 
-  const isProductSaved = useSavedStore((state) =>
-    state.products.some((p) => p.id === product.id || '')
+  const isProductSaved = savedProducts.some(
+    (savedProduct) => savedProduct.id === (product?.id ?? '')
   )
 
   return {
