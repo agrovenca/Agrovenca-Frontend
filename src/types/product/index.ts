@@ -1,15 +1,8 @@
-import { BaseFilterParams } from '../shared'
+import { BaseFilterParams, BasePaginatedResponse } from '../shared'
 import { ProductImage } from './images'
 
-export interface ProductResponse {
+export interface ProductResponse extends BasePaginatedResponse {
   objects: Product[]
-  page: number
-  totalItems: number
-  totalPages: number
-  hasNextPage: boolean
-  hasPreviousPage: boolean
-  nextPage: number | null
-  previousPage: number | null
   spaceBaseUrl: string
 }
 

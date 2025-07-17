@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   Table,
   TableBody,
@@ -11,60 +11,33 @@ import { Button } from '@/components/ui/button'
 import { RefreshCwIcon } from 'lucide-react'
 import { getLocalDateTime, getUserRole } from '@/lib/utils'
 import { Loader } from '@/components/ui/loader'
-import { getAll } from '@/actions/users'
 import { User, UserFilterParams } from '@/types/auth/user'
 import { Badge } from '@/components/ui/badge'
 import { useAuthStore } from '@/store/auth/useAuthStore'
 import Pagination from '@/components/blocks/pagination'
-import { usePaginationStore } from '@/store/shared/usePaginationStore'
 import AccountOptions from './SettingsAccount'
 import UserFilters from './UserFilters'
+import useUsers from '@/hooks/users/useUsers'
 
 function UsersDashboardPage() {
   const [data, setData] = useState<User[]>([])
-  const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [limit, setLimit] = useState(10)
   const [isActive, setIsActive] = useState<UserFilterParams['isActive']>()
-  const paginationData = usePaginationStore((state) => state.paginationData)
-  const setPaginationData = usePaginationStore((state) => state.setPaginationData)
 
-  const [isLoading, setIsLoading] = useState(false)
   const currentUser = useAuthStore((state) => state.user) as User
 
-  const fetchData = useCallback(
-    async (page: number, search: string, limit: number, isActive: UserFilterParams['isActive']) => {
-      setIsLoading(true)
-      const res = await getAll({ page, search, limit, isActive })
-      if ('data' in res) {
-        setData(res.data.objects)
-        setPaginationData({ ...res.data })
-      } else {
-        console.error('Error al obtener los usuarios:', res.error)
-      }
-      setIsLoading(false)
-    },
-    [setPaginationData]
-  )
+  const { usersQuery, setNextPage, setPrevPage, setPageNumber } = useUsers({
+    search,
+    limit,
+    isActive,
+  })
 
-  useEffect(() => {
-    fetchData(page, search, limit, isActive)
-  }, [fetchData, page, search, limit, isActive])
-
-  const handleFilterSubmit = (params?: Omit<UserFilterParams, 'page'>) => {
-    setPage(1)
-    setSearch(params?.search ?? '')
-    setLimit(params?.limit ?? 10)
-    setIsActive(params?.isActive)
-  }
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full w-full gap-2">
-        <Loader size="md" />
-        <span>Cargando...</span>
-      </div>
-    )
+  const handleFilterSubmit = (params: UserFilterParams) => {
+    console.log(params)
+    setSearch(String(params.search))
+    setLimit(Number(params.limit))
+    setIsActive(params.isActive)
   }
 
   return (
@@ -75,13 +48,13 @@ function UsersDashboardPage() {
             initialSearch={search}
             initialLimit={limit}
             initialIsActive={isActive}
-            onSubmit={handleFilterSubmit}
+            handleSubmit={handleFilterSubmit}
           />
         </div>
         <div className="flex items-center gap-2">
           <Button
             variant={'outline'}
-            onClick={() => fetchData(page, search, limit, isActive)}
+            onClick={() => usersQuery.refetch()}
             className="flex items-center gap-2"
           >
             <RefreshCwIcon />
@@ -102,8 +75,18 @@ function UsersDashboardPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.length > 0 ? (
-            data.map((user) => (
+          {usersQuery.isFetching && (
+            <TableRow>
+              <TableCell colSpan={7} className="text-center">
+                <div className="flex items-center justify-center h-full w-full gap-2">
+                  <Loader size="md" />
+                  <span>Cargando...</span>
+                </div>
+              </TableCell>
+            </TableRow>
+          )}
+          {usersQuery.isSuccess && usersQuery.data.objects.length ? (
+            usersQuery.data.objects.map((user) => (
               <TableRow key={user.id} className="font-serif">
                 <TableCell className="font-medium">{user.name}</TableCell>
                 <TableCell className="flex items-center gap-2">
@@ -142,8 +125,16 @@ function UsersDashboardPage() {
         </TableBody>
       </Table>
 
-      {paginationData && (
-        <Pagination paginationData={paginationData} onPageChange={(newPage) => setPage(newPage)} />
+      {usersQuery.data?.objects && (
+        <Pagination
+          hasNextPage={usersQuery.data.hasNextPage}
+          hasPreviousPage={usersQuery.data.hasPreviousPage}
+          currentPage={usersQuery.data.page}
+          totalPages={usersQuery.data.totalPages}
+          setNextPage={setNextPage}
+          setPrevPage={setPrevPage}
+          setPageNumber={setPageNumber}
+        />
       )}
     </>
   )
