@@ -1,4 +1,4 @@
-import { BaseFilterParams } from '../shared'
+import { BaseFilterParams, BasePaginatedResponse } from '../shared'
 
 export interface User {
   id: string
@@ -14,4 +14,8 @@ export interface User {
 
 export interface UserFilterParams extends BaseFilterParams {
   isActive: 'active' | 'inactive' | undefined
+}
+
+export interface UserResponse extends BasePaginatedResponse {
+  objects: User[]
 }
