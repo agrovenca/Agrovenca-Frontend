@@ -292,29 +292,9 @@ function ProductsPage() {
 
   const { productsQuery, setNextPage, setPrevPage, setPageNumber } = useProducts({})
 
-  // const fetchData = useCallback(
-  //   async (params?: ProductFilterParams) => {
-  //     setIsLoading(true)
-  //     try {
-  //       const { data } = await getProducts(params)
-  //       setProducts(data.objects)
-  //       setPaginationData({ ...data })
-  //     } catch (error) {
-  //       console.error('Error al obtener productos', error)
-  //     } finally {
-  //       setIsLoading(false)
-  //     }
-  //   },
-  //   [setProducts, setPaginationData]
-  // )
-
   useEffect(() => {
     if (user) setUserId(user.id)
   }, [setUserId, user])
-
-  // useEffect(() => {
-  //   fetchData({ limit, page })
-  // }, [fetchData, limit, page])
 
   return (
     <div>

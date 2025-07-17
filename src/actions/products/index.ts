@@ -16,8 +16,8 @@ export const getProducts = async (params?: ProductFilterParams): Promise<Product
     })
   }
   try {
-    const res = await apiWithOutCredentials.get<ProductResponse>(url.toString())
-    return res.data
+    const { data } = await apiWithOutCredentials.get<ProductResponse>(url.toString())
+    return data
   } catch (error) {
     if (axios.isAxiosError(error)) {
       return error.response?.data || { error: 'An unknown error occurred' }
