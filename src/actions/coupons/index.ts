@@ -1,18 +1,18 @@
 import { apiWithCredentials, apiWithOutCredentials } from '@/actions/api'
 import { CouponCreateSchema, CouponUpdateSchema } from '@/schemas/coupons'
-import { CouponApplyRequest } from '@/types/coupon'
+import { CouponApplyRequest, CouponType } from '@/types/coupon'
 import axios from 'axios'
 import { z } from 'zod'
 
-export const getAll = async () => {
+export const getAllCoupons = async (): Promise<CouponType[]> => {
   try {
-    const res = await apiWithOutCredentials.get(`/coupons`, {})
-    return res
+    const { data } = await apiWithOutCredentials.get(`/coupons`, {})
+    return data
   } catch (error) {
     if (axios.isAxiosError(error)) {
       return error.response?.data || { error: 'An unknown error occurred' }
     }
-    return { error: 'An unknown error occurred' }
+    throw new Error('An unknown error occurred')
   }
 }
 

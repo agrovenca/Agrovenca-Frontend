@@ -1,15 +1,15 @@
-import { getOrders } from '@/actions/orders'
 import Footer from '@/components/pages/Footer'
 import Navbar from '@/components/pages/HomeNavbar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/ui/loader'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Order, OrderItem, OrderStatus, orderStatusConfig } from '@/types/order'
-import { useCallback, useEffect, useState } from 'react'
+import { OrderItem, OrderStatus, orderStatusConfig } from '@/types/order'
+import { useState } from 'react'
 import { Separator } from '@/components/ui/separator'
 import { ChevronDown, ChevronUp, RotateCcw, UploadIcon } from 'lucide-react'
 import { getLocalDateTime, pluralize, productImage } from '@/lib/utils'
+import useOrders from '@/hooks/orders/useOrders'
 
 function RenderOrderItem({ item }: { item: OrderItem }) {
   return (
@@ -33,8 +33,7 @@ function RenderOrderItem({ item }: { item: OrderItem }) {
 }
 
 function OrdersPage() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [orders, setOrders] = useState<Order[]>([])
+  const { ordersQuery } = useOrders()
   const [expandedOrders, setExpandedOrders] = useState<string[]>([])
 
   const toggleOrderExpansion = (orderId: string) => {
@@ -43,36 +42,19 @@ function OrdersPage() {
     )
   }
 
-  const fetchData = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const res = await getOrders()
-      if (res.status === 200) {
-        setOrders(res.data)
-      }
-    } catch (error) {
-      console.error('Error fetching orders:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchData()
-  }, [fetchData])
-
   return (
     <div>
       <Navbar />
       <section className="container mx-auto py-4 px-2 min-h-screen">
-        {isLoading ? (
+        {ordersQuery.isFetching && (
           <div className="flex items-center justify-center gap-2">
             <Loader />
             <span>Cargando...</span>
           </div>
-        ) : orders.length ? (
-          <div className="space-y-4">
-            {orders.map((order) => {
+        )}
+        {ordersQuery.isSuccess && ordersQuery.data.length ? (
+          <div className="flex flex-col gap-4">
+            {ordersQuery.data.map((order) => {
               const isExpanded = expandedOrders.includes(order.id)
               const OrderIcon = orderStatusConfig[order.status].icon
               return (

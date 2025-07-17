@@ -1,5 +1,4 @@
 import { Loader } from '@/components/ui/loader'
-import { useCallback, useEffect, useState } from 'react'
 import {
   Table,
   TableBody,
@@ -14,46 +13,24 @@ import { getLocalDateTime, truncateText } from '@/lib/utils'
 import { CouponTypes } from '@/types/coupon'
 import { Badge } from '@/components/ui/badge'
 import CreateCoupon from './Create'
-import { destroy, getAll } from '@/actions/coupons'
+import { destroy } from '@/actions/coupons'
 import UpdateCoupon from './Update'
 import DeleteDialog from '@/components/blocks/DeleteDialog'
-import { useCouponsStore } from '@/store/coupons/useCouponsStore'
+import useCoupons from '@/hooks/coupons/useCoupons'
 
 function CouponsDashboardPage() {
-  const [isLoading, setIsLoading] = useState(false)
-  const coupons = useCouponsStore((state) => state.coupons)
-  const setCoupons = useCouponsStore((state) => state.setCoupons)
-
-  const fetchData = useCallback(async () => {
-    setIsLoading(true)
-    const res = await getAll()
-    if ('data' in res) {
-      setCoupons(res.data)
-    } else {
-      console.error('Error al obtener los cupones:', res.error)
-    }
-    setIsLoading(false)
-  }, [setCoupons])
-
-  useEffect(() => {
-    fetchData()
-  }, [fetchData])
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full w-full gap-2">
-        <Loader size="md" />
-        <span>Cargando...</span>
-      </div>
-    )
-  }
+  const { couponsQuery } = useCoupons()
 
   return (
     <>
       <div className="w-full flex justify-between gap-4 mb-4">
         <div></div>
         <div className="flex items-center gap-2">
-          <Button variant={'outline'} onClick={fetchData} className="flex items-center gap-2">
+          <Button
+            variant={'outline'}
+            onClick={() => couponsQuery.refetch()}
+            className="flex items-center gap-2 cursor-pointer"
+          >
             <RefreshCwIcon />
             <span>Recargar</span>
           </Button>
@@ -76,8 +53,18 @@ function CouponsDashboardPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {coupons.length > 0 ? (
-            coupons.map((coupon) => (
+          {couponsQuery.isFetching && (
+            <TableRow>
+              <TableCell colSpan={10} className="text-center">
+                <div className="flex items-center justify-center h-full w-full gap-2">
+                  <Loader size="md" />
+                  <span>Cargando...</span>
+                </div>
+              </TableCell>
+            </TableRow>
+          )}
+          {couponsQuery.data && couponsQuery.data.length ? (
+            couponsQuery.data.map((coupon) => (
               <TableRow key={coupon.id} className="font-serif">
                 <TableCell className="font-medium">{coupon.code}</TableCell>
                 <TableCell className="italic">{truncateText(coupon.description, 20)}</TableCell>
@@ -109,7 +96,10 @@ function CouponsDashboardPage() {
                 <TableCell className="text-right">
                   <div className="flex items-center gap-2">
                     <UpdateCoupon coupon={coupon} />
-                    <DeleteDialog action={() => destroy(coupon.id)} callback={fetchData} />
+                    <DeleteDialog
+                      action={() => destroy(coupon.id)}
+                      callback={couponsQuery.refetch}
+                    />
                   </div>
                 </TableCell>
               </TableRow>
