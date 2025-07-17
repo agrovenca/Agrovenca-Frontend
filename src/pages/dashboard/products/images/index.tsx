@@ -29,6 +29,8 @@ import ExtendedTooltip from '@/components/blocks/ExtendedTooltip'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 
+const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
+
 type SortableImageProps = {
   image: ProductImage
   product: Product
@@ -61,7 +63,7 @@ export function SortableImage({
       <img
         className="object-cover"
         loading="lazy"
-        src={image.s3Key}
+        src={spaceBaseUrl + image.s3Key}
         alt={`Imagen número ${image.displayOrder} del producto ${product.name}`}
       />
       {!imagesDraggable && (
