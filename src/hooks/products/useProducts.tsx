@@ -9,15 +9,17 @@ interface Options {
   unitiesIds?: string[]
   priceRange?: number[]
   inStockOnly?: boolean
+  enabled?: boolean
 }
 
-function useProducts({ limit }: Options) {
+function useProducts({ limit, enabled = true }: Options) {
   const [page, setPage] = useState(1)
 
   const productsQuery = useQuery({
     queryKey: ['products', { page, limit }],
     queryFn: () => getProducts({ page, limit }),
     staleTime: 1000 * 60 * 10,
+    enabled,
   })
 
   const setPrevPage = () => {
