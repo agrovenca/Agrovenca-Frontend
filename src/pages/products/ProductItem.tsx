@@ -4,15 +4,14 @@ import { HeartIcon, HeartOffIcon, XIcon } from 'lucide-react'
 import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
 
 import { useCartStore } from '@/store/cart/useCartStore'
-import { useSavedStore } from '@/store/products/useSavedStore'
 import { Product } from '@/types/product'
-import { toast } from 'sonner'
 import { Link } from 'react-router-dom'
 import AddCartItem from './AddCartItem'
 import { Separator } from '@/components/ui/separator'
 import { Card, CardContent } from '@/components/ui/card'
 import useCategories from '@/hooks/categories/useCategories'
 import useUnities from '@/hooks/unities/useUnities'
+import { useProductActions } from '@/hooks/products/useActions'
 
 const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
 
@@ -28,29 +27,12 @@ function ProductItem({ product, renderMode }: { product: Product; renderMode: 'g
   const { categoriesQuery } = useCategories()
   const { unitiesQuery } = useUnities()
 
-  const saveProduct = useSavedStore((state) => state.addProduct)
-  const removeSaved = useSavedStore((state) => state.removeProduct)
-  const isProductSaved = useSavedStore((state) => state.products.some((p) => p.id === product.id))
+  const { handleRemoveCartItem, handleSaveItem, handleUnSaveItem, isProductSaved } =
+    useProductActions(product as Product)
 
-  const deleteItem = useCartStore((state) => state.deleteItem)
   const isProductInCart = useCartStore((state) =>
     state.items.some((item) => item.productId === product.id)
   )
-
-  const handleSaveItem = async ({ product }: { product: Product }) => {
-    saveProduct(product)
-    toast.success('Producto guardado en favoritos correctamente')
-  }
-
-  const handleUnSaveItem = async ({ productId }: { productId: string }) => {
-    removeSaved(productId)
-    toast.success('Producto eliminado de favoritos correctamente')
-  }
-
-  const handleRemoveCartItem = async ({ productId }: { productId: string }) => {
-    deleteItem(productId)
-    toast.success('Producto eliminado del carrito correctamente')
-  }
 
   if (renderMode === 'list') {
     return (
