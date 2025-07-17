@@ -1,7 +1,7 @@
 import { apiWithCredentials, apiWithOutCredentials } from '@/actions/api'
 import { ProductSchema, ProductUpdateSchema } from '@/schemas/products'
 import { CartItem } from '@/types/cart'
-import { ProductFilterParams, ProductResponse } from '@/types/product'
+import { Product, ProductFilterParams, ProductResponse } from '@/types/product'
 import axios from 'axios'
 import { z } from 'zod'
 
@@ -26,10 +26,12 @@ export const getProducts = async (params?: ProductFilterParams): Promise<Product
   }
 }
 
-export const getProduct = async ({ slug }: { slug: string }) => {
+export const getProduct = async ({ slug }: { slug: string }): Promise<Product> => {
   try {
-    const res = await apiWithOutCredentials.get(`/products/${slug}`)
-    return res
+    const { data } = await apiWithOutCredentials.get<{ product: Product; message: string }>(
+      `/products/${slug}`
+    )
+    return data.product
   } catch (error) {
     if (axios.isAxiosError(error)) {
       return error.response?.data || { error: 'An unknown error occurred' }

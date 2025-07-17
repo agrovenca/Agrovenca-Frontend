@@ -9,11 +9,9 @@ import {
 import Navbar from '@/components/pages/HomeNavbar'
 import { Loader } from '@/components/ui/loader'
 
-import { toast } from 'sonner'
 import { Product } from '@/types/product'
-import { getProduct } from '@/actions/products'
 import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import {
@@ -33,10 +31,11 @@ import LiteYouTubeEmbed from 'react-lite-youtube-embed'
 import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css'
 import { useProductsStore } from '@/store/products/useProductsStore'
 import { useAuthStore } from '@/store/auth/useAuthStore'
-import { useSavedStore } from '@/store/products/useSavedStore'
 import Footer from '@/components/pages/Footer'
 import ProductItem from './ProductItem'
 import useProducts from '@/hooks/products/useProducts'
+import useProduct from '@/hooks/products/useProduct'
+import { useProductActions } from '@/hooks/products/useActions'
 
 const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
 
@@ -45,88 +44,55 @@ function ProductDetail() {
   const { slug } = useParams()
   const [count, setCount] = useState(0)
   const [current, setCurrent] = useState(0)
-  const [quantity, setQuantity] = useState(1)
   const [api, setApi] = useState<CarouselApi>()
-  const [product, setProduct] = useState<Product>()
-  const [isLoading, setIsLoading] = useState(false)
 
   const user = useAuthStore((state) => state.user)
   const setUserId = useProductsStore((state) => state.setUserId)
-  const addItem = useCartStore((state) => state.addItem)
-  const deleteItem = useCartStore((state) => state.deleteItem)
-  const saveProduct = useSavedStore((state) => state.addProduct)
-  const removeSaved = useSavedStore((state) => state.removeProduct)
-  const isProductSaved = useSavedStore((state) =>
-    state.products.some((p) => p.id === product?.id || '')
-  )
 
-  const productStock = product?.stock ?? 0
-  const inStock = productStock > 0
+  const { productQuery } = useProduct({ slug: slug ?? '' })
+  const { productsQuery } = useProducts({
+    categoriesIds: [productQuery.data?.categoryId ?? ''],
+    limit: 9,
+    enabled: !!productQuery.data,
+  })
+
+  const product = productQuery.data
+
+  const {
+    quantity,
+    handleQuantityChange,
+    handleAddCartItem,
+    handleRemoveCartItem,
+    handleSaveItem,
+    handleUnSaveItem,
+    isProductSaved,
+  } = useProductActions(product as Product)
+
+  const inStock = product?.stock ?? 0 > 0
   const productPrice = Number(product?.price)
   const productSecondPrice = Number(product?.secondPrice ?? 0)
   const productPriceToShow = productSecondPrice ? productSecondPrice : productPrice
   const savingPrice = Number(productPrice - productSecondPrice).toFixed(2)
   const savingPercentage = Number(100 - (productSecondPrice * 100) / productPrice).toFixed(2)
-  const itemInCart = useCartStore((state) =>
-    state.items.find((item) => item.productId === product?.id)
-  )
+
   const parsed = parseFormattedText(product?.description)
-
-  const fetchProduct = useCallback(
-    async (slug: string) => {
-      setIsLoading(true)
-      try {
-        const res = await getProduct({ slug })
-        if (res.status === 404) {
-          toast.error(res.error)
-          navigate('/products')
-          return
-        }
-        setProduct(res.data.product)
-      } catch (error) {
-        console.error('Error al obtener productos', error)
-      } finally {
-        setIsLoading(false)
-      }
-    },
-    [navigate]
-  )
-
-  const { productsQuery } = useProducts({ categoriesIds: [product?.categoryId ?? ''], limit: 9 })
-
-  const handleQuantityChange = (change: number) => {
-    setQuantity(Math.max(1, Math.min(productStock, quantity + change)))
-  }
-
-  const handleAddCartItem = async ({
-    product,
-    quantity,
-  }: {
-    product: Product
-    quantity: number
-  }) => {
-    addItem({ product, productId: product.id, quantity })
-    toast.success('Producto añadido al carrito correctamente')
-  }
-
-  const handleRemoveCartItem = async ({ productId }: { productId: string }) => {
-    deleteItem(productId)
-    toast.success('Producto eliminado del carrito correctamente')
-  }
-
-  const handleSaveItem = async ({ product }: { product: Product }) => {
-    saveProduct(product)
-    toast.success('Producto guardado en favoritos correctamente')
-  }
-
-  const handleUnSaveItem = async ({ productId }: { productId: string }) => {
-    removeSaved(productId)
-    toast.success('Producto eliminado de favoritos correctamente')
-  }
-
   const getRecommendedProducts = (products: Product[], currentProductId: string) => {
     return products.filter((p) => p.id !== currentProductId)
   }
+  const itemInCart = useCartStore((state) =>
+    state.items.find((item) => item.productId === product?.id)
+  )
+
+  useEffect(() => {
+    if (user) setUserId(user.id)
+  }, [setUserId, user])
+
+  useEffect(() => {
+    if (!slug?.trim()) {
+      navigate('/products')
+      return
+    }
+  }, [slug, navigate])
 
   useEffect(() => {
     if (!api) return
@@ -139,19 +105,7 @@ function ProductDetail() {
     })
   }, [api])
 
-  useEffect(() => {
-    if (user) setUserId(user.id)
-  }, [setUserId, user])
-
-  useEffect(() => {
-    if (!slug?.trim()) {
-      navigate('/products')
-      return
-    }
-    fetchProduct(slug.trim())
-  }, [slug, navigate, fetchProduct])
-
-  if (isLoading || !product) {
+  if (productQuery.isFetching || !product) {
     return (
       <div className="flex items-center justify-center h-full w-full gap-2">
         <Loader size="md" />
