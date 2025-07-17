@@ -11,7 +11,7 @@ import { Loader } from '@/components/ui/loader'
 
 import { toast } from 'sonner'
 import { Product } from '@/types/product'
-import { getProduct, getProducts } from '@/actions/products'
+import { getProduct } from '@/actions/products'
 import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -31,11 +31,14 @@ import { useCartStore } from '@/store/cart/useCartStore'
 import { parseFormattedText } from '@/lib/utils'
 import LiteYouTubeEmbed from 'react-lite-youtube-embed'
 import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css'
-import { ProductCard } from '.'
 import { useProductsStore } from '@/store/products/useProductsStore'
 import { useAuthStore } from '@/store/auth/useAuthStore'
 import { useSavedStore } from '@/store/products/useSavedStore'
 import Footer from '@/components/pages/Footer'
+import ProductItem from './ProductItem'
+import useProducts from '@/hooks/products/useProducts'
+
+const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
 
 function ProductDetail() {
   const navigate = useNavigate()
@@ -45,12 +48,10 @@ function ProductDetail() {
   const [quantity, setQuantity] = useState(1)
   const [api, setApi] = useState<CarouselApi>()
   const [product, setProduct] = useState<Product>()
-  const [recommended, setRecommended] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
   const user = useAuthStore((state) => state.user)
   const setUserId = useProductsStore((state) => state.setUserId)
-  const filteredProducts = recommended.filter((p) => p.id !== product?.id)
   const addItem = useCartStore((state) => state.addItem)
   const deleteItem = useCartStore((state) => state.deleteItem)
   const saveProduct = useSavedStore((state) => state.addProduct)
@@ -58,7 +59,6 @@ function ProductDetail() {
   const isProductSaved = useSavedStore((state) =>
     state.products.some((p) => p.id === product?.id || '')
   )
-  const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
 
   const productStock = product?.stock ?? 0
   const inStock = productStock > 0
@@ -92,19 +92,7 @@ function ProductDetail() {
     [navigate]
   )
 
-  const fetchRecommended = useCallback(async () => {
-    if (!product?.categoryId) return
-
-    setIsLoading(true)
-    try {
-      const res = await getProducts({ categoriesIds: [product.categoryId], limit: 9 })
-      setRecommended(res.data.objects)
-    } catch (error) {
-      console.error('Error al obtener productos recomendados', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [product])
+  const { productsQuery } = useProducts({ categoriesIds: [product?.categoryId ?? ''], limit: 9 })
 
   const handleQuantityChange = (change: number) => {
     setQuantity(Math.max(1, Math.min(productStock, quantity + change)))
@@ -136,10 +124,12 @@ function ProductDetail() {
     toast.success('Producto eliminado de favoritos correctamente')
   }
 
+  const getRecommendedProducts = (products: Product[], currentProductId: string) => {
+    return products.filter((p) => p.id !== currentProductId)
+  }
+
   useEffect(() => {
-    if (!api) {
-      return
-    }
+    if (!api) return
 
     setCount(api.scrollSnapList().length)
     setCurrent(api.selectedScrollSnap() + 1)
@@ -160,13 +150,6 @@ function ProductDetail() {
     }
     fetchProduct(slug.trim())
   }, [slug, navigate, fetchProduct])
-
-  // Carga los recomendados una vez que `product` ya fue cargado
-  useEffect(() => {
-    if (product) {
-      fetchRecommended()
-    }
-  }, [product, fetchRecommended])
 
   if (isLoading || !product) {
     return (
@@ -396,25 +379,34 @@ function ProductDetail() {
             </div>
           </div>
         )}
-        {filteredProducts.length > 0 && (
-          <section className="my-6 mx-auto">
-            <h4 className="font-bold text-3xl mb-8 text-center">
-              Productos recomendados ({filteredProducts.length})
-            </h4>
-            <Carousel opts={{ align: 'start', loop: true }} className="px-4">
-              <div className="flex gap-2 justify-center items-baseline my-4">
-                <CarouselPrevious className="relative left-0 top-0 translate-none" />
-                <CarouselNext className="relative left-0 top-0 translate-none" />
-              </div>
-              <CarouselContent>
-                {filteredProducts.map((product) => (
-                  <CarouselItem key={product.id} className="basis-4/4 sm:basis-1/4">
-                    <ProductCard product={product} key={product.id} />
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-            </Carousel>
-          </section>
+        {productsQuery.isFetching ? (
+          <div className="flex items-center justify-center h-full w-full gap-2">
+            <Loader size="md" />
+            <span>Cargando...</span>
+          </div>
+        ) : (
+          productsQuery.isSuccess &&
+          productsQuery.data.objects.length && (
+            <section className="my-6 mx-auto">
+              <h4 className="font-bold text-3xl mb-8 text-center">
+                Productos recomendados (
+                {getRecommendedProducts(productsQuery.data.objects, product.id).length})
+              </h4>
+              <Carousel opts={{ align: 'start', loop: true }} className="px-4">
+                <div className="flex gap-2 justify-center items-baseline my-4">
+                  <CarouselPrevious className="relative left-0 top-0 translate-none" />
+                  <CarouselNext className="relative left-0 top-0 translate-none" />
+                </div>
+                <CarouselContent>
+                  {getRecommendedProducts(productsQuery.data.objects, product.id).map((product) => (
+                    <CarouselItem key={product.id} className="basis-4/4 sm:basis-1/4">
+                      <ProductItem product={product} renderMode="grid" />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+              </Carousel>
+            </section>
+          )
         )}
       </div>
       <Footer />

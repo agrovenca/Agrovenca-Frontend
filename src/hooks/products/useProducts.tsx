@@ -11,12 +11,12 @@ interface Options {
   inStockOnly?: boolean
 }
 
-function useProducts(options: Options) {
+function useProducts({ limit }: Options) {
   const [page, setPage] = useState(1)
 
   const productsQuery = useQuery({
-    queryKey: ['products', { page }],
-    queryFn: () => getProducts({ page }),
+    queryKey: ['products', { page, limit }],
+    queryFn: () => getProducts({ page, limit }),
     staleTime: 1000 * 60 * 10,
   })
 
