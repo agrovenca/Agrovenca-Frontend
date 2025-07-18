@@ -1,9 +1,9 @@
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { Link } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
 import useProducts from '@/hooks/products/useProducts'
 import ProductItem from '../products/ProductItem'
+import ProductSkeleton from '../products/ProductSkeleton'
 
 function FeaturedProducts() {
   const limit = 4
@@ -14,8 +14,8 @@ function FeaturedProducts() {
       <div className="container space-y-12 mx-auto">
         {productsQuery.isFetching && (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {[...Array(limit)].map((_, i) => (
-              <Card key={i} className="animate-pulse h-[350px] bg-muted" />
+            {[...Array(limit)].map((_, idx) => (
+              <ProductSkeleton key={idx} renderMode="card" />
             ))}
           </div>
         )}
@@ -31,7 +31,7 @@ function FeaturedProducts() {
             </div>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {productsQuery.data.objects.map((product) => (
-                <ProductItem key={product.id} product={product} renderMode="grid" />
+                <ProductItem key={product.id} product={product} renderMode="card" />
               ))}
             </div>
           </>
