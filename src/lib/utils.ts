@@ -141,3 +141,7 @@ export function generateRandomHexString(length = 6) {
 
 export const productImage = (productImage: ProductImage[]) =>
   productImage.length ? spaceBaseUrl + productImage[0].s3Key : ProductImagePlaceholder
+
+export const sleep = (ms: number) => {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}

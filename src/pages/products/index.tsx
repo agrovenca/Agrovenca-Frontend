@@ -2,7 +2,6 @@ import Navbar from '@/components/pages/HomeNavbar'
 import { useProductsStore } from '@/store/products/useProductsStore'
 import { useEffect, useState } from 'react'
 
-import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Grid, List, Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -13,6 +12,8 @@ import useProducts from '@/hooks/products/useProducts'
 import ProductItem from './ProductItem'
 
 import { useDebounce } from 'use-debounce'
+import ProductSkeleton from './ProductSkeleton'
+import ExtendedTooltip from '@/components/blocks/ExtendedTooltip'
 
 function ProductsPage() {
   const [search, setSearch] = useState('')
@@ -57,22 +58,26 @@ function ProductsPage() {
 
           <div className="flex items-center gap-4">
             <div className="flex border rounded-md">
-              <Button
-                variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setViewMode('grid')}
-                className="rounded-r-none"
-              >
-                <Grid className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={viewMode === 'list' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setViewMode('list')}
-                className="rounded-l-none"
-              >
-                <List className="h-4 w-4" />
-              </Button>
+              <ExtendedTooltip content={'Ver tarjetas'}>
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className="rounded-r-none"
+                >
+                  <Grid className="h-4 w-4" />
+                </Button>
+              </ExtendedTooltip>
+              <ExtendedTooltip content={'Ver items'}>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="rounded-l-none"
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </ExtendedTooltip>
             </div>
           </div>
         </div>
@@ -80,37 +85,43 @@ function ProductsPage() {
         <div className="flex gap-6 flex-col sm:flex-row">
           {/* Main Content */}
           <main className="flex-1 mx-auto">
+            <div className="space-y-4"></div>
             {/* Products Grid/List */}
-            {productsQuery.isPending ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {[...Array(8)].map((_, i) => (
-                  <Card key={i} className="animate-pulse h-[350px] bg-muted" />
-                ))}
-              </div>
+            {productsQuery.isFetching ? (
+              viewMode === 'grid' ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  {[...Array(8)].map((_, idx) => (
+                    <ProductSkeleton key={idx} renderMode="card" />
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {[...Array(8)].map((_, idx) => (
+                    <ProductSkeleton key={idx} renderMode="listItem" />
+                  ))}
+                </div>
+              )
+            ) : productsQuery.isSuccess && productsQuery.data.objects.length ? (
+              viewMode === 'grid' ? (
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {productsQuery.data.objects.map((product) => (
+                    <ProductItem key={product.id} product={product} renderMode="card" />
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {productsQuery.data.objects.map((product) => (
+                    <ProductItem key={product.id} product={product} renderMode="listItem" />
+                  ))}
+                </div>
+              )
             ) : (
-              <>
-                {viewMode === 'grid' ? (
-                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {productsQuery.data?.objects.map((product) => (
-                      <ProductItem key={product.id} product={product} renderMode="grid" />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {productsQuery.data?.objects.map((product) => (
-                      <ProductItem key={product.id} product={product} renderMode="list" />
-                    ))}
-                  </div>
-                )}
-                {productsQuery.data?.objects.length === 0 && (
-                  <div className="text-center py-12">
-                    <p className="text-muted-foreground">No se encontraron productos</p>
-                  </div>
-                )}
-              </>
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">No se encontraron productos</p>
+              </div>
             )}
 
-            {productsQuery.data && (
+            {productsQuery.isSuccess && productsQuery.data && (
               <Pagination
                 hasNextPage={productsQuery.data.hasNextPage}
                 hasPreviousPage={productsQuery.data.hasPreviousPage}

@@ -36,6 +36,7 @@ import ProductItem from './ProductItem'
 import useProducts from '@/hooks/products/useProducts'
 import useProduct from '@/hooks/products/useProduct'
 import { useProductActions } from '@/hooks/products/useActions'
+import ProductSkeleton from './ProductSkeleton'
 
 const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
 
@@ -355,9 +356,10 @@ function ProductDetail() {
           </div>
         )}
         {productsQuery.isFetching ? (
-          <div className="flex items-center justify-center h-full w-full gap-2">
-            <Loader size="md" />
-            <span>Cargando...</span>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
+            {[...Array(4)].map((_, idx) => (
+              <ProductSkeleton key={idx} renderMode="card" />
+            ))}
           </div>
         ) : (
           productsQuery.isSuccess &&
@@ -375,7 +377,7 @@ function ProductDetail() {
                 <CarouselContent>
                   {getRecommendedProducts(productsQuery.data.objects, product.id).map((product) => (
                     <CarouselItem key={product.id} className="basis-4/4 sm:basis-1/4">
-                      <ProductItem product={product} renderMode="grid" />
+                      <ProductItem product={product} renderMode="card" />
                     </CarouselItem>
                   ))}
                 </CarouselContent>

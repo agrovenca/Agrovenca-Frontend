@@ -13,7 +13,13 @@ import useUnities from '@/hooks/unities/useUnities'
 import { useProductActions } from '@/hooks/products/useActions'
 import useProductPrefetch from '@/hooks/products/useProductPrefetch'
 
-function ProductItem({ product, renderMode }: { product: Product; renderMode: 'grid' | 'list' }) {
+function ProductItem({
+  product,
+  renderMode,
+}: {
+  product: Product
+  renderMode: 'card' | 'listItem'
+}) {
   const inStock = product.stock > 0
   const productPrice = Number(product.price)
   const productSecondPrice = Number(product.secondPrice ?? 0)
@@ -37,11 +43,11 @@ function ProductItem({ product, renderMode }: { product: Product; renderMode: 'g
 
   const firstProductImage = getFirstProductImage(product.images)
 
-  if (renderMode === 'list') {
+  if (renderMode === 'listItem') {
     return (
       <Card
         onMouseEnter={() => prefetch({ slug: product.slug })}
-        className="overflow-x-scroll overflow-y-hidden sm:overflow-hidden py-0"
+        className="overflow-x-scroll overflow-y-hidden sm:overflow-hidden py-0 animate-fadeIn"
       >
         <CardContent className="p-0">
           <div className="flex gap-2">
@@ -151,7 +157,7 @@ function ProductItem({ product, renderMode }: { product: Product; renderMode: 'g
   return (
     <div
       onMouseEnter={() => prefetch({ slug: product.slug })}
-      className="group relative mx-auto overflow-hidden rounded-lg border bg-background p-2 flex flex-col transition-colors hover:border-primary h-full max-w-sm w-full"
+      className="group animate-fadeIn relative mx-auto overflow-hidden rounded-lg border bg-background p-2 flex flex-col transition-colors hover:border-primary h-full max-w-sm w-full"
     >
       <Link to={`/products/${product.slug}`} viewTransition>
         <figure className="aspect-square overflow-hidden rounded-md flex-1 h-[300px] w-full">
