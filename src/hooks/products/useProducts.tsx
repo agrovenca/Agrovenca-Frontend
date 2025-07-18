@@ -12,12 +12,12 @@ interface Options {
   enabled?: boolean
 }
 
-function useProducts({ limit, enabled = true }: Options) {
+function useProducts({ search, limit, enabled = true }: Options) {
   const [page, setPage] = useState(1)
 
   const productsQuery = useQuery({
-    queryKey: ['products', { page, limit }],
-    queryFn: () => getProducts({ page, limit }),
+    queryKey: ['products', { page, limit, search }],
+    queryFn: () => getProducts({ page, limit, search }),
     staleTime: 1000 * 60 * 10,
     enabled,
   })

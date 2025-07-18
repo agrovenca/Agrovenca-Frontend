@@ -12,6 +12,8 @@ import Footer from '@/components/pages/Footer'
 import useProducts from '@/hooks/products/useProducts'
 import ProductItem from './ProductItem'
 
+import { useDebounce } from 'use-debounce'
+
 function ProductsPage() {
   const [search, setSearch] = useState('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
@@ -19,7 +21,12 @@ function ProductsPage() {
   const user = useAuthStore((state) => state.user)
   const setUserId = useProductsStore((state) => state.setUserId)
 
-  const { productsQuery, setNextPage, setPrevPage, setPageNumber } = useProducts({ limit: 12 })
+  const [debouncedSearch] = useDebounce(search, 500)
+
+  const { productsQuery, setNextPage, setPrevPage, setPageNumber } = useProducts({
+    limit: 12,
+    search: debouncedSearch,
+  })
 
   useEffect(() => {
     if (user) setUserId(user.id)
@@ -72,7 +79,7 @@ function ProductsPage() {
 
         <div className="flex gap-6 flex-col sm:flex-row">
           {/* Main Content */}
-          <main className="flex-1">
+          <main className="flex-1 mx-auto">
             {/* Products Grid/List */}
             {productsQuery.isPending ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
