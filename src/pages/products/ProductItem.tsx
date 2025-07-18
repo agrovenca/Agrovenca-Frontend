@@ -151,7 +151,7 @@ function ProductItem({ product, renderMode }: { product: Product; renderMode: 'g
   return (
     <div
       onMouseEnter={() => prefetch({ slug: product.slug })}
-      className="group relative overflow-hidden rounded-lg border bg-background p-2 flex flex-col transition-colors hover:border-primary h-full max-w-sm w-full"
+      className="group relative mx-auto overflow-hidden rounded-lg border bg-background p-2 flex flex-col transition-colors hover:border-primary h-full max-w-sm w-full"
     >
       <Link to={`/products/${product.slug}`} viewTransition>
         <figure className="aspect-square overflow-hidden rounded-md flex-1 h-[300px] w-full">

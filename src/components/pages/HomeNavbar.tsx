@@ -51,7 +51,11 @@ function Navbar() {
               key={idx}
               to={item.link}
               viewTransition
-              className="text-sm font-medium hover:text-primary"
+              // className={"text-sm font-medium hover:text-primary"}
+              className={({ isActive }) =>
+                (isActive ? 'text-primary' : 'text-muted-foreground') +
+                ' text-sm font-medium hover:text-primary'
+              }
             >
               {item.name}
             </NavLink>
@@ -96,13 +100,17 @@ function Navbar() {
                   <SheetTitle>Menú</SheetTitle>
                   <SheetDescription>Navegue por nuestras secciones</SheetDescription>
                 </SheetHeader>
-                <div className="mt-6 flex flex-col space-y-4">
+                <div className="mt-6 flex flex-col space-y-4 mx-4">
                   {menuItems.map((item, idx) => (
                     <NavLink
                       key={idx}
                       to={item.link}
                       viewTransition
-                      className="px-3 py-2 text-sm font-medium hover:text-primary"
+                      // className="px-3 py-2 text-sm font-medium hover:text-primary"
+                      className={({ isActive }) =>
+                        (isActive ? 'text-primary' : 'text-muted-foreground') +
+                        ' text-sm font-medium hover:text-primary'
+                      }
                     >
                       {item.name}
                     </NavLink>
