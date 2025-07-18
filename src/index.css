@@ -124,6 +124,15 @@
     U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
+::view-transition-old(ProductImage-*),
+::view-transition-new(ProductImage-*) {
+  animation-duration: 500ms;
+  animation-timing-function: ease-in-out;
+  transition-property: transform, opacity;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);

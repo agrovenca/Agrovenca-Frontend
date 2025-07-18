@@ -1,7 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { HeartIcon, HeartOffIcon, XIcon } from 'lucide-react'
-import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
 
 import { useCartStore } from '@/store/cart/useCartStore'
 import { Product } from '@/types/product'
@@ -12,49 +11,50 @@ import { Card, CardContent } from '@/components/ui/card'
 import useCategories from '@/hooks/categories/useCategories'
 import useUnities from '@/hooks/unities/useUnities'
 import { useProductActions } from '@/hooks/products/useActions'
-
-const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
+import useProductPrefetch from '@/hooks/products/useProductPrefetch'
 
 function ProductItem({ product, renderMode }: { product: Product; renderMode: 'grid' | 'list' }) {
   const inStock = product.stock > 0
   const productPrice = Number(product.price)
   const productSecondPrice = Number(product.secondPrice ?? 0)
   const priceToShow = productSecondPrice ? productSecondPrice : productPrice
-  const firstProductImage = product.images.length
-    ? product.images.find((image) => image.displayOrder === 1)?.s3Key
-    : ProductImagePlaceholder
 
   const { categoriesQuery } = useCategories()
   const { unitiesQuery } = useUnities()
+  const { prefetch } = useProductPrefetch()
 
-  const { handleRemoveCartItem, handleSaveItem, handleUnSaveItem, isProductSaved } =
-    useProductActions(product as Product)
+  const {
+    handleRemoveCartItem,
+    handleSaveItem,
+    handleUnSaveItem,
+    isProductSaved,
+    getFirstProductImage,
+  } = useProductActions(product as Product)
 
   const isProductInCart = useCartStore((state) =>
     state.items.some((item) => item.productId === product.id)
   )
 
+  const firstProductImage = getFirstProductImage(product.images)
+
   if (renderMode === 'list') {
     return (
-      <Card className="overflow-x-scroll overflow-y-hidden sm:overflow-hidden py-0">
+      <Card
+        onMouseEnter={() => prefetch({ slug: product.slug })}
+        className="overflow-x-scroll overflow-y-hidden sm:overflow-hidden py-0"
+      >
         <CardContent className="p-0">
           <div className="flex gap-2">
             <Link to={`/products/${product.slug}`} viewTransition>
               <figure className="relative w-48 h-48 shrink-0">
                 <img
+                  src={firstProductImage?.s3Key}
                   style={{
-                    viewTransitionName: `ProductImage-${
-                      firstProductImage ?? ProductImagePlaceholder
-                    }`,
+                    viewTransitionName: `ProductImage-${firstProductImage?.id}`,
                   }}
                   loading="lazy"
                   alt={product.name}
-                  className="w-full h-full object-cover"
-                  src={
-                    product.images.length > 0
-                      ? spaceBaseUrl + firstProductImage
-                      : ProductImagePlaceholder
-                  }
+                  className="w-full h-full object-cover aspect-video"
                 />
                 {!inStock && (
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
@@ -149,15 +149,19 @@ function ProductItem({ product, renderMode }: { product: Product; renderMode: 'g
   }
 
   return (
-    <div className="group relative overflow-hidden rounded-lg border bg-background p-2 flex flex-col transition-colors hover:border-primary h-full max-w-sm w-full">
+    <div
+      onMouseEnter={() => prefetch({ slug: product.slug })}
+      className="group relative overflow-hidden rounded-lg border bg-background p-2 flex flex-col transition-colors hover:border-primary h-full max-w-sm w-full"
+    >
       <Link to={`/products/${product.slug}`} viewTransition>
         <figure className="aspect-square overflow-hidden rounded-md flex-1 h-[300px] w-full">
           <img
-            src={
-              product.images.length > 0 ? spaceBaseUrl + firstProductImage : ProductImagePlaceholder
-            }
+            src={firstProductImage?.s3Key}
+            style={{
+              viewTransitionName: `ProductImage-${firstProductImage?.id}`,
+            }}
             alt={product.name}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 aspect-video"
           />
         </figure>
       </Link>
