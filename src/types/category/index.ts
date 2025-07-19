@@ -10,3 +10,8 @@ export interface Category {
   updatedAt: string
   _count: { products: number }
 }
+
+export interface CategoryResponse {
+  category: Category
+  message: string
+}

@@ -47,7 +47,7 @@ function CategoriesDashboardPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {(categoriesQuery.isPending || categoriesQuery.isFetching) && (
+          {categoriesQuery.isPending || categoriesQuery.isFetching ? (
             <TableRow>
               <TableCell colSpan={6} className="text-center">
                 <div className="flex items-center justify-center h-full w-full gap-2">
@@ -56,8 +56,7 @@ function CategoriesDashboardPage() {
                 </div>
               </TableCell>
             </TableRow>
-          )}
-          {categoriesQuery.isSuccess && categoriesQuery.data.length ? (
+          ) : categoriesQuery.isSuccess && categoriesQuery.data.length ? (
             categoriesQuery.data.map((category) => (
               <TableRow key={category.id} className="font-serif">
                 <TableCell className="font-medium">{category.name}</TableCell>

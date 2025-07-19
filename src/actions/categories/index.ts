@@ -1,6 +1,6 @@
 import { apiWithCredentials, apiWithOutCredentials } from '@/actions/api'
 import { CategorySchema } from '@/schemas/category'
-import { Category } from '@/types/category'
+import { Category, CategoryResponse } from '@/types/category'
 import axios from 'axios'
 import { z } from 'zod'
 
@@ -20,13 +20,10 @@ export const createCategory = async ({
   newData,
 }: {
   newData: z.infer<typeof CategorySchema>
-}): Promise<Category> => {
+}): Promise<CategoryResponse> => {
   try {
-    const { data } = await apiWithCredentials.post<{ category: Category; message: string }>(
-      `/categories`,
-      newData
-    )
-    return data.category
+    const { data } = await apiWithCredentials.post<CategoryResponse>(`/categories`, newData)
+    return data
   } catch (error) {
     if (axios.isAxiosError(error)) {
       const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }
@@ -42,13 +39,10 @@ export const updateCategory = async ({
 }: {
   id: string
   newData: z.infer<typeof CategorySchema>
-}): Promise<Category> => {
+}): Promise<CategoryResponse> => {
   try {
-    const { data } = await apiWithCredentials.patch<{ category: Category; message: string }>(
-      `/categories/${id}`,
-      newData
-    )
-    return data.category
+    const { data } = await apiWithCredentials.patch<CategoryResponse>(`/categories/${id}`, newData)
+    return data
   } catch (error) {
     if (axios.isAxiosError(error)) {
       const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }
@@ -58,12 +52,10 @@ export const updateCategory = async ({
   }
 }
 
-export const deleteCategory = async ({ id }: { id: string }): Promise<Category> => {
+export const deleteCategory = async ({ id }: { id: string }): Promise<CategoryResponse> => {
   try {
-    const { data } = await apiWithCredentials.delete<{ category: Category; message: string }>(
-      `/categories/${id}`
-    )
-    return data.category
+    const { data } = await apiWithCredentials.delete<CategoryResponse>(`/categories/${id}`)
+    return data
   } catch (error) {
     if (axios.isAxiosError(error)) {
       const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }

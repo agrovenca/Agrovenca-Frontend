@@ -16,12 +16,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { useEffect, useState } from 'react'
 import ErrorForm from '@/components/pages/ErrorForm'
-import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { UnitySchema } from '@/schemas/unity'
 import { Unity } from '@/types/unity'
 import { Loader } from '@/components/ui/loader'
-import { update } from '@/actions/unities'
-import { useUnitiesStore } from '@/store/unities/useUnitiesStore'
 import {
   Form,
   FormControl,
@@ -30,6 +27,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import useUpdateUnity from '@/hooks/unities/useUpdateUnity'
 
 type Props = {
   unity: Unity
@@ -38,11 +36,8 @@ type Props = {
 function Update({ unity }: Props) {
   const [charCount, setCharCount] = useState(unity.description?.length || 0)
   const [isOpen, setIsOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
 
-  const updateUnity = useUnitiesStore((state) => state.updateUnity)
-  const errorStatus = useResponseStatusStore((state) => state.errorStatus)
-  const setError = useResponseStatusStore((state) => state.setError)
+  const { updateUnityMutation } = useUpdateUnity()
 
   const form = useForm<z.infer<typeof UnitySchema>>({
     resolver: zodResolver(UnitySchema),
@@ -52,29 +47,21 @@ function Update({ unity }: Props) {
     },
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof UnitySchema>> = async (data) => {
-    setIsLoading(true)
-    try {
-      const res = await update(unity.id, data)
-
-      if (res.error) {
-        setError(res.error)
+  const onSubmit: SubmitHandler<z.infer<typeof UnitySchema>> = async (newData) => {
+    updateUnityMutation.mutate(
+      { id: unity.id, newData },
+      {
+        onSuccess: (unityResponse) => {
+          toast.success(unityResponse.message)
+          form.reset()
+          setCharCount(0)
+          setIsOpen(false)
+        },
+        onError: (_error) => {
+          toast.error('Ocurrió un error. Por favor intenta de nuevo.')
+        },
       }
-
-      if (res.status === 200) {
-        const { message, unity: updatedUnity } = res.data
-        toast.success(message)
-
-        form.reset()
-        setCharCount(0)
-        setIsOpen(false)
-        updateUnity(updatedUnity)
-      }
-    } catch (_error) {
-      toast.error('Ocurrió un error. Por favor intenta de nuevo.')
-    } finally {
-      setIsLoading(false)
-    }
+    )
   }
 
   useEffect(() => {
@@ -141,14 +128,24 @@ function Update({ unity }: Props) {
               )}
             />
 
-            {errorStatus.error && <ErrorForm message={errorStatus.message} />}
+            {updateUnityMutation.isError && (
+              <ErrorForm message={updateUnityMutation.error.message} />
+            )}
 
             <div className="flex items-center gap-2 justify-end">
               <Button type="button" variant={'secondary'} onClick={() => form.reset({ ...unity })}>
                 Restablecer
               </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? <Loader size="sm" variant="spinner" /> : 'Guardar'}
+              <Button
+                className={
+                  updateUnityMutation.isPending || !form.formState.isValid
+                    ? 'cursor-not-allowed'
+                    : 'cursor-pointer'
+                }
+                type="submit"
+                disabled={updateUnityMutation.isPending}
+              >
+                {updateUnityMutation.isPending ? <Loader size="sm" variant="spinner" /> : 'Guardar'}
               </Button>
             </div>
           </form>

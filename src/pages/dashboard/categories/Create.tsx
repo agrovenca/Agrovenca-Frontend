@@ -50,8 +50,8 @@ function CreateCategory() {
     createCategoryMutation.mutate(
       { newData: data },
       {
-        onSuccess: (_newCategory) => {
-          toast.success(`Categoría creada con éxito.`)
+        onSuccess: (categoryResponse) => {
+          toast.success(categoryResponse.message)
           form.reset()
           setCharCount(0)
           setIsOpen(false)
