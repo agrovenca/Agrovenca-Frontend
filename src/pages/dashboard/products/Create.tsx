@@ -38,9 +38,9 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
 import { create } from '@/actions/products'
 import { useProductsStore } from '@/store/products/useProductsStore'
-import { useCategoriesStore } from '@/store/categories/useCategoriesStore'
-import { useUnitiesStore } from '@/store/unities/useUnitiesStore'
 import { useAuthStore } from '@/store/auth/useAuthStore'
+import useCategories from '@/hooks/categories/useCategories'
+import useUnities from '@/hooks/unities/useUnities'
 
 function CreateProduct() {
   const [charCount, setCharCount] = useState(0)
@@ -52,10 +52,11 @@ function CreateProduct() {
   const products = useProductsStore((state) => state.products)
   const setUserId = useProductsStore((state) => state.setUserId)
   const setProducts = useProductsStore((state) => state.setProducts)
-  const categories = useCategoriesStore((state) => state.categories)
-  const unities = useUnitiesStore((state) => state.unities)
   const errorStatus = useResponseStatusStore((state) => state.errorStatus)
   const setError = useResponseStatusStore((state) => state.setError)
+
+  const { categoriesQuery } = useCategories()
+  const { unitiesQuery } = useUnities()
 
   const form = useForm<z.infer<typeof ProductSchema>>({
     resolver: zodResolver(ProductSchema),
@@ -271,12 +272,12 @@ function CreateProduct() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {categories.length <= 0 ? (
-                          <SelectItem value="" disabled>
+                        {!categoriesQuery.data || !categoriesQuery.data.length ? (
+                          <SelectItem value="null" disabled>
                             No existen categorías
                           </SelectItem>
                         ) : (
-                          categories.map((category) => (
+                          categoriesQuery.data.map((category) => (
                             <SelectItem value={category.id} key={category.id}>
                               {category.name}
                             </SelectItem>
@@ -302,12 +303,12 @@ function CreateProduct() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {unities.length <= 0 ? (
-                          <SelectItem value="" disabled>
+                        {!unitiesQuery.data || !unitiesQuery.data.length ? (
+                          <SelectItem value="null" disabled>
                             No existen unidades
                           </SelectItem>
                         ) : (
-                          unities.map((unity) => (
+                          unitiesQuery.data.map((unity) => (
                             <SelectItem value={unity.id} key={unity.id}>
                               {unity.name}
                             </SelectItem>

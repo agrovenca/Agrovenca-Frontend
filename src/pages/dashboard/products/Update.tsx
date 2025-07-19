@@ -39,8 +39,8 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
 import { update } from '@/actions/products'
 import { useProductsStore } from '@/store/products/useProductsStore'
-import { useCategoriesStore } from '@/store/categories/useCategoriesStore'
-import { useUnitiesStore } from '@/store/unities/useUnitiesStore'
+import useCategories from '@/hooks/categories/useCategories'
+import useUnities from '@/hooks/unities/useUnities'
 
 type Props = {
   object: Product
@@ -53,10 +53,11 @@ function UpdateProduct({ object }: Props) {
   const [isOpen, setIsOpen] = useState(false)
 
   const updateProduct = useProductsStore((state) => state.updateProduct)
-  const categories = useCategoriesStore((state) => state.categories)
-  const unities = useUnitiesStore((state) => state.unities)
   const errorStatus = useResponseStatusStore((state) => state.errorStatus)
   const setError = useResponseStatusStore((state) => state.setError)
+
+  const { categoriesQuery } = useCategories()
+  const { unitiesQuery } = useUnities()
 
   const form = useForm<z.infer<typeof ProductUpdateSchema>>({
     resolver: zodResolver(ProductUpdateSchema),
@@ -266,12 +267,12 @@ function UpdateProduct({ object }: Props) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {categories.length <= 0 ? (
-                          <SelectItem value="" disabled>
+                        {!categoriesQuery.data || !categoriesQuery.data.length ? (
+                          <SelectItem value="null" disabled>
                             No existen categorías
                           </SelectItem>
                         ) : (
-                          categories.map((category) => (
+                          categoriesQuery.data.map((category) => (
                             <SelectItem value={category.id} key={category.id}>
                               {category.name}
                             </SelectItem>
@@ -297,12 +298,12 @@ function UpdateProduct({ object }: Props) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {unities.length <= 0 ? (
-                          <SelectItem value="" disabled>
+                        {!unitiesQuery.data || !unitiesQuery.data.length ? (
+                          <SelectItem value="null" disabled>
                             No existen unidades
                           </SelectItem>
                         ) : (
-                          unities.map((unity) => (
+                          unitiesQuery.data.map((unity) => (
                             <SelectItem value={unity.id} key={unity.id}>
                               {unity.name}
                             </SelectItem>

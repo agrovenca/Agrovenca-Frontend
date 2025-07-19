@@ -35,7 +35,7 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import ErrorForm from '@/components/pages/ErrorForm'
 import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { CouponUpdateSchema } from '@/schemas/coupons'
@@ -43,8 +43,7 @@ import { CouponType } from '@/types/coupon'
 import { Loader } from '@/components/ui/loader'
 import { update } from '@/actions/coupons'
 import { useCouponsStore } from '@/store/coupons/useCouponsStore'
-import { useCategoriesStore } from '@/store/categories/useCategoriesStore'
-import { getAllCategories } from '@/actions/categories'
+import useCategories from '@/hooks/categories/useCategories'
 
 type Props = {
   coupon: CouponType
@@ -58,8 +57,8 @@ function UpdateCoupon({ coupon }: Props) {
   const updateCoupon = useCouponsStore((state) => state.updateCoupon)
   const errorStatus = useResponseStatusStore((state) => state.errorStatus)
   const setError = useResponseStatusStore((state) => state.setError)
-  const categories = useCategoriesStore((store) => store.categories)
-  const setCategories = useCategoriesStore((store) => store.setCategories)
+
+  const { categoriesQuery } = useCategories()
 
   const form = useForm<z.infer<typeof CouponUpdateSchema>>({
     resolver: zodResolver(CouponUpdateSchema),
@@ -94,32 +93,6 @@ function UpdateCoupon({ coupon }: Props) {
       setIsLoading(false)
     }
   }
-
-  const fetchCategories = useCallback(async () => {
-    try {
-      const res = await getAllCategories()
-      if (res.error) {
-        setError(res.error)
-        return
-      }
-      if (res.status === 200) {
-        setCategories(res.data)
-      }
-    } catch (error) {
-      console.error('Error fetching categories:', error)
-      setError('No se pudieron cargar las categorías. Por favor intenta de nuevo más tarde.')
-    }
-  }, [setCategories, setError])
-
-  useEffect(() => {
-    if (!categories || !categories.length) {
-      try {
-        fetchCategories()
-      } catch (error) {
-        console.error('Error fetching categories:', error)
-      }
-    }
-  }, [categories, fetchCategories])
 
   useEffect(() => {
     const { description, expiresAt } = coupon
@@ -338,7 +311,9 @@ function UpdateCoupon({ coupon }: Props) {
                           {field.value && field.value.length > 0
                             ? field.value
                                 .map((id) => {
-                                  const category = categories.find((cat) => cat.id === id)
+                                  const category = categoriesQuery.data?.find(
+                                    (cat) => cat.id === id
+                                  )
                                   return category ? category.name : ''
                                 })
                                 .join(', ')
@@ -347,7 +322,7 @@ function UpdateCoupon({ coupon }: Props) {
                       </PopoverTrigger>
                       <PopoverContent className="w-[200px]">
                         <div className="flex flex-col gap-2">
-                          {categories.map((category) => (
+                          {categoriesQuery.data?.map((category) => (
                             <div key={category.id} className="flex items-center gap-2">
                               <Checkbox
                                 id={category.id}
