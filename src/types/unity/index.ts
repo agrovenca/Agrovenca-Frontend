@@ -6,3 +6,8 @@ export interface Unity {
   updatedAt: string
   _count: { products: number }
 }
+
+export interface UnityResponse {
+  unity: Unity
+  message: string
+}

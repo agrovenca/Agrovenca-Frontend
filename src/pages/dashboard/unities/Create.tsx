@@ -16,11 +16,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { useState } from 'react'
 import ErrorForm from '@/components/pages/ErrorForm'
-import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { UnitySchema } from '@/schemas/unity'
-import { create } from '@/actions/unities'
 import { Loader } from '@/components/ui/loader'
-import { useUnitiesStore } from '@/store/unities/useUnitiesStore'
 import {
   Form,
   FormControl,
@@ -29,16 +26,13 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import useCreateUnity from '@/hooks/unities/useCreateUnity'
 
 function CreateUnity() {
   const [charCount, setCharCount] = useState(0)
   const [isOpen, setIsOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
 
-  const unities = useUnitiesStore((state) => state.unities)
-  const setUnities = useUnitiesStore((state) => state.setUnities)
-  const errorStatus = useResponseStatusStore((state) => state.errorStatus)
-  const setError = useResponseStatusStore((state) => state.setError)
+  const { createUnityMutation } = useCreateUnity()
 
   const form = useForm<z.infer<typeof UnitySchema>>({
     resolver: zodResolver(UnitySchema),
@@ -49,29 +43,24 @@ function CreateUnity() {
   })
 
   const onSubmit: SubmitHandler<z.infer<typeof UnitySchema>> = async (data) => {
-    setIsLoading(true)
-
-    try {
-      const res = await create(data)
-
-      if (res.error) {
-        setError(res.error)
+    createUnityMutation.mutate(
+      { newData: data },
+      {
+        onSuccess: (unityResponse) => {
+          toast.success(unityResponse.message)
+          form.reset()
+          setCharCount(0)
+          setIsOpen(false)
+        },
+        onError: (err) => {
+          const errorMsg = () => {
+            if (err instanceof Error) return err.message
+            return 'Ocurrió un error. Por favor intenta de nuevo.'
+          }
+          toast.error(errorMsg())
+        },
       }
-
-      if (res.status === 201) {
-        const { message, unity } = res.data
-        toast.success(message)
-
-        form.reset()
-        setCharCount(0)
-        setIsOpen(false)
-        setUnities([unity, ...unities])
-      }
-    } catch (_error) {
-      toast.error('Ocurrió un error. Por favor intenta de nuevo.')
-    } finally {
-      setIsLoading(false)
-    }
+    )
   }
 
   return (
@@ -132,16 +121,20 @@ function CreateUnity() {
               )}
             />
 
-            {errorStatus.error && <ErrorForm message={errorStatus.message} />}
+            {createUnityMutation.isError && (
+              <ErrorForm message={createUnityMutation.error.message} />
+            )}
 
             <Button
               type="submit"
               className={
-                isLoading || !form.formState.isValid ? 'cursor-not-allowed' : 'cursor-pointer'
+                createUnityMutation.isPending || !form.formState.isValid
+                  ? 'cursor-not-allowed'
+                  : 'cursor-pointer'
               }
-              disabled={isLoading || !form.formState.isValid}
+              disabled={createUnityMutation.isPending || !form.formState.isValid}
             >
-              {isLoading ? <Loader size="sm" variant="spinner" /> : 'Guardar'}
+              {createUnityMutation.isPending ? <Loader size="sm" variant="spinner" /> : 'Guardar'}
             </Button>
           </form>
         </Form>

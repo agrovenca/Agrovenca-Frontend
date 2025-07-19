@@ -44,12 +44,12 @@ function Update({ category }: Props) {
 
   const { updateCategoryMutation } = useUpdateCategory()
 
-  const onSubmit: SubmitHandler<z.infer<typeof CategorySchema>> = async (data) => {
+  const onSubmit: SubmitHandler<z.infer<typeof CategorySchema>> = async (newData) => {
     updateCategoryMutation.mutate(
-      { id: category.id, newData: data },
+      { id: category.id, newData },
       {
-        onSuccess: (_data) => {
-          toast.success('Categoría actualizada')
+        onSuccess: (categoryResponse) => {
+          toast.success(categoryResponse.message)
           form.reset()
           setCharCount(0)
           setIsOpen(false)

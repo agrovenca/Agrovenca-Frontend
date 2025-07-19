@@ -1,4 +1,3 @@
-import { destroy } from '@/actions/unities'
 import { Loader } from '@/components/ui/loader'
 import {
   Table,
@@ -11,10 +10,10 @@ import {
 import { Button } from '@/components/ui/button'
 import { RefreshCwIcon } from 'lucide-react'
 import { getLocalDateTime, truncateText } from '@/lib/utils'
-import DeleteDialog from '@/components/blocks/DeleteDialog'
 import CreateUnity from './Create'
 import Update from './Update'
 import useUnities from '@/hooks/unities/useUnities'
+import DeleteUnity from './Delete'
 
 function UnitiesDashboardPage() {
   const { unitiesQuery } = useUnities()
@@ -46,7 +45,7 @@ function UnitiesDashboardPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {(unitiesQuery.isPending || unitiesQuery.isFetching) && (
+          {unitiesQuery.isPending ? (
             <TableRow>
               <TableCell colSpan={5} className="text-center">
                 <div className="flex items-center justify-center h-full w-full gap-2">
@@ -55,8 +54,7 @@ function UnitiesDashboardPage() {
                 </div>
               </TableCell>
             </TableRow>
-          )}
-          {unitiesQuery.isSuccess && unitiesQuery.data.length ? (
+          ) : unitiesQuery.isSuccess && unitiesQuery.data.length ? (
             unitiesQuery.data.map((unity) => (
               <TableRow key={unity.id} className="font-serif">
                 <TableCell className="font-medium">{unity.name}</TableCell>
@@ -66,10 +64,7 @@ function UnitiesDashboardPage() {
                 <TableCell className="text-right">
                   <div className="flex items-center gap-2">
                     <Update unity={unity} />
-                    <DeleteDialog
-                      action={() => destroy(unity.id)}
-                      callback={unitiesQuery.refetch}
-                    />
+                    <DeleteUnity unity={unity} />
                   </div>
                 </TableCell>
               </TableRow>

@@ -32,7 +32,7 @@ function useCreateCategory({ user }: Props) {
       })
       return { optimisticCategory }
     },
-    onSuccess: (newCategory, _variables, context) => {
+    onSuccess: ({ category: newCategory }, _variables, context) => {
       queryClient.setQueryData<Category[]>(['categories'], (oldCategories) => {
         if (!oldCategories) return []
 

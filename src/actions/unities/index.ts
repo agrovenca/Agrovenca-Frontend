@@ -1,6 +1,6 @@
 import { apiWithCredentials, apiWithOutCredentials } from '@/actions/api'
 import { UnitySchema } from '@/schemas/unity'
-import { Unity } from '@/types/unity'
+import { Unity, UnityResponse } from '@/types/unity'
 import axios from 'axios'
 import { z } from 'zod'
 
@@ -16,38 +16,51 @@ export const getAllUnities = async (): Promise<Unity[]> => {
   }
 }
 
-export const create = async (data: z.infer<typeof UnitySchema>) => {
+export const createUnity = async ({
+  newData,
+}: {
+  newData: z.infer<typeof UnitySchema>
+}): Promise<UnityResponse> => {
   try {
-    const res = await apiWithCredentials.post(`/unities`, data, {})
-    return res
+    const { data } = await apiWithCredentials.post<UnityResponse>(`/unities`, newData)
+    return data
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      return error.response?.data || { error: 'An unknown error occurred' }
+      const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }
+      throw new Error(errorData.error ?? 'Ocurrió un error desconocido')
     }
-    return { error: 'An unknown error occurred' }
+    throw new Error('Ocurrió un error desconocido')
   }
 }
 
-export const update = async (id: string, data: z.infer<typeof UnitySchema>) => {
+export const updateUnity = async ({
+  id,
+  newData,
+}: {
+  id: string
+  newData: z.infer<typeof UnitySchema>
+}): Promise<UnityResponse> => {
   try {
-    const res = await apiWithCredentials.patch(`/unities/${id}`, data, {})
-    return res
+    const { data } = await apiWithCredentials.patch<UnityResponse>(`/unities/${id}`, newData)
+    return data
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      return error.response?.data || { error: 'An unknown error occurred' }
+      const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }
+      throw new Error(errorData.error ?? 'Ocurrió un error desconocido')
     }
-    return { error: 'An unknown error occurred' }
+    throw new Error('Ocurrió un error desconocido')
   }
 }
 
-export const destroy = async (id: string) => {
+export const deleteUnity = async ({ id }: { id: string }): Promise<UnityResponse> => {
   try {
-    const res = await apiWithCredentials.delete(`/unities/${id}`, {})
-    return res
+    const { data } = await apiWithCredentials.delete(`/unities/${id}`)
+    return data
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      return error.response?.data || { error: 'An unknown error occurred' }
+      const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }
+      throw new Error(errorData.error ?? 'Ocurrió un error desconocido')
     }
-    return { error: 'An unknown error occurred' }
+    throw new Error('Ocurrió un error desconocido')
   }
 }

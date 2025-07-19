@@ -11,30 +11,30 @@ import { toast } from 'sonner'
 import { FormEvent, useState } from 'react'
 import ErrorForm from '@/components/pages/ErrorForm'
 import { Loader } from '@/components/ui/loader'
-import { Category } from '@/types/category'
 import { Checkbox } from '@/components/ui/checkbox'
-import useDeleteCategory from '@/hooks/categories/useDeleteCategory'
 import { TrashIcon } from 'lucide-react'
+import { Unity } from '@/types/unity'
+import useDeleteUnity from '@/hooks/unities/useDeleteUnity'
 
 type Props = {
-  category: Category
+  unity: Unity
   children?: React.ReactNode
 }
 
-function DeleteCategory({ category, children }: Props) {
+function DeleteUnity({ unity, children }: Props) {
   const [isOpen, setIsOpen] = useState(false)
-  const { deleteCategoryMutation } = useDeleteCategory()
+  const { deleteUnityMutation } = useDeleteUnity()
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    deleteCategoryMutation.mutate(
-      { id: category.id },
+    deleteUnityMutation.mutate(
+      { id: unity.id },
       {
-        onSuccess: (categoryResponse) => {
-          toast.success(categoryResponse.message)
+        onSuccess: (unityResponse) => {
+          toast.success(unityResponse.message)
         },
         onError: () => {
-          toast.error('Error al eliminar la categoría')
+          toast.error('Error al eliminar la unidad')
         },
       }
     )
@@ -53,8 +53,8 @@ function DeleteCategory({ category, children }: Props) {
       )}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Eliminar categoría</DialogTitle>
-          <DialogDescription>Estás a punto de eliminar esta categoría</DialogDescription>
+          <DialogTitle>Eliminar unidad</DialogTitle>
+          <DialogDescription>Estás a punto de eliminar esta unidad</DialogDescription>
         </DialogHeader>
         <form className="space-y-4" onSubmit={handleSubmit} id="deleteForm">
           <div className="flex items-center space-x-2">
@@ -67,12 +67,10 @@ function DeleteCategory({ category, children }: Props) {
             </label>
           </div>
 
-          {deleteCategoryMutation.isError && (
-            <ErrorForm message={deleteCategoryMutation.error.message} />
-          )}
+          {deleteUnityMutation.isError && <ErrorForm message={deleteUnityMutation.error.message} />}
 
-          <Button type="submit" disabled={deleteCategoryMutation.isPending} form="deleteForm">
-            {deleteCategoryMutation.isPending ? <Loader size="sm" variant="spinner" /> : 'Eliminar'}
+          <Button type="submit" disabled={deleteUnityMutation.isPending} form="deleteForm">
+            {deleteUnityMutation.isPending ? <Loader size="sm" variant="spinner" /> : 'Eliminar'}
           </Button>
         </form>
       </DialogContent>
@@ -80,4 +78,4 @@ function DeleteCategory({ category, children }: Props) {
   )
 }
 
-export default DeleteCategory
+export default DeleteUnity
