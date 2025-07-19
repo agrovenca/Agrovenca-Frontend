@@ -16,11 +16,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { useState } from 'react'
 import ErrorForm from '@/components/pages/ErrorForm'
-import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { CategorySchema } from '@/schemas/category'
-import { create } from '@/actions/categories'
 import { Loader } from '@/components/ui/loader'
-import { useCategoriesStore } from '@/store/categories/useCategoriesStore'
 import {
   Form,
   FormControl,
@@ -29,16 +26,15 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import useCreateCategory from '@/hooks/categories/useCreateCategory'
+import { useAuthStore } from '@/store/auth/useAuthStore'
+import { User } from '@/types/auth/user'
 
 function CreateCategory() {
   const [charCount, setCharCount] = useState(0)
   const [isOpen, setIsOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
 
-  const categories = useCategoriesStore((state) => state.categories)
-  const setCategories = useCategoriesStore((state) => state.setCategories)
-  const errorStatus = useResponseStatusStore((state) => state.errorStatus)
-  const setError = useResponseStatusStore((state) => state.setError)
+  const user = useAuthStore((state) => state.user)
 
   const form = useForm<z.infer<typeof CategorySchema>>({
     resolver: zodResolver(CategorySchema),
@@ -48,29 +44,27 @@ function CreateCategory() {
     },
   })
 
+  const { createCategoryMutation } = useCreateCategory({ user: user as User })
+
   const onSubmit: SubmitHandler<z.infer<typeof CategorySchema>> = async (data) => {
-    setIsLoading(true)
-    try {
-      const res = await create(data)
-
-      if (res.error) {
-        setError(res.error)
+    createCategoryMutation.mutate(
+      { newData: data },
+      {
+        onSuccess: (_newCategory) => {
+          toast.success(`Categoría creada con éxito.`)
+          form.reset()
+          setCharCount(0)
+          setIsOpen(false)
+        },
+        onError: (err) => {
+          const errorMsg = () => {
+            if (err instanceof Error) return err.message
+            return 'Ocurrió un error. Por favor intenta de nuevo.'
+          }
+          toast.error(errorMsg())
+        },
       }
-
-      if (res.status === 201) {
-        const { message, category } = res.data
-        toast.success(message)
-
-        form.reset()
-        setCharCount(0)
-        setIsOpen(false)
-        setCategories([category, ...categories])
-      }
-    } catch (_error) {
-      toast.error('Ocurrió un error. Por favor intenta de nuevo.')
-    } finally {
-      setIsLoading(false)
-    }
+    )
   }
 
   return (
@@ -130,16 +124,25 @@ function CreateCategory() {
                 </FormItem>
               )}
             />
-            {errorStatus.error && <ErrorForm message={errorStatus.message} />}
+
+            {createCategoryMutation.isError && (
+              <ErrorForm message={createCategoryMutation.error.message} />
+            )}
 
             <Button
               className={
-                isLoading || !form.formState.isValid ? 'cursor-not-allowed' : 'cursor-pointer'
+                createCategoryMutation.isPending || !form.formState.isValid
+                  ? 'cursor-not-allowed'
+                  : 'cursor-pointer'
               }
               type="submit"
-              disabled={isLoading || !form.formState.isValid}
+              disabled={createCategoryMutation.isPending || !form.formState.isValid}
             >
-              {isLoading ? <Loader size="sm" variant="spinner" /> : 'Guardar'}
+              {createCategoryMutation.isPending ? (
+                <Loader size="sm" variant="spinner" />
+              ) : (
+                'Guardar'
+              )}
             </Button>
           </form>
         </Form>

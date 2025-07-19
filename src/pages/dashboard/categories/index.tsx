@@ -1,4 +1,3 @@
-import { destroy } from '@/actions/categories'
 import {
   Table,
   TableBody,
@@ -12,10 +11,10 @@ import { Button } from '@/components/ui/button'
 import { RefreshCwIcon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { getLocalDateTime, truncateText } from '@/lib/utils'
-import DeleteDialog from '@/components/blocks/DeleteDialog'
 import Update from './Update'
 import { Loader } from '@/components/ui/loader'
 import useCategories from '@/hooks/categories/useCategories'
+import DeleteCategory from './Delete'
 
 function CategoriesDashboardPage() {
   const { categoriesQuery } = useCategories()
@@ -73,10 +72,7 @@ function CategoriesDashboardPage() {
                 <TableCell className="text-right">
                   <div className="flex items-center gap-2">
                     <Update category={category} />
-                    <DeleteDialog
-                      action={() => destroy(category.id)}
-                      callback={categoriesQuery.refetch}
-                    />
+                    <DeleteCategory category={category} />
                   </div>
                 </TableCell>
               </TableRow>

@@ -16,38 +16,59 @@ export const getAllCategories = async (): Promise<Category[]> => {
   }
 }
 
-export const create = async (data: z.infer<typeof CategorySchema>) => {
+export const createCategory = async ({
+  newData,
+}: {
+  newData: z.infer<typeof CategorySchema>
+}): Promise<Category> => {
   try {
-    const res = await apiWithCredentials.post(`/categories`, data, {})
-    return res
+    const { data } = await apiWithCredentials.post<{ category: Category; message: string }>(
+      `/categories`,
+      newData
+    )
+    return data.category
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      return error.response?.data || { error: 'An unknown error occurred' }
+      const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }
+      throw new Error(errorData.error ?? 'Ocurrió un error desconocido')
     }
-    return { error: 'An unknown error occurred' }
+    throw new Error('Ocurrió un error desconocido')
   }
 }
 
-export const update = async (id: string, data: z.infer<typeof CategorySchema>) => {
+export const updateCategory = async ({
+  id,
+  newData,
+}: {
+  id: string
+  newData: z.infer<typeof CategorySchema>
+}): Promise<Category> => {
   try {
-    const res = await apiWithCredentials.patch(`/categories/${id}`, data, {})
-    return res
+    const { data } = await apiWithCredentials.patch<{ category: Category; message: string }>(
+      `/categories/${id}`,
+      newData
+    )
+    return data.category
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      return error.response?.data || { error: 'An unknown error occurred' }
+      const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }
+      throw new Error(errorData.error ?? 'Ocurrió un error desconocido')
     }
-    return { error: 'An unknown error occurred' }
+    throw new Error('Ocurrió un error desconocido')
   }
 }
 
-export const destroy = async (id: string) => {
+export const deleteCategory = async ({ id }: { id: string }): Promise<Category> => {
   try {
-    const res = await apiWithCredentials.delete(`/categories/${id}`, {})
-    return res
+    const { data } = await apiWithCredentials.delete<{ category: Category; message: string }>(
+      `/categories/${id}`
+    )
+    return data.category
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      return error.response?.data || { error: 'An unknown error occurred' }
+      const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }
+      throw new Error(errorData.error ?? 'Ocurrió un error desconocido')
     }
-    return { error: 'An unknown error occurred' }
+    throw new Error('Ocurrió un error desconocido')
   }
 }
