@@ -16,12 +16,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { useEffect, useState } from 'react'
 import ErrorForm from '@/components/pages/ErrorForm'
-import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { CategorySchema } from '@/schemas/category'
 import { Category } from '@/types/category'
 import { Loader } from '@/components/ui/loader'
-import { update } from '@/actions/categories'
-import { useCategoriesStore } from '@/store/categories/useCategoriesStore'
 import {
   Form,
   FormControl,
@@ -30,6 +27,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import useUpdateCategory from '@/hooks/categories/useUpdateCategory'
 
 type Props = {
   category: Category
@@ -38,40 +36,29 @@ type Props = {
 function Update({ category }: Props) {
   const [charCount, setCharCount] = useState(category.description?.length || 0)
   const [isOpen, setIsOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-
-  const updateCategory = useCategoriesStore((state) => state.updateCategory)
-  const errorStatus = useResponseStatusStore((state) => state.errorStatus)
-  const setError = useResponseStatusStore((state) => state.setError)
 
   const form = useForm<z.infer<typeof CategorySchema>>({
     resolver: zodResolver(CategorySchema),
     defaultValues: { ...category },
   })
 
+  const { updateCategoryMutation } = useUpdateCategory()
+
   const onSubmit: SubmitHandler<z.infer<typeof CategorySchema>> = async (data) => {
-    setIsLoading(true)
-    try {
-      const res = await update(category.id, data)
-
-      if (res.error) {
-        setError(res.error)
+    updateCategoryMutation.mutate(
+      { id: category.id, newData: data },
+      {
+        onSuccess: (_data) => {
+          toast.success('Categoría actualizada')
+          form.reset()
+          setCharCount(0)
+          setIsOpen(false)
+        },
+        onError: (_error) => {
+          toast.error('Ocurrió un error. Por favor intenta de nuevo.')
+        },
       }
-
-      if (res.status === 200) {
-        const { message, category: updatedCategory } = res.data
-        toast.success(message)
-
-        updateCategory(updatedCategory)
-        form.reset()
-        setCharCount(0)
-        setIsOpen(false)
-      }
-    } catch (_error) {
-      toast.error('Ocurrió un error. Por favor intenta de nuevo.')
-    } finally {
-      setIsLoading(false)
-    }
+    )
   }
 
   useEffect(() => {
@@ -138,7 +125,9 @@ function Update({ category }: Props) {
               )}
             />
 
-            {errorStatus.error && <ErrorForm message={errorStatus.message} />}
+            {updateCategoryMutation.isError && (
+              <ErrorForm message={updateCategoryMutation.error.message} />
+            )}
 
             <div className="flex items-center gap-2 justify-end">
               <Button
@@ -150,12 +139,18 @@ function Update({ category }: Props) {
               </Button>
               <Button
                 className={
-                  isLoading || !form.formState.isValid ? 'cursor-not-allowed' : 'cursor-pointer'
+                  updateCategoryMutation.isPending || !form.formState.isValid
+                    ? 'cursor-not-allowed'
+                    : 'cursor-pointer'
                 }
                 type="submit"
-                disabled={isLoading || !form.formState.isValid}
+                disabled={updateCategoryMutation.isPending || !form.formState.isValid}
               >
-                {isLoading ? <Loader size="sm" variant="spinner" /> : 'Guardar'}
+                {updateCategoryMutation.isPending ? (
+                  <Loader size="sm" variant="spinner" />
+                ) : (
+                  'Guardar'
+                )}
               </Button>
             </div>
           </form>
