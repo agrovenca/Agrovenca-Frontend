@@ -140,25 +140,6 @@ function ShippingAddress() {
   const removeAddress = useShippingAddressStore((state) => state.removeAddress)
   const [address, setAddress] = useState<ShippingAddress | null>(null)
 
-  // const fetchData = useCallback(
-  //   async (userId: string) => {
-  //     // Fetch shipping address data
-  //     setIsLoading(true)
-  //     try {
-  //       const res = await getShippingAddresses(userId)
-  //       if (res.status !== 200) {
-  //         throw new Error('Failed to fetch shipping addresses')
-  //       }
-  //       setAddresses(res.data)
-  //     } catch (error) {
-  //       console.error(error)
-  //     } finally {
-  //       setIsLoading(false)
-  //     }
-  //   },
-  //   [setAddresses]
-  // )
-
   useEffect(() => {
     const fetchData = async () => {
       // Fetch shipping address data
