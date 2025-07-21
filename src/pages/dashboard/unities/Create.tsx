@@ -43,16 +43,17 @@ function CreateUnity() {
   })
 
   const onSubmit: SubmitHandler<z.infer<typeof UnitySchema>> = async (data) => {
+    setIsOpen(false)
     createUnityMutation.mutate(
       { newData: data },
       {
-        onSuccess: (unityResponse) => {
-          toast.success(unityResponse.message)
+        onSuccess: ({ message }) => {
+          toast.success(message)
           form.reset()
           setCharCount(0)
-          setIsOpen(false)
         },
         onError: (err) => {
+          setIsOpen(true)
           const errorMsg = () => {
             if (err instanceof Error) return err.message
             return 'Ocurrió un error. Por favor intenta de nuevo.'

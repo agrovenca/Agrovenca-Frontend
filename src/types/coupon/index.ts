@@ -30,3 +30,8 @@ export interface CouponApplyRequest {
   }[]
   subtotal: number
 }
+
+export interface CouponResponse {
+  coupon: CouponType
+  message: string
+}

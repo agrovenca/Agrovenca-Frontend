@@ -26,9 +26,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { useState } from 'react'
 import ErrorForm from '@/components/pages/ErrorForm'
-import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { CouponCreateSchema } from '@/schemas/coupons'
-import { create } from '@/actions/coupons'
 import { CouponTypes } from '@/types/coupon'
 import { Loader } from '@/components/ui/loader'
 import {
@@ -41,20 +39,17 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { cn } from '@/lib/utils'
-import { useCouponsStore } from '@/store/coupons/useCouponsStore'
 import { Checkbox } from '@/components/ui/checkbox'
 import useCategories from '@/hooks/categories/useCategories'
+import useCreateCoupon from '@/hooks/coupons/useCreateCoupon'
 
 function CreateCoupon() {
-  const [isLoading, setIsLoading] = useState(false)
   const [codeCount, setCodeCount] = useState(0)
   const [descriptionCount, setDescriptionCount] = useState(0)
   const [isOpen, setIsOpen] = useState(false)
 
-  const coupons = useCouponsStore((state) => state.coupons)
-  const setCoupons = useCouponsStore((state) => state.setCoupons)
-  const errorStatus = useResponseStatusStore((state) => state.errorStatus)
-  const setError = useResponseStatusStore((state) => state.setError)
+  const { categoriesQuery } = useCategories()
+  const { createCouponMutation } = useCreateCoupon()
 
   const form = useForm<z.infer<typeof CouponCreateSchema>>({
     resolver: zodResolver(CouponCreateSchema),
@@ -72,32 +67,27 @@ function CreateCoupon() {
   })
 
   const onSubmit: SubmitHandler<z.infer<typeof CouponCreateSchema>> = async (data) => {
-    setIsLoading(true)
-    try {
-      console.log('Creating coupon with data:', data)
-      const res = await create(data)
-      if (res.error) {
-        setError(res.error)
+    setIsOpen(false)
+    createCouponMutation.mutate(
+      { newData: data },
+      {
+        onSuccess: ({ message }) => {
+          toast.success(message)
+          form.reset()
+          setCodeCount(0)
+          setDescriptionCount(0)
+        },
+        onError: (err) => {
+          setIsOpen(true)
+          const errorMsg = () => {
+            if (err instanceof Error) return err.message
+            return 'Ocurrió un error. Por favor intenta de nuevo.'
+          }
+          toast.error(errorMsg())
+        },
       }
-
-      if (res.status === 201) {
-        const { message, newObject } = res.data
-        toast.success(message)
-
-        form.reset()
-        setCodeCount(0)
-        setDescriptionCount(0)
-        setIsOpen(false)
-        setCoupons([newObject, ...coupons])
-      }
-    } catch (_error) {
-      toast.error('Ocurrió un error. Por favor intenta de nuevo.')
-    } finally {
-      setIsLoading(false)
-    }
+    )
   }
-
-  const { categoriesQuery } = useCategories()
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -353,16 +343,20 @@ function CreateCoupon() {
               />
             </div>
 
-            {errorStatus.error && <ErrorForm message={errorStatus.message} />}
+            {createCouponMutation.isError && (
+              <ErrorForm message={createCouponMutation.error.message} />
+            )}
 
             <Button
               type="submit"
-              disabled={isLoading || !form.formState.isValid}
+              disabled={createCouponMutation.isPending || !form.formState.isValid}
               className={`${
-                isLoading || !form.formState.isValid ? 'cursor-not-allowed' : 'cursor-pointer'
+                createCouponMutation.isPending || !form.formState.isValid
+                  ? 'cursor-not-allowed'
+                  : 'cursor-pointer'
               }`}
             >
-              {isLoading ? <Loader size="sm" variant="spinner" /> : 'Guardar'}
+              {createCouponMutation.isPending ? <Loader size="sm" variant="spinner" /> : 'Guardar'}
             </Button>
           </form>
         </Form>
