@@ -48,17 +48,22 @@ function Update({ unity }: Props) {
   })
 
   const onSubmit: SubmitHandler<z.infer<typeof UnitySchema>> = async (newData) => {
+    setIsOpen(false)
     updateUnityMutation.mutate(
       { id: unity.id, newData },
       {
-        onSuccess: (unityResponse) => {
-          toast.success(unityResponse.message)
+        onSuccess: ({ message }) => {
+          toast.success(message)
           form.reset()
           setCharCount(0)
-          setIsOpen(false)
         },
-        onError: (_error) => {
-          toast.error('Ocurrió un error. Por favor intenta de nuevo.')
+        onError: (err) => {
+          setIsOpen(true)
+          const errorMsg = () => {
+            if (err instanceof Error) return err.message
+            return 'Ocurrió un error. Por favor intenta de nuevo.'
+          }
+          toast.error(errorMsg())
         },
       }
     )

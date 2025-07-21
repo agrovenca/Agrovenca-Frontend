@@ -45,17 +45,22 @@ function Update({ category }: Props) {
   const { updateCategoryMutation } = useUpdateCategory()
 
   const onSubmit: SubmitHandler<z.infer<typeof CategorySchema>> = async (newData) => {
+    setIsOpen(false)
     updateCategoryMutation.mutate(
       { id: category.id, newData },
       {
-        onSuccess: (categoryResponse) => {
-          toast.success(categoryResponse.message)
+        onSuccess: ({ message }) => {
+          toast.success(message)
           form.reset()
           setCharCount(0)
-          setIsOpen(false)
         },
-        onError: (_error) => {
-          toast.error('Ocurrió un error. Por favor intenta de nuevo.')
+        onError: (err) => {
+          setIsOpen(true)
+          const errorMsg = () => {
+            if (err instanceof Error) return err.message
+            return 'Ocurrió un error. Por favor intenta de nuevo.'
+          }
+          toast.error(errorMsg())
         },
       }
     )

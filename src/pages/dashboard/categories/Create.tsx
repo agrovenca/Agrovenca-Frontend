@@ -47,16 +47,17 @@ function CreateCategory() {
   const { createCategoryMutation } = useCreateCategory({ user: user as User })
 
   const onSubmit: SubmitHandler<z.infer<typeof CategorySchema>> = async (data) => {
+    setIsOpen(false)
     createCategoryMutation.mutate(
       { newData: data },
       {
-        onSuccess: (categoryResponse) => {
-          toast.success(categoryResponse.message)
+        onSuccess: ({ message }) => {
+          toast.success(message)
           form.reset()
           setCharCount(0)
-          setIsOpen(false)
         },
         onError: (err) => {
+          setIsOpen(true)
           const errorMsg = () => {
             if (err instanceof Error) return err.message
             return 'Ocurrió un error. Por favor intenta de nuevo.'

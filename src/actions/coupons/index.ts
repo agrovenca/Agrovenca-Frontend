@@ -1,6 +1,6 @@
 import { apiWithCredentials, apiWithOutCredentials } from '@/actions/api'
 import { CouponCreateSchema, CouponUpdateSchema } from '@/schemas/coupons'
-import { CouponApplyRequest, CouponType } from '@/types/coupon'
+import { CouponApplyRequest, CouponResponse, CouponType } from '@/types/coupon'
 import axios from 'axios'
 import { z } from 'zod'
 
@@ -28,15 +28,20 @@ export const getCoupon = async (couponCode: string) => {
   }
 }
 
-export const create = async (data: z.infer<typeof CouponCreateSchema>) => {
+export const createCoupon = async ({
+  newData,
+}: {
+  newData: z.infer<typeof CouponCreateSchema>
+}): Promise<CouponResponse> => {
   try {
-    const res = await apiWithCredentials.post(`/coupons`, data, {})
-    return res
+    const { data } = await apiWithCredentials.post(`/coupons`, newData)
+    return data
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      return error.response?.data || { error: 'An unknown error occurred' }
+      const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }
+      throw new Error(errorData.error ?? 'Ocurrió un error desconocido')
     }
-    return { error: 'An unknown error occurred' }
+    throw new Error('Ocurrió un error desconocido')
   }
 }
 

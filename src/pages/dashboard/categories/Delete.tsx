@@ -30,8 +30,8 @@ function DeleteCategory({ category, children }: Props) {
     deleteCategoryMutation.mutate(
       { id: category.id },
       {
-        onSuccess: (categoryResponse) => {
-          toast.success(categoryResponse.message)
+        onSuccess: ({ message }) => {
+          toast.success(message)
         },
         onError: () => {
           toast.error('Error al eliminar la categoría')
