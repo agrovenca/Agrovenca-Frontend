@@ -52,11 +52,15 @@ const GetTableHeaders = () => {
 
 const GetTableRow = ({
   page,
+  limit,
+  search,
   product,
   isDraggable,
   handleDelete,
 }: {
   page: number
+  limit: number
+  search: string
   product: Product
   isDraggable: boolean
   handleDelete: (productId: string) => Promise<void>
@@ -117,7 +121,7 @@ const GetTableRow = ({
             >
               <ExternalLinkIcon />
             </Button>
-            <UpdateProduct product={product} page={page} />
+            <UpdateProduct product={product} page={page} limit={limit} search={search} />
             <DeleteDialog
               action={() => destroy(product.id)}
               callback={() => handleDelete(product.id)}
@@ -211,8 +215,10 @@ function ProductsTable({ limit, search, isDraggable, setIsDraggable }: Props) {
                   {productsQuery.data.objects.map((product) => (
                     <GetTableRow
                       page={page}
-                      product={product}
+                      limit={limit}
+                      search={search}
                       key={product.id}
+                      product={product}
                       isDraggable={isDraggable}
                       handleDelete={handleDelete}
                     />
@@ -236,8 +242,10 @@ function ProductsTable({ limit, search, isDraggable, setIsDraggable }: Props) {
               productsQuery.data.objects.map((product) => (
                 <GetTableRow
                   page={page}
-                  product={product}
+                  limit={limit}
+                  search={search}
                   key={product.id}
+                  product={product}
                   isDraggable={isDraggable}
                   handleDelete={handleDelete}
                 />
