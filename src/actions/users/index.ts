@@ -1,10 +1,10 @@
 import { apiWithCredentials } from '@/actions/api'
 import { UserAccountSettingsSchema } from '@/schemas/user'
-import { UserFilterParams, UserResponse } from '@/types/auth/user'
+import { UserFilterParams, UsersPaginatedResponse } from '@/types/auth/user'
 import axios from 'axios'
 import { z } from 'zod'
 
-export const getAllUsers = async (params?: UserFilterParams): Promise<UserResponse> => {
+export const getAllUsers = async (params?: UserFilterParams): Promise<UsersPaginatedResponse> => {
   const url = new URL(apiWithCredentials.defaults.baseURL?.toString() + '/users' || '')
 
   if (params) {
@@ -16,7 +16,7 @@ export const getAllUsers = async (params?: UserFilterParams): Promise<UserRespon
   }
 
   try {
-    const { data } = await apiWithCredentials.get(url.toString())
+    const { data } = await apiWithCredentials.get<UsersPaginatedResponse>(url.toString())
     return data
   } catch (error) {
     if (axios.isAxiosError(error)) {

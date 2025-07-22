@@ -251,10 +251,7 @@ function ProductsTable({ limit, search, isDraggable, setIsDraggable }: Props) {
 
       {productsQuery.data && (
         <Pagination
-          hasNextPage={productsQuery.data.hasNextPage}
-          hasPreviousPage={productsQuery.data.hasPreviousPage}
-          currentPage={productsQuery.data.page}
-          totalPages={productsQuery.data.totalPages}
+          paginationData={productsQuery.data.pagination}
           setNextPage={setNextPage}
           setPrevPage={setPrevPage}
           setPageNumber={setPageNumber}

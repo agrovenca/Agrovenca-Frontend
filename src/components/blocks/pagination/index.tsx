@@ -1,11 +1,9 @@
 import { Button } from '@/components/ui/button'
+import { BasePaginatedResponse } from '@/types/shared'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 type Props = {
-  hasPreviousPage: boolean
-  hasNextPage: boolean
-  currentPage: number
-  totalPages: number
+  paginationData: BasePaginatedResponse
   setPrevPage: () => void
   setNextPage: () => void
   setPageNumber: (page: number) => void
@@ -38,15 +36,8 @@ function getVisiblePages(current: number, total: number): (number | 'dots')[] {
   return range.filter((v, i, self) => v !== 'dots' || self[i - 1] !== 'dots')
 }
 
-function Pagination({
-  hasPreviousPage,
-  hasNextPage,
-  currentPage,
-  totalPages,
-  setPrevPage,
-  setNextPage,
-  setPageNumber,
-}: Props) {
+function Pagination({ paginationData, setPrevPage, setNextPage, setPageNumber }: Props) {
+  const { hasNextPage, hasPreviousPage, page: currentPage, totalPages } = paginationData
   const visiblePages = getVisiblePages(currentPage, totalPages)
 
   return (
