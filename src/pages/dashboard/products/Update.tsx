@@ -31,62 +31,54 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { useEffect, useState } from 'react'
 import ErrorForm from '@/components/pages/ErrorForm'
-import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { ProductUpdateSchema } from '@/schemas/products'
 import { Product } from '@/types/product'
 import { Loader } from '@/components/ui/loader'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
-import { update } from '@/actions/products'
-import { useProductsStore } from '@/store/products/useProductsStore'
 import useCategories from '@/hooks/categories/useCategories'
 import useUnities from '@/hooks/unities/useUnities'
+import useUpdateProduct from '@/hooks/products/useUpdateProduct'
 
 type Props = {
-  object: Product
+  page: number
+  product: Product
 }
 
-function UpdateProduct({ object }: Props) {
-  const [charCount, setCharCount] = useState(object.description.length)
-  const [description, setDescription] = useState(object.description)
-  const [isLoading, setIsLoading] = useState(false)
+function UpdateProduct({ page, product }: Props) {
+  const [charCount, setCharCount] = useState(product.description.length)
+  const [description, setDescription] = useState(product.description)
   const [isOpen, setIsOpen] = useState(false)
 
-  const updateProduct = useProductsStore((state) => state.updateProduct)
-  const errorStatus = useResponseStatusStore((state) => state.errorStatus)
-  const setError = useResponseStatusStore((state) => state.setError)
-
+  const { updateProductMutation } = useUpdateProduct({ page })
   const { categoriesQuery } = useCategories()
   const { unitiesQuery } = useUnities()
 
   const form = useForm<z.infer<typeof ProductUpdateSchema>>({
     resolver: zodResolver(ProductUpdateSchema),
-    defaultValues: object,
+    defaultValues: { ...product },
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof ProductUpdateSchema>> = async (data) => {
-    setIsLoading(true)
-    try {
-      const res = await update(object.id, data)
-
-      if (res.error) {
-        setError(res.error)
+  const onSubmit: SubmitHandler<z.infer<typeof ProductUpdateSchema>> = async (newData) => {
+    setIsOpen(false)
+    updateProductMutation.mutate(
+      { id: product.id, newData },
+      {
+        onSuccess: ({ message }) => {
+          toast.success(message)
+          form.reset()
+          setCharCount(0)
+        },
+        onError: (err) => {
+          setIsOpen(true)
+          const errorMsg = () => {
+            if (err instanceof Error) return err.message
+            return 'Ocurrió un error. Por favor intenta de nuevo.'
+          }
+          toast.error(errorMsg())
+        },
       }
-
-      if (res.status === 200) {
-        const { message, product } = res.data
-        toast.success(message)
-
-        updateProduct(product)
-        form.reset()
-        setCharCount(0)
-        setIsOpen(false)
-      }
-    } catch (_error) {
-      toast.error('Ocurrió un error. Por favor intenta de nuevo.')
-    } finally {
-      setIsLoading(false)
-    }
+    )
   }
 
   const handleFormat = ({ format, text }: { format: 'bold' | 'italic' | 'list'; text: string }) => {
@@ -105,10 +97,10 @@ function UpdateProduct({ object }: Props) {
 
   useEffect(() => {
     if (isOpen) {
-      form.reset({ ...object })
-      setCharCount(object.description?.length || 0)
+      form.reset({ ...product })
+      setCharCount(product.description?.length || 0)
     }
-  }, [isOpen, object, form])
+  }, [isOpen, product, form])
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -247,7 +239,12 @@ function UpdateProduct({ object }: Props) {
                   render={({ field }) => (
                     <FormItem className="flex-1">
                       <FormLabel htmlFor="videoId">ID de video (opcional)</FormLabel>
-                      <Input id="videoId" type="text" placeholder="" {...field} />
+                      <Input
+                        id="videoId"
+                        type="text"
+                        placeholder=""
+                        {...{ ...field, value: field.value || undefined }}
+                      />
                       <FormMessage />
                     </FormItem>
                   )}
@@ -331,26 +328,35 @@ function UpdateProduct({ object }: Props) {
                 )}
               />
 
-              {errorStatus.error && <ErrorForm message={errorStatus.message} />}
+              {updateProductMutation.isError && (
+                <ErrorForm message={updateProductMutation.error.message} />
+              )}
 
               <div className="flex flex-col items-center gap-2 justify-end">
                 <Button
                   type="button"
                   variant={'secondary'}
-                  onClick={() => form.reset({ ...object })}
+                  onClick={() => form.reset({ ...product })}
                   className="w-full uppercase"
                 >
                   Restablecer
                 </Button>
                 <Button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={updateProductMutation.isPending}
                   className={`${
-                    isLoading || !form.formState.isValid ? 'cursor-not-allowed' : 'cursor-pointer'
+                    updateProductMutation.isPending || !form.formState.isValid
+                      ? 'cursor-not-allowed'
+                      : 'cursor-pointer'
                   } w-full uppercase`}
                 >
-                  {isLoading ? <Loader size="sm" variant="spinner" /> : 'Actualizar'}
+                  {updateProductMutation.isPending ? (
+                    <Loader size="sm" variant="spinner" />
+                  ) : (
+                    'Actualizar'
+                  )}
                 </Button>
+                {form.formState.isValid ? 'valid' : 'invalid'}
               </div>
             </form>
           </Form>

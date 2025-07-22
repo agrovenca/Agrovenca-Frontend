@@ -10,7 +10,7 @@ const baseProductSchema = z.object({
   secondPrice: z.coerce.number().min(0).optional(),
   stock: z.coerce.number().min(1, { message: 'Stock es requerido' }),
   freeShipping: z.boolean(),
-  videoId: z.string().optional(),
+  videoId: z.union([z.string(), z.null()]).optional(),
 
   categoryId: z.string().uuid().min(1, { message: 'Categoría es requerida' }),
   unityId: z.string().uuid().min(1, { message: 'Unidad es requerida' }),
