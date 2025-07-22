@@ -45,27 +45,35 @@ export const createCoupon = async ({
   }
 }
 
-export const update = async (id: string, data: z.infer<typeof CouponUpdateSchema>) => {
+export const updateCoupon = async ({
+  id,
+  newData,
+}: {
+  id: string
+  newData: z.infer<typeof CouponUpdateSchema>
+}): Promise<CouponResponse> => {
   try {
-    const res = await apiWithCredentials.patch(`/coupons/${id}`, data, {})
-    return res
+    const { data } = await apiWithCredentials.patch<CouponResponse>(`/coupons/${id}`, newData, {})
+    return data
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      return error.response?.data || { error: 'An unknown error occurred' }
+      const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }
+      throw new Error(errorData.error ?? 'Ocurrió un error desconocido')
     }
-    return { error: 'An unknown error occurred' }
+    throw new Error('Ocurrió un error desconocido')
   }
 }
 
-export const destroy = async (id: string) => {
+export const deleteCoupon = async ({ id }: { id: string }): Promise<CouponResponse> => {
   try {
-    const res = await apiWithCredentials.delete(`/coupons/${id}`, {})
-    return res
+    const { data } = await apiWithCredentials.delete<CouponResponse>(`/coupons/${id}`)
+    return data
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      return error.response?.data || { error: 'An unknown error occurred' }
+      const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }
+      throw new Error(errorData.error ?? 'Ocurrió un error desconocido')
     }
-    return { error: 'An unknown error occurred' }
+    throw new Error('Ocurrió un error desconocido')
   }
 }
 

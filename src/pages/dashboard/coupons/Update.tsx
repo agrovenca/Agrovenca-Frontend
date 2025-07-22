@@ -37,13 +37,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { useEffect, useState } from 'react'
 import ErrorForm from '@/components/pages/ErrorForm'
-import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { CouponUpdateSchema } from '@/schemas/coupons'
 import { CouponType } from '@/types/coupon'
 import { Loader } from '@/components/ui/loader'
-import { update } from '@/actions/coupons'
-import { useCouponsStore } from '@/store/coupons/useCouponsStore'
 import useCategories from '@/hooks/categories/useCategories'
+import useUpdateCoupon from '@/hooks/coupons/useUpdateCoupon'
+import { Badge } from '@/components/ui/badge'
 
 type Props = {
   coupon: CouponType
@@ -52,13 +51,9 @@ type Props = {
 function UpdateCoupon({ coupon }: Props) {
   const [descriptionCount, setDescriptionCount] = useState(coupon.description?.length || 0)
   const [isOpen, setIsOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-
-  const updateCoupon = useCouponsStore((state) => state.updateCoupon)
-  const errorStatus = useResponseStatusStore((state) => state.errorStatus)
-  const setError = useResponseStatusStore((state) => state.setError)
 
   const { categoriesQuery } = useCategories()
+  const { updateCouponMutation } = useUpdateCoupon()
 
   const form = useForm<z.infer<typeof CouponUpdateSchema>>({
     resolver: zodResolver(CouponUpdateSchema),
@@ -69,29 +64,31 @@ function UpdateCoupon({ coupon }: Props) {
     },
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof CouponUpdateSchema>> = async (data) => {
-    setIsLoading(true)
-    try {
-      const res = await update(coupon.id, data)
-
-      if (res.error) {
-        setError(res.error)
+  const onSubmit: SubmitHandler<z.infer<typeof CouponUpdateSchema>> = async (newData) => {
+    setIsOpen(false)
+    updateCouponMutation.mutate(
+      { id: coupon.id, newData },
+      {
+        onSuccess: ({ message }) => {
+          toast.success(message)
+          form.reset()
+          setDescriptionCount(0)
+        },
+        onError: (err) => {
+          setIsOpen(true)
+          const errorMsg = () => {
+            if (err instanceof Error) return err.message
+            return 'Ocurrió un error. Por favor intenta de nuevo.'
+          }
+          toast.error(errorMsg())
+        },
       }
+    )
+  }
 
-      if (res.status === 200) {
-        const { message, coupon: updatedCoupon } = res.data
-        toast.success(message)
-
-        form.reset()
-        setDescriptionCount(0)
-        setIsOpen(false)
-        updateCoupon(updatedCoupon)
-      }
-    } catch (_error) {
-      toast.error('Ocurrió un error. Por favor intenta de nuevo.')
-    } finally {
-      setIsLoading(false)
-    }
+  const changedExpiresDate = form.watch('expiresAt')
+  const removeExpiresAt = () => {
+    form.setValue('expiresAt', null)
   }
 
   useEffect(() => {
@@ -244,13 +241,14 @@ function UpdateCoupon({ coupon }: Props) {
                         <FormControl>
                           <Button
                             variant={'outline'}
+                            key={field.value?.toString()}
                             className={cn(
-                              'w-full pl-3 text-left font-normal md:rounded-none md:rounded-tr-md md:rounded-br-md',
+                              'w-full pl-3 text-left font-normal md:rounded-none md:rounded-tr-md md:rounded-br-md hola',
                               !field.value && 'text-muted-foreground'
                             )}
                           >
-                            {field.value ? (
-                              format(field.value, 'dd/MM/yyyy')
+                            {changedExpiresDate ? (
+                              format(changedExpiresDate, 'dd/MM/yyyy')
                             ) : (
                               <span>Escoge un fecha</span>
                             )}
@@ -260,15 +258,28 @@ function UpdateCoupon({ coupon }: Props) {
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
+                          key={field.value?.toString() || 'no-date'}
                           mode="single"
-                          selected={field.value}
+                          selected={field.value ?? undefined}
                           onSelect={field.onChange}
                           disabled={(date) => date < new Date()}
                           initialFocus
                         />
                       </PopoverContent>
                     </Popover>
-                    <FormDescription></FormDescription>
+                    <FormDescription>
+                      {!!changedExpiresDate && (
+                        <Badge variant="destructive" asChild>
+                          <button
+                            className="font-serif cursor-pointer"
+                            type="button"
+                            onClick={removeExpiresAt}
+                          >
+                            Eliminar fecha
+                          </button>
+                        </Badge>
+                      )}
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -351,16 +362,20 @@ function UpdateCoupon({ coupon }: Props) {
               />
             </div>
 
-            {errorStatus.error && <ErrorForm message={errorStatus.message} />}
+            {updateCouponMutation.isError && (
+              <ErrorForm message={updateCouponMutation.error.message} />
+            )}
 
             <Button
               type="submit"
-              disabled={isLoading || !form.formState.isValid}
+              disabled={updateCouponMutation.isPending || !form.formState.isValid}
               className={`${
-                isLoading || !form.formState.isValid ? 'cursor-not-allowed' : 'cursor-pointer'
+                updateCouponMutation.isPending || !form.formState.isValid
+                  ? 'cursor-not-allowed'
+                  : 'cursor-pointer'
               }`}
             >
-              {isLoading ? <Loader size="sm" variant="spinner" /> : 'Guardar'}
+              {updateCouponMutation.isPending ? <Loader size="sm" variant="spinner" /> : 'Guardar'}
             </Button>
           </form>
         </Form>
