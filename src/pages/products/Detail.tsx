@@ -29,8 +29,6 @@ import { useCartStore } from '@/store/cart/useCartStore'
 import { parseFormattedText } from '@/lib/utils'
 import LiteYouTubeEmbed from 'react-lite-youtube-embed'
 import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css'
-import { useProductsStore } from '@/store/products/useProductsStore'
-import { useAuthStore } from '@/store/auth/useAuthStore'
 import Footer from '@/components/pages/Footer'
 import ProductItem from './ProductItem'
 import useProducts from '@/hooks/products/useProducts'
@@ -46,9 +44,6 @@ function ProductDetail() {
   const [count, setCount] = useState(0)
   const [current, setCurrent] = useState(0)
   const [api, setApi] = useState<CarouselApi>()
-
-  const user = useAuthStore((state) => state.user)
-  const setUserId = useProductsStore((state) => state.setUserId)
 
   const { productQuery } = useProduct({ slug: slug ?? '' })
   const { productsQuery } = useProducts({
@@ -86,10 +81,6 @@ function ProductDetail() {
   const itemInCart = useCartStore((state) =>
     state.items.find((item) => item.productId === product?.id)
   )
-
-  useEffect(() => {
-    if (user) setUserId(user.id)
-  }, [setUserId, user])
 
   useEffect(() => {
     if (!slug?.trim()) {

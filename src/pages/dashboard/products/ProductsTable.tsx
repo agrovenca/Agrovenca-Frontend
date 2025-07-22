@@ -25,12 +25,9 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { Button } from '@/components/ui/button'
-import { useProductsStore } from '@/store/products/useProductsStore'
 import { toast } from 'sonner'
 import ProductImagesPage from './images'
 import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
-import { useEffect } from 'react'
-import { useAuthStore } from '@/store/auth/useAuthStore'
 import useProducts from '@/hooks/products/useProducts'
 import { Loader } from '@/components/ui/loader'
 import useReorderProducts from '@/hooks/products/useReorderProducts'
@@ -131,15 +128,17 @@ const GetTableRow = ({
 }
 
 type Props = {
+  limit: number
+  search: string
   isDraggable: boolean
   setIsDraggable: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-function ProductsTable({ isDraggable, setIsDraggable }: Props) {
-  const user = useAuthStore((state) => state.user)
-  const setUserId = useProductsStore((state) => state.setUserId)
-
-  const { productsQuery, page, setNextPage, setPrevPage, setPageNumber } = useProducts({})
+function ProductsTable({ limit, search, isDraggable, setIsDraggable }: Props) {
+  const { productsQuery, page, setNextPage, setPrevPage, setPageNumber } = useProducts({
+    search: search,
+    limit,
+  })
   const { reorderMutation } = useReorderProducts({ page })
 
   const sensors = useSensors(
@@ -180,10 +179,6 @@ function ProductsTable({ isDraggable, setIsDraggable }: Props) {
     //    console.error('Error al eliminar el producto:', error)
     //  }
   }
-
-  useEffect(() => {
-    if (user) setUserId(user.id)
-  }, [setUserId, user])
 
   return (
     <div className="flex-1">
