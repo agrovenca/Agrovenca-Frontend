@@ -9,14 +9,13 @@ import {
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { RefreshCwIcon } from 'lucide-react'
-import { getLocalDateTime, truncateText } from '@/lib/utils'
+import { getLocalDateTime, pluralize, truncateText } from '@/lib/utils'
 import { CouponTypes } from '@/types/coupon'
 import { Badge } from '@/components/ui/badge'
 import CreateCoupon from './Create'
-import { destroy } from '@/actions/coupons'
 import UpdateCoupon from './Update'
-import DeleteDialog from '@/components/blocks/DeleteDialog'
 import useCoupons from '@/hooks/coupons/useCoupons'
+import DeleteCoupon from './Delete'
 
 function CouponsDashboardPage() {
   const { couponsQuery } = useCoupons()
@@ -53,7 +52,7 @@ function CouponsDashboardPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {couponsQuery.isFetching && (
+          {couponsQuery.isFetching ? (
             <TableRow>
               <TableCell colSpan={10} className="text-center">
                 <div className="flex items-center justify-center h-full w-full gap-2">
@@ -62,8 +61,7 @@ function CouponsDashboardPage() {
                 </div>
               </TableCell>
             </TableRow>
-          )}
-          {couponsQuery.data && couponsQuery.data.length ? (
+          ) : couponsQuery.isSuccess && couponsQuery.data.length ? (
             couponsQuery.data.map((coupon) => (
               <TableRow key={coupon.id} className="font-serif">
                 <TableCell className="font-medium">{coupon.code}</TableCell>
@@ -81,11 +79,17 @@ function CouponsDashboardPage() {
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Badge>{coupon.usageLimit ? `${coupon.usageLimit} veces` : 'Sín límite'}</Badge>
+                  <Badge>
+                    {coupon.usageLimit
+                      ? `${coupon.usageLimit} ${pluralize('ve', coupon.usageLimit, 'ces', 'z')}`
+                      : 'Sín límite'}
+                  </Badge>
                 </TableCell>
                 <TableCell>
                   <Badge variant={coupon.timesUsed === 0 ? 'outline' : 'default'}>
-                    {coupon.timesUsed === 0 ? 'No usado' : `${coupon.timesUsed} veces`}
+                    {coupon.timesUsed === 0
+                      ? 'No usado'
+                      : `${coupon.timesUsed} ${pluralize('ve', coupon.timesUsed, 'ces', 'z')}`}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -96,10 +100,7 @@ function CouponsDashboardPage() {
                 <TableCell className="text-right">
                   <div className="flex items-center gap-2">
                     <UpdateCoupon coupon={coupon} />
-                    <DeleteDialog
-                      action={() => destroy(coupon.id)}
-                      callback={couponsQuery.refetch}
-                    />
+                    <DeleteCoupon coupon={coupon} />
                   </div>
                 </TableCell>
               </TableRow>

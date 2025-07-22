@@ -14,7 +14,7 @@ export interface CouponType {
   timesUsed: number
   minPurchase?: number
   validCategories?: string[]
-  expiresAt?: string
+  expiresAt?: string | null
   createdAt: string
   updatedAt: string
 }

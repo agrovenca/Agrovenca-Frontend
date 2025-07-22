@@ -16,7 +16,9 @@ export const CouponCreateSchema = z.object({
     .array(z.string())
     .max(10, { message: 'No pueden ser más de 10 categorías' })
     .optional(),
-  expiresAt: z.date().min(new Date(), { message: 'No puede ser menor a hoy' }).optional(),
+  expiresAt: z
+    .union([z.date().min(new Date(), { message: 'No puede ser menor a hoy' }), z.null()])
+    .optional(),
 })
 
 export const CouponUpdateSchema = CouponCreateSchema.omit({ code: true }).partial()

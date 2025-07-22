@@ -219,7 +219,9 @@ function CreateCoupon() {
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription></FormDescription>
+                    <FormDescription>
+                      {Number(field.value) === 0 && <p className="ms-2">0 = Sin límite</p>}
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -253,7 +255,7 @@ function CreateCoupon() {
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={field.value}
+                          selected={field.value ?? undefined}
                           onSelect={field.onChange}
                           disabled={(date) => date < new Date()}
                           captionLayout={'dropdown'}
