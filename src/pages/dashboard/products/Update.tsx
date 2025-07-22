@@ -42,15 +42,17 @@ import useUpdateProduct from '@/hooks/products/useUpdateProduct'
 
 type Props = {
   page: number
+  limit: number
+  search: string
   product: Product
 }
 
-function UpdateProduct({ page, product }: Props) {
+function UpdateProduct({ page, limit, search, product }: Props) {
   const [charCount, setCharCount] = useState(product.description.length)
   const [description, setDescription] = useState(product.description)
   const [isOpen, setIsOpen] = useState(false)
 
-  const { updateProductMutation } = useUpdateProduct({ page })
+  const { updateProductMutation } = useUpdateProduct({ page, limit, search })
   const { categoriesQuery } = useCategories()
   const { unitiesQuery } = useUnities()
 
