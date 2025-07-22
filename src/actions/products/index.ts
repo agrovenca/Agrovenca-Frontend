@@ -90,15 +90,22 @@ export const createProduct = async ({
   }
 }
 
-export const update = async (id: string, data: z.infer<typeof ProductUpdateSchema>) => {
+export const updateProduct = async ({
+  id,
+  newData,
+}: {
+  id: string
+  newData: z.infer<typeof ProductUpdateSchema>
+}): Promise<ProductResponse> => {
   try {
-    const res = await apiWithCredentials.patch(`/products/${id}`, data, {})
-    return res
+    const { data } = await apiWithCredentials.patch<ProductResponse>(`/products/${id}`, newData)
+    return data
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      return error.response?.data || { error: 'An unknown error occurred' }
+      const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }
+      throw new Error(errorData.error ?? 'Ocurrió un error desconocido')
     }
-    return { error: 'An unknown error occurred' }
+    throw new Error('Ocurrió un error desconocido')
   }
 }
 

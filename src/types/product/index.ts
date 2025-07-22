@@ -15,7 +15,7 @@ export interface Product {
   secondPrice?: number
   stock: number
   freeShipping: boolean
-  videoId?: string
+  videoId?: string | null
   images: ProductImage[]
 
   userId: string
