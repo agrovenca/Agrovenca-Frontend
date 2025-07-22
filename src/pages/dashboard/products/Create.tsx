@@ -29,32 +29,22 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import ErrorForm from '@/components/pages/ErrorForm'
-import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { ProductSchema } from '@/schemas/products'
 import { Loader } from '@/components/ui/loader'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
-import { create } from '@/actions/products'
-import { useProductsStore } from '@/store/products/useProductsStore'
-import { useAuthStore } from '@/store/auth/useAuthStore'
 import useCategories from '@/hooks/categories/useCategories'
 import useUnities from '@/hooks/unities/useUnities'
+import useCreateProduct from '@/hooks/products/useCreateProduct'
 
 function CreateProduct() {
   const [charCount, setCharCount] = useState(0)
-  const [isLoading, setIsLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [description, setDescription] = useState('')
 
-  const user = useAuthStore((state) => state.user)
-  const products = useProductsStore((state) => state.products)
-  const setUserId = useProductsStore((state) => state.setUserId)
-  const setProducts = useProductsStore((state) => state.setProducts)
-  const errorStatus = useResponseStatusStore((state) => state.errorStatus)
-  const setError = useResponseStatusStore((state) => state.setError)
-
+  const { createProductMutation } = useCreateProduct()
   const { categoriesQuery } = useCategories()
   const { unitiesQuery } = useUnities()
 
@@ -73,29 +63,26 @@ function CreateProduct() {
     },
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof ProductSchema>> = async (data) => {
-    setIsLoading(true)
-    try {
-      const res = await create(data)
-
-      if (res.error) {
-        setError(res.error)
+  const onSubmit: SubmitHandler<z.infer<typeof ProductSchema>> = async (newData) => {
+    setIsOpen(false)
+    createProductMutation.mutate(
+      { newData },
+      {
+        onSuccess: ({ message }) => {
+          toast.success(message)
+          form.reset()
+          setCharCount(0)
+        },
+        onError: (err) => {
+          setIsOpen(true)
+          const errorMsg = () => {
+            if (err instanceof Error) return err.message
+            return 'Ocurrió un error. Por favor intenta de nuevo.'
+          }
+          toast.error(errorMsg())
+        },
       }
-
-      if (res.status === 201) {
-        const { message, product } = res.data
-        toast.success(message)
-
-        setCharCount(0)
-        form.reset()
-        setIsOpen(false)
-        setProducts([...products, product])
-      }
-    } catch (_error) {
-      toast.error('Ocurrió un error. Por favor intenta de nuevo.')
-    } finally {
-      setIsLoading(false)
-    }
+    )
   }
 
   const handleFormat = ({ format, text }: { format: 'bold' | 'italic' | 'list'; text: string }) => {
@@ -111,10 +98,6 @@ function CreateProduct() {
     setDescription(text)
     setCharCount(text.length)
   }
-
-  useEffect(() => {
-    if (user) setUserId(user.id)
-  }, [setUserId, user])
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -336,16 +319,20 @@ function CreateProduct() {
                 )}
               />
 
-              {errorStatus.error && <ErrorForm message={errorStatus.message} />}
+              {createProductMutation.isError && (
+                <ErrorForm message={createProductMutation.error.message} />
+              )}
 
               <Button
                 type="submit"
-                disabled={isLoading || !form.formState.isValid}
+                disabled={createProductMutation.isPending || !form.formState.isValid}
                 className={`${
-                  isLoading || !form.formState.isValid ? 'cursor-not-allowed' : 'cursor-pointer'
+                  createProductMutation.isPending || !form.formState.isValid
+                    ? 'cursor-not-allowed'
+                    : 'cursor-pointer'
                 } w-full uppercase`}
               >
-                {isLoading ? <Loader size="sm" variant="spinner" /> : 'Crear'}
+                {createProductMutation.isPending ? <Loader size="sm" variant="spinner" /> : 'Crear'}
               </Button>
             </form>
           </Form>

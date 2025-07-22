@@ -1,12 +1,10 @@
 import Navbar from '@/components/pages/HomeNavbar'
-import { useProductsStore } from '@/store/products/useProductsStore'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Grid, List, Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import Pagination from '@/components/blocks/pagination'
-import { useAuthStore } from '@/store/auth/useAuthStore'
 import Footer from '@/components/pages/Footer'
 import useProducts from '@/hooks/products/useProducts'
 import ProductItem from './ProductItem'
@@ -19,19 +17,12 @@ function ProductsPage() {
   const [search, setSearch] = useState('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
-  const user = useAuthStore((state) => state.user)
-  const setUserId = useProductsStore((state) => state.setUserId)
-
   const [debouncedSearch] = useDebounce(search, 500)
 
   const { productsQuery, setNextPage, setPrevPage, setPageNumber } = useProducts({
     limit: 12,
     search: debouncedSearch,
   })
-
-  useEffect(() => {
-    if (user) setUserId(user.id)
-  }, [setUserId, user])
 
   return (
     <div>

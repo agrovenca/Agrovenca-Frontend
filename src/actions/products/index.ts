@@ -66,15 +66,20 @@ export const exportProducts = async (format: string) => {
   }
 }
 
-export const create = async (data: z.infer<typeof ProductSchema>) => {
+export const createProduct = async ({
+  newData,
+}: {
+  newData: z.infer<typeof ProductSchema>
+}): Promise<ProductResponse> => {
   try {
-    const res = await apiWithCredentials.post(`/products`, data)
-    return res
+    const { data } = await apiWithCredentials.post<ProductResponse>(`/products`, newData)
+    return data
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      return error.response?.data || { error: 'An unknown error occurred' }
+      const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }
+      throw new Error(errorData.error ?? 'Ocurrió un error desconocido')
     }
-    return { error: 'An unknown error occurred' }
+    throw new Error('Ocurrió un error desconocido')
   }
 }
 

@@ -33,3 +33,8 @@ export interface ProductFilterParams extends BaseFilterParams {
   priceRange?: number[]
   inStockOnly?: boolean
 }
+
+export interface ProductResponse {
+  product: Product
+  message: string
+}

@@ -9,18 +9,20 @@ import ExtendedTooltip from '@/components/blocks/ExtendedTooltip'
 import ProductsTable from './ProductsTable'
 import { useExcelExport } from '@/hooks/useExcelExport'
 import { toast } from 'sonner'
-import { FiltersBar } from './Filters'
+// import { FiltersBar } from './Filters'
 import { Input } from '@/components/ui/input'
 import useProducts from '@/hooks/products/useProducts'
+import { useDebounce } from 'use-debounce'
 
 function ProductsDashboardPage() {
   const [search, setSearch] = useState('')
-  const [limit, setLimit] = useState(10)
+  const [limit, _setLimit] = useState(12)
   const [dragAndDropActive, setDragAndDropActive] = useState(false)
+  const [debouncedSearch] = useDebounce(search, 500)
 
   const { exportExcel } = useExcelExport()
 
-  const { productsQuery } = useProducts({})
+  const { productsQuery } = useProducts({ limit, search: debouncedSearch })
 
   const handleExport = async (format: string) => {
     try {
@@ -85,15 +87,20 @@ function ProductsDashboardPage() {
       </div>
 
       <div className="flex gap-6 flex-col sm:flex-row">
-        <FiltersBar
+        {/* <FiltersBar
           limit={limit}
           setSearch={setSearch}
           search={search}
           setLimit={setLimit}
           recordsPerPage={[1, 2, 3]}
-        />
+        /> */}
 
-        <ProductsTable isDraggable={dragAndDropActive} setIsDraggable={setDragAndDropActive} />
+        <ProductsTable
+          limit={limit}
+          search={debouncedSearch}
+          isDraggable={dragAndDropActive}
+          setIsDraggable={setDragAndDropActive}
+        />
       </div>
     </>
   )

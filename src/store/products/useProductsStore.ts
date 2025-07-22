@@ -4,8 +4,6 @@ import { persist } from 'zustand/middleware'
 
 interface ProductsState {
   products: Product[]
-  userId: string | null
-  setUserId: (userId: string | null) => void
   setProducts: (products: Product[] | ((products: Product[]) => Product[])) => void
   addProduct: (product: Product) => void
   updateProduct: (updatedProduct: Product) => void
@@ -14,14 +12,8 @@ interface ProductsState {
 
 export const useProductsStore = create<ProductsState>()(
   persist(
-    (set, get) => ({
-      userId: null,
+    (set) => ({
       products: [],
-      setUserId: (userId) => {
-        if (get().userId !== userId) {
-          set({ userId, products: [] }) // limpia productos al cambiar el usuario
-        }
-      },
       setProducts: (updater) => {
         set((state) => ({
           products: typeof updater === 'function' ? updater(state.products) : updater,
@@ -46,7 +38,6 @@ export const useProductsStore = create<ProductsState>()(
       name: `products-store`,
       partialize: (state) => ({
         products: state.products,
-        userId: state.userId,
       }),
     }
   )
