@@ -19,12 +19,12 @@ function useUsers({ search, limit, isActive }: Options) {
 
   const setPrevPage = () => {
     if (page === 1) return
-    setPage(Number(usersQuery.data?.previousPage))
+    setPage(Number(usersQuery.data?.pagination.previousPage))
   }
 
   const setNextPage = () => {
-    if (!usersQuery.data?.hasNextPage) return
-    setPage(Number(usersQuery.data?.nextPage))
+    if (!usersQuery.data?.pagination.hasNextPage) return
+    setPage(Number(usersQuery.data?.pagination.nextPage))
   }
 
   const setPageNumber = (page: number) => {

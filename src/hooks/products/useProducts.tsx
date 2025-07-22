@@ -25,13 +25,13 @@ function useProducts({ search, limit, enabled = true }: Options) {
   const setPrevPage = () => {
     if (page === 1) return
 
-    setPage(Number(productsQuery.data?.previousPage))
+    setPage(Number(productsQuery.data?.pagination.previousPage))
   }
 
   const setNextPage = () => {
-    if (!productsQuery.data?.hasNextPage) return
+    if (!productsQuery.data?.pagination.hasNextPage) return
 
-    setPage(Number(productsQuery.data?.nextPage))
+    setPage(Number(productsQuery.data?.pagination.nextPage))
   }
 
   const setPageNumber = (page: number) => {

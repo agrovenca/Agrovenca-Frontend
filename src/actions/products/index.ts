@@ -1,11 +1,18 @@
 import { apiWithCredentials, apiWithOutCredentials } from '@/actions/api'
 import { ProductSchema, ProductUpdateSchema } from '@/schemas/products'
 import { CartItem } from '@/types/cart'
-import { Product, ProductFilterParams, ProductResponse } from '@/types/product'
+import {
+  Product,
+  ProductsPaginatedResponse,
+  ProductFilterParams,
+  ProductResponse,
+} from '@/types/product'
 import axios from 'axios'
 import { z } from 'zod'
 
-export const getProducts = async (params?: ProductFilterParams): Promise<ProductResponse> => {
+export const getProducts = async (
+  params?: ProductFilterParams
+): Promise<ProductsPaginatedResponse> => {
   const url = new URL(apiWithOutCredentials.defaults.baseURL?.toString() + '/products' || '')
 
   if (params) {
@@ -16,7 +23,7 @@ export const getProducts = async (params?: ProductFilterParams): Promise<Product
     })
   }
   try {
-    const { data } = await apiWithOutCredentials.get<ProductResponse>(url.toString())
+    const { data } = await apiWithOutCredentials.get<ProductsPaginatedResponse>(url.toString())
     return data
   } catch (error) {
     if (axios.isAxiosError(error)) {

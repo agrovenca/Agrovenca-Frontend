@@ -1,9 +1,9 @@
 import { BaseFilterParams, BasePaginatedResponse } from '../shared'
 import { ProductImage } from './images'
 
-export interface ProductResponse extends BasePaginatedResponse {
+export interface ProductsPaginatedResponse {
   objects: Product[]
-  spaceBaseUrl: string
+  pagination: BasePaginatedResponse
 }
 
 export interface Product {

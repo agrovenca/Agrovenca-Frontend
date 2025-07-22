@@ -127,10 +127,7 @@ function UsersDashboardPage() {
 
       {usersQuery.data?.objects && (
         <Pagination
-          hasNextPage={usersQuery.data.hasNextPage}
-          hasPreviousPage={usersQuery.data.hasPreviousPage}
-          currentPage={usersQuery.data.page}
-          totalPages={usersQuery.data.totalPages}
+          paginationData={usersQuery.data.pagination}
           setNextPage={setNextPage}
           setPrevPage={setPrevPage}
           setPageNumber={setPageNumber}

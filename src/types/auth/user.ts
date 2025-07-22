@@ -16,6 +16,7 @@ export interface UserFilterParams extends BaseFilterParams {
   isActive: 'active' | 'inactive' | undefined
 }
 
-export interface UserResponse extends BasePaginatedResponse {
+export interface UsersPaginatedResponse {
   objects: User[]
+  pagination: BasePaginatedResponse
 }
