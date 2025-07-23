@@ -11,10 +11,8 @@ import { Product } from '@/types/product'
 import Pagination from '@/components/blocks/pagination'
 import { formatDecimal } from '@/lib/utils'
 import UpdateProduct from './Update'
-import DeleteDialog from '@/components/blocks/DeleteDialog'
 import { ExternalLinkIcon } from 'lucide-react'
 import { DndContext, closestCenter } from '@dnd-kit/core'
-import { destroy } from '@/actions/products'
 
 import { KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core'
 import {
@@ -31,6 +29,8 @@ import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png
 import useProducts from '@/hooks/products/useProducts'
 import { Loader } from '@/components/ui/loader'
 import useReorderProducts from '@/hooks/products/useReorderProducts'
+import DeleteProduct from './Delete'
+import { useProductFiltersStore } from '@/store/products/useProductFiltersStore'
 
 const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
 
@@ -50,21 +50,7 @@ const GetTableHeaders = () => {
   )
 }
 
-const GetTableRow = ({
-  page,
-  limit,
-  search,
-  product,
-  isDraggable,
-  handleDelete,
-}: {
-  page: number
-  limit: number
-  search: string
-  product: Product
-  isDraggable: boolean
-  handleDelete: (productId: string) => Promise<void>
-}) => {
+const GetTableRow = ({ product, isDraggable }: { product: Product; isDraggable: boolean }) => {
   const firstProductImage = product.images.find((image) => image.displayOrder === 1)?.s3Key
 
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
@@ -121,11 +107,8 @@ const GetTableRow = ({
             >
               <ExternalLinkIcon />
             </Button>
-            <UpdateProduct product={product} page={page} limit={limit} search={search} />
-            <DeleteDialog
-              action={() => destroy(product.id)}
-              callback={() => handleDelete(product.id)}
-            />
+            <UpdateProduct product={product} />
+            <DeleteProduct product={product} />
           </div>
         )}
       </TableCell>
@@ -134,18 +117,14 @@ const GetTableRow = ({
 }
 
 type Props = {
-  limit: number
-  search: string
   isDraggable: boolean
   setIsDraggable: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-function ProductsTable({ limit, search, isDraggable, setIsDraggable }: Props) {
-  const { productsQuery, page, setNextPage, setPrevPage, setPageNumber } = useProducts({
-    search: search,
-    limit,
-  })
-  const { reorderMutation } = useReorderProducts({ page })
+function ProductsTable({ isDraggable, setIsDraggable }: Props) {
+  const { productsQuery, setNextPage, setPrevPage, setPageNumber } = useProducts({})
+  const { page, limit } = useProductFiltersStore()
+  const { reorderMutation } = useReorderProducts()
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -161,29 +140,26 @@ function ProductsTable({ limit, search, isDraggable, setIsDraggable }: Props) {
       const newIndex = products.findIndex((item) => item.id === over?.id)
       const newItems = arrayMove(products, oldIndex, newIndex)
 
+      const offset = limit === 0 || limit === Infinity ? 0 : (page - 1) * limit
+
       const reordered = newItems.map((item, index) => ({
         ...item,
-        displayOrder: index + 1,
+        displayOrder: offset + index + 1,
       }))
 
-      try {
-        setIsDraggable(false)
-        reorderMutation.mutate(reordered.map((p) => ({ id: p.id, displayOrder: p.displayOrder })))
-      } catch (_error) {
-        toast.error('Error al actualizar el orden de los productos')
-      } finally {
-        setIsDraggable(true)
-      }
+      setIsDraggable(false)
+      reorderMutation.mutate(
+        reordered.map((p) => ({ id: p.id, displayOrder: p.displayOrder })),
+        {
+          onError: () => {
+            toast.error('Error al actualizar el orden de los productos')
+          },
+          onSettled: () => {
+            setIsDraggable(true)
+          },
+        }
+      )
     }
-  }
-
-  const handleDelete = async (_productId: string) => {
-    //  try {
-    //    deleteProduct(productId)
-    //    await fetchData({ page, search, limit })
-    //  } catch (error) {
-    //    console.error('Error al eliminar el producto:', error)
-    //  }
   }
 
   return (
@@ -213,15 +189,7 @@ function ProductsTable({ limit, search, isDraggable, setIsDraggable }: Props) {
                   strategy={verticalListSortingStrategy}
                 >
                   {productsQuery.data.objects.map((product) => (
-                    <GetTableRow
-                      page={page}
-                      limit={limit}
-                      search={search}
-                      key={product.id}
-                      product={product}
-                      isDraggable={isDraggable}
-                      handleDelete={handleDelete}
-                    />
+                    <GetTableRow key={product.id} product={product} isDraggable={isDraggable} />
                   ))}
                 </SortableContext>
               ) : (
@@ -240,15 +208,7 @@ function ProductsTable({ limit, search, isDraggable, setIsDraggable }: Props) {
           <TableBody>
             {productsQuery.isSuccess && productsQuery.data.objects.length ? (
               productsQuery.data.objects.map((product) => (
-                <GetTableRow
-                  page={page}
-                  limit={limit}
-                  search={search}
-                  key={product.id}
-                  product={product}
-                  isDraggable={isDraggable}
-                  handleDelete={handleDelete}
-                />
+                <GetTableRow key={product.id} product={product} isDraggable={isDraggable} />
               ))
             ) : (
               <TableRow>

@@ -38,3 +38,8 @@ export interface ProductResponse {
   product: Product
   message: string
 }
+
+export interface ProductReorderResponse {
+  result: Product[]
+  message: string
+}

@@ -72,6 +72,7 @@ function CreateProduct() {
           toast.success(message)
           form.reset()
           setCharCount(0)
+          setDescription('')
         },
         onError: (err) => {
           setIsOpen(true)
@@ -235,7 +236,12 @@ function CreateProduct() {
                   render={({ field }) => (
                     <FormItem className="flex-1">
                       <FormLabel htmlFor="videoId">ID de video (opcional)</FormLabel>
-                      <Input id="videoId" type="text" placeholder="" {...field} />
+                      <Input
+                        id="videoId"
+                        type="text"
+                        placeholder=""
+                        {...{ ...field, value: field.value || undefined }}
+                      />
                       <FormMessage />
                     </FormItem>
                   )}

@@ -2,10 +2,10 @@ import { apiWithCredentials, apiWithOutCredentials } from '@/actions/api'
 import { ProductSchema, ProductUpdateSchema } from '@/schemas/products'
 import { CartItem } from '@/types/cart'
 import {
-  Product,
   ProductsPaginatedResponse,
   ProductFilterParams,
   ProductResponse,
+  ProductReorderResponse,
 } from '@/types/product'
 import axios from 'axios'
 import { z } from 'zod'
@@ -33,12 +33,10 @@ export const getProducts = async (
   }
 }
 
-export const getProduct = async ({ slug }: { slug: string }): Promise<Product> => {
+export const getProduct = async ({ slug }: { slug: string }): Promise<ProductResponse> => {
   try {
-    const { data } = await apiWithOutCredentials.get<{ product: Product; message: string }>(
-      `/products/${slug}`
-    )
-    return data.product
+    const { data } = await apiWithOutCredentials.get<ProductResponse>(`/products/${slug}`)
+    return data
   } catch (error) {
     if (axios.isAxiosError(error)) {
       return error.response?.data || { error: 'An unknown error occurred' }
@@ -109,28 +107,30 @@ export const updateProduct = async ({
   }
 }
 
-export const destroy = async (id: string) => {
+export const deleteProduct = async ({ id }: { id: string }): Promise<ProductResponse> => {
   try {
-    const res = await apiWithCredentials.delete(`/products/${id}`, {})
-    return res
+    const { data } = await apiWithCredentials.delete<ProductResponse>(`/products/${id}`, {})
+    return data
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      return error.response?.data || { error: 'An unknown error occurred' }
+      const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }
+      throw new Error(errorData.error ?? 'Ocurrió un error desconocido')
     }
-    return { error: 'An unknown error occurred' }
+    throw new Error('Ocurrió un error desconocido')
   }
 }
 
 export async function updateProductOrder(updatedProducts: { id: string; displayOrder: number }[]) {
   try {
-    const res = await apiWithCredentials.patch(`/products/order/`, {
+    const { data } = await apiWithCredentials.patch<ProductReorderResponse>(`/products/order/`, {
       updatedProducts,
     })
-    return res
+    return data
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      return error.response?.data || { error: 'An unknown error occurred' }
+      const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }
+      throw new Error(errorData.error ?? 'Ocurrió un error desconocido')
     }
-    return { error: 'An unknown error occurred' }
+    throw new Error('Ocurrió un error desconocido')
   }
 }

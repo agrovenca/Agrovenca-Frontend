@@ -41,18 +41,15 @@ import useUnities from '@/hooks/unities/useUnities'
 import useUpdateProduct from '@/hooks/products/useUpdateProduct'
 
 type Props = {
-  page: number
-  limit: number
-  search: string
   product: Product
 }
 
-function UpdateProduct({ page, limit, search, product }: Props) {
+function UpdateProduct({ product }: Props) {
   const [charCount, setCharCount] = useState(product.description.length)
   const [description, setDescription] = useState(product.description)
   const [isOpen, setIsOpen] = useState(false)
 
-  const { updateProductMutation } = useUpdateProduct({ page, limit, search })
+  const { updateProductMutation } = useUpdateProduct()
   const { categoriesQuery } = useCategories()
   const { unitiesQuery } = useUnities()
 
@@ -358,7 +355,6 @@ function UpdateProduct({ page, limit, search, product }: Props) {
                     'Actualizar'
                   )}
                 </Button>
-                {form.formState.isValid ? 'valid' : 'invalid'}
               </div>
             </form>
           </Form>
