@@ -1,4 +1,11 @@
 import Navbar from '@/components/pages/HomeNavbar'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -12,15 +19,16 @@ import ProductItem from './ProductItem'
 import { useDebounce } from 'use-debounce'
 import ProductSkeleton from './ProductSkeleton'
 import ExtendedTooltip from '@/components/blocks/ExtendedTooltip'
+import { useProductFiltersStore } from '@/store/products/useProductFiltersStore'
+import { limitOptions } from '@/lib/productLimitOptions'
 
 function ProductsPage() {
-  const [search, setSearch] = useState('')
+  const { limit, setLimit, search, setSearch } = useProductFiltersStore()
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
   const [debouncedSearch] = useDebounce(search, 500)
 
   const { productsQuery, setNextPage, setPrevPage, setPageNumber } = useProducts({
-    limit: 12,
     search: debouncedSearch,
   })
 
@@ -37,14 +45,33 @@ function ProductsPage() {
 
         {/* Search and Filters Bar */}
         <div className="flex  gap-4 mb-6 flex-row md:items-center md:justify-between">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Filtrar por nombre..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10"
-            />
+          <div className="flex-1 flex gap-2">
+            <div className="relative w-full max-w-md">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Filtrar por nombre..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <div>
+              <Select
+                defaultValue={limit.toString()}
+                onValueChange={(value) => setLimit(Number(value))}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Mostrar" />
+                </SelectTrigger>
+                <SelectContent>
+                  {limitOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      Mostrar {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="flex items-center gap-4">
@@ -115,6 +142,7 @@ function ProductsPage() {
             {productsQuery.isSuccess && productsQuery.data && (
               <Pagination
                 paginationData={productsQuery.data.pagination}
+                currentItems={productsQuery.data.objects.length}
                 setNextPage={setNextPage}
                 setPrevPage={setPrevPage}
                 setPageNumber={setPageNumber}

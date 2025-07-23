@@ -75,7 +75,6 @@ function CreateShippingAddress() {
         throw new Error('Failed to create shipping address')
       }
       addAddress(res.data.address)
-      console.log('Shipping address created successfully:', res.data)
     } catch (error) {
       console.error('Error creating shipping address:', error)
     } finally {
