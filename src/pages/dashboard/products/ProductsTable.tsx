@@ -117,14 +117,13 @@ const GetTableRow = ({ product, isDraggable }: { product: Product; isDraggable: 
 }
 
 type Props = {
-  search: string
   isDraggable: boolean
   setIsDraggable: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-function ProductsTable({ search, isDraggable, setIsDraggable }: Props) {
+function ProductsTable({ isDraggable, setIsDraggable }: Props) {
   const { page, limit } = useProductFiltersStore()
-  const { productsQuery, setNextPage, setPrevPage, setPageNumber } = useProducts({ search })
+  const { productsQuery, setNextPage, setPrevPage, setPageNumber } = useProducts({})
   const { reorderMutation } = useReorderProducts()
 
   const sensors = useSensors(

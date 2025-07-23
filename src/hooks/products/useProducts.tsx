@@ -3,20 +3,18 @@ import { useProductFiltersStore } from '@/store/products/useProductFiltersStore'
 import { useQuery } from '@tanstack/react-query'
 
 interface Options {
-  search?: string
-  categoriesIds?: string[]
   unitiesIds?: string[]
   priceRange?: number[]
   inStockOnly?: boolean
   enabled?: boolean
 }
 
-function useProducts({ search, categoriesIds, enabled = true }: Options) {
-  const { page, setPage, limit } = useProductFiltersStore()
+function useProducts({ enabled = true }: Options) {
+  const { search, page, setPage, limit, categoriesId } = useProductFiltersStore()
 
   const productsQuery = useQuery({
-    queryKey: ['products', { page, limit, search, categoriesIds }],
-    queryFn: () => getProducts({ page, limit, search, categoriesIds }),
+    queryKey: ['products', { page, limit, search, categoriesId }],
+    queryFn: () => getProducts({ page, limit, search, categoriesId }),
     staleTime: 1000 * 60 * 10,
     enabled,
   })

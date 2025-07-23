@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { DownloadIcon, RefreshCwIcon, Search } from 'lucide-react'
+import { DownloadIcon, RefreshCwIcon } from 'lucide-react'
 import CreateProduct from './Create'
 import { exportProducts } from '@/actions/products'
 import { Switch } from '@/components/ui/switch'
@@ -9,25 +9,13 @@ import ExtendedTooltip from '@/components/blocks/ExtendedTooltip'
 import ProductsTable from './ProductsTable'
 import { useExcelExport } from '@/hooks/useExcelExport'
 import { toast } from 'sonner'
-import { Input } from '@/components/ui/input'
 import useProducts from '@/hooks/products/useProducts'
-import { useDebounce } from 'use-debounce'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { useProductFiltersStore } from '@/store/products/useProductFiltersStore'
-import { limitOptions } from '@/lib/productLimitOptions'
+import Filters from '@/components/pages/products/Filters'
 
 function ProductsDashboardPage() {
-  const { limit, setLimit, search, setSearch } = useProductFiltersStore()
   const [dragAndDropActive, setDragAndDropActive] = useState(false)
-  const [debouncedSearch] = useDebounce(search, 500)
 
-  const { productsQuery } = useProducts({ search: debouncedSearch })
+  const { productsQuery } = useProducts({})
   const { exportExcel } = useExcelExport()
 
   const handleExport = async (format: string) => {
@@ -45,34 +33,7 @@ function ProductsDashboardPage() {
   return (
     <>
       <div className="w-full flex justify-between gap-6 mb-4">
-        <div className="flex-1 flex gap-2">
-          <div className="relative w-full max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Filtrar por nombre..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <div>
-            <Select
-              defaultValue={limit.toString()}
-              onValueChange={(value) => setLimit(Number(value))}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Mostrar" />
-              </SelectTrigger>
-              <SelectContent>
-                {limitOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    Mostrar {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        <Filters />
         <div className="flex items-center gap-2">
           <CreateProduct />
           <Button
@@ -114,11 +75,7 @@ function ProductsDashboardPage() {
       </div>
 
       <div className="flex gap-6 flex-col sm:flex-row">
-        <ProductsTable
-          search={debouncedSearch}
-          isDraggable={dragAndDropActive}
-          setIsDraggable={setDragAndDropActive}
-        />
+        <ProductsTable isDraggable={dragAndDropActive} setIsDraggable={setDragAndDropActive} />
       </div>
     </>
   )
