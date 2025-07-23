@@ -47,12 +47,12 @@ function ProductDetail() {
 
   const { productQuery } = useProduct({ slug: slug ?? '' })
   const { productsQuery } = useProducts({
-    categoriesIds: [productQuery.data?.categoryId ?? ''],
+    categoriesIds: [productQuery.data?.product.categoryId ?? ''],
     limit: 9,
     enabled: !!productQuery.data,
   })
 
-  const product = productQuery.data
+  const product = productQuery.data?.product
 
   const {
     quantity,

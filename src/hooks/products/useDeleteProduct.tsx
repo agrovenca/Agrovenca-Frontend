@@ -1,25 +1,15 @@
-import { updateProduct } from '@/actions/products'
-import { ProductUpdateSchema } from '@/schemas/products'
+import { deleteProduct } from '@/actions/products'
 import { useProductFiltersStore } from '@/store/products/useProductFiltersStore'
 import { ProductsPaginatedResponse } from '@/types/product'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { z } from 'zod'
 
-interface Props {
-  id: string
-  newData: z.infer<typeof ProductUpdateSchema>
-}
-
-function useUpdateProduct() {
+function useDeleteProduct() {
   const { page, limit, search } = useProductFiltersStore()
   const queryClient = useQueryClient()
-  const updateProductMutation = useMutation({
-    mutationFn: ({ id, newData }: Props) => updateProduct({ id, newData }),
-    onMutate: async ({ id, newData }) => {
-      await queryClient.cancelQueries({
-        queryKey: ['products', { page, limit, search }],
-      })
-
+  const deleteProductMutation = useMutation({
+    mutationFn: ({ id }: { id: string }) => deleteProduct({ id }),
+    onMutate: async ({ id }) => {
+      await queryClient.cancelQueries({ queryKey: ['products', { page, limit, search }] })
       const previousProducts = queryClient.getQueryData<ProductsPaginatedResponse>([
         'products',
         { page, limit, search },
@@ -31,17 +21,19 @@ function useUpdateProduct() {
           if (!oldProducts || !oldProducts.objects) return oldProducts
           return {
             ...oldProducts,
-            objects: oldProducts.objects.map((product) =>
-              product.id === id ? { ...product, ...newData } : product
-            ),
+            objects: oldProducts.objects.filter((product) => product.id !== id),
           }
         }
       )
+
       return { previousProducts }
     },
     onError: (_error, _variables, context) => {
       if (context?.previousProducts) {
-        queryClient.setQueryData(['products', { page, limit, search }], context.previousProducts)
+        queryClient.setQueryData<ProductsPaginatedResponse>(
+          ['products', { page, limit, search }],
+          context?.previousProducts
+        )
       }
     },
     onSettled: () => {
@@ -49,7 +41,7 @@ function useUpdateProduct() {
     },
   })
 
-  return { updateProductMutation }
+  return { deleteProductMutation }
 }
 
-export default useUpdateProduct
+export default useDeleteProduct
