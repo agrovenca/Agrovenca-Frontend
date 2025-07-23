@@ -34,7 +34,6 @@ function UsersDashboardPage() {
   })
 
   const handleFilterSubmit = (params: UserFilterParams) => {
-    console.log(params)
     setSearch(String(params.search))
     setLimit(Number(params.limit))
     setIsActive(params.isActive)
@@ -128,6 +127,7 @@ function UsersDashboardPage() {
       {usersQuery.data?.objects && (
         <Pagination
           paginationData={usersQuery.data.pagination}
+          currentItems={usersQuery.data.objects.length}
           setNextPage={setNextPage}
           setPrevPage={setPrevPage}
           setPageNumber={setPageNumber}

@@ -9,10 +9,9 @@ import ExtendedTooltip from '@/components/blocks/ExtendedTooltip'
 import ProductsTable from './ProductsTable'
 import { useExcelExport } from '@/hooks/useExcelExport'
 import { toast } from 'sonner'
-// import { FiltersBar } from './Filters'
 import { Input } from '@/components/ui/input'
 import useProducts from '@/hooks/products/useProducts'
-// import { useDebounce } from 'use-debounce'
+import { useDebounce } from 'use-debounce'
 import {
   Select,
   SelectContent,
@@ -21,33 +20,14 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useProductFiltersStore } from '@/store/products/useProductFiltersStore'
-
-const limitOptions = [
-  {
-    label: '15',
-    value: '15',
-  },
-  {
-    label: '30',
-    value: '30',
-  },
-  {
-    label: '50',
-    value: '50',
-  },
-  {
-    label: 'Todos',
-    value: '0',
-  },
-]
+import { limitOptions } from '@/lib/productLimitOptions'
 
 function ProductsDashboardPage() {
-  // const [search, setSearch] = useState('')
-  // const [limit, setLimit] = useState(15)
   const { limit, setLimit, search, setSearch } = useProductFiltersStore()
   const [dragAndDropActive, setDragAndDropActive] = useState(false)
+  const [debouncedSearch] = useDebounce(search, 500)
 
-  const { productsQuery } = useProducts({})
+  const { productsQuery } = useProducts({ search: debouncedSearch })
   const { exportExcel } = useExcelExport()
 
   const handleExport = async (format: string) => {
@@ -134,7 +114,11 @@ function ProductsDashboardPage() {
       </div>
 
       <div className="flex gap-6 flex-col sm:flex-row">
-        <ProductsTable isDraggable={dragAndDropActive} setIsDraggable={setDragAndDropActive} />
+        <ProductsTable
+          search={debouncedSearch}
+          isDraggable={dragAndDropActive}
+          setIsDraggable={setDragAndDropActive}
+        />
       </div>
     </>
   )

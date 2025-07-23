@@ -12,10 +12,10 @@ interface ProductFiltersState {
 
 export const useProductFiltersStore = create<ProductFiltersState>((set) => ({
   page: 1,
-  limit: 12,
+  limit: 16,
   search: '',
   setPage: (page) => set({ page }),
   setLimit: (limit) => set({ limit }),
   setSearch: (search) => set({ search }),
-  resetFilters: () => set({ page: 1, limit: 12, search: '' }),
+  resetFilters: () => set({ page: 1, limit: 16, search: '' }),
 }))

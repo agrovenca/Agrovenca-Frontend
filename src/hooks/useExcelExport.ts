@@ -10,7 +10,6 @@ export function useExcelExport() {
 
       // Obtener el nombre del archivo del header 'content-disposition'
       const disposition = response.headers['content-disposition']
-      console.log(disposition)
       let filename = fallbackFilename
 
       if (disposition && disposition.includes('filename=')) {

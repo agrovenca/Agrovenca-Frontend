@@ -1,9 +1,12 @@
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { useProductFiltersStore } from '@/store/products/useProductFiltersStore'
 import { BasePaginatedResponse } from '@/types/shared'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 type Props = {
   paginationData: BasePaginatedResponse
+  currentItems: number
   setPrevPage: () => void
   setNextPage: () => void
   setPageNumber: (page: number) => void
@@ -36,51 +39,79 @@ function getVisiblePages(current: number, total: number): (number | 'dots')[] {
   return range.filter((v, i, self) => v !== 'dots' || self[i - 1] !== 'dots')
 }
 
-function Pagination({ paginationData, setPrevPage, setNextPage, setPageNumber }: Props) {
+function Pagination({
+  paginationData,
+  currentItems,
+  setPrevPage,
+  setNextPage,
+  setPageNumber,
+}: Props) {
+  const { limit } = useProductFiltersStore()
   const { hasNextPage, hasPreviousPage, page: currentPage, totalPages } = paginationData
   const visiblePages = getVisiblePages(currentPage, totalPages)
 
   return (
-    <div className="flex flex-wrap gap-4 items-center justify-center mt-4 p-4">
-      <Button
-        variant={'outline'}
-        disabled={!hasPreviousPage}
-        onClick={() => handleClick(setPrevPage)}
-        className="flex items-center gap-2"
-      >
-        <ChevronLeft />
-        <span>Anterior</span>
-      </Button>
-
-      <div className="flex gap-2 justify-between items-center">
-        {visiblePages.map((page, idx) =>
-          page === 'dots' ? (
-            <span key={`dots-${idx}`} className="px-2 text-muted-foreground select-none">
-              …
-            </span>
-          ) : (
-            <Button
-              key={page}
-              variant={page === currentPage ? 'ghost' : 'default'}
-              disabled={page === currentPage}
-              className={page === currentPage ? 'cursor-not-allowed border' : 'cursor-pointer'}
-              onClick={() => handleClick(() => setPageNumber(page))}
-            >
-              {page}
-            </Button>
-          )
-        )}
+    <div className="flex flex-col gap-2 items-center mt-4">
+      <div className="flex items-center font-serif">
+        <span>Mostrando</span>
+        <Badge className="mx-1" variant={'outline'}>
+          {(currentPage - 1) * limit + 1}{' '}
+        </Badge>{' '}
+        <span>a</span>
+        <Badge className="mx-1" variant={'outline'}>
+          {(currentPage - 1) * limit + currentItems}{' '}
+        </Badge>
+        <span>de</span>{' '}
+        <Badge className="mx-1" variant={'outline'}>
+          {paginationData.totalItems}
+        </Badge>
+        <span>resultados en total</span>
       </div>
+      <div className="flex flex-wrap gap-4 items-center justify-center mt-4 p-4">
+        <Button
+          variant={'outline'}
+          disabled={!hasPreviousPage}
+          onClick={() => handleClick(setPrevPage)}
+          className={`flex items-center gap-2 ${
+            !hasPreviousPage ? 'cursor-not-allowed' : 'cursor-pointer'
+          }`}
+        >
+          <ChevronLeft />
+          <span>Anterior</span>
+        </Button>
 
-      <Button
-        variant={'outline'}
-        disabled={!hasNextPage}
-        onClick={() => handleClick(setNextPage)}
-        className="flex items-center gap-2"
-      >
-        <span>Siguiente</span>
-        <ChevronRight />
-      </Button>
+        <div className="flex gap-2 justify-between items-center">
+          {visiblePages.map((page, idx) =>
+            page === 'dots' ? (
+              <span key={`dots-${idx}`} className="px-2 text-muted-foreground select-none">
+                …
+              </span>
+            ) : (
+              <Button
+                key={page}
+                variant={page === currentPage ? 'ghost' : 'default'}
+                disabled={page === currentPage}
+                className={page === currentPage ? 'cursor-not-allowed border' : 'cursor-pointer'}
+                onClick={() => handleClick(() => setPageNumber(page))}
+              >
+                {page}
+              </Button>
+            )
+          )}
+        </div>
+
+        <Button
+          variant={'outline'}
+          disabled={!hasNextPage}
+          onClick={() => handleClick(setNextPage)}
+          className={`flex items-center gap-2 ${
+            !hasNextPage ? 'cursor-not-allowed' : 'cursor-pointer'
+          }`}
+        >
+          <span>Siguiente</span>
+          <ChevronRight />
+        </Button>
+      </div>
     </div>
   )
 }
