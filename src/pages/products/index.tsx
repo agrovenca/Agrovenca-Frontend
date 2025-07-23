@@ -1,43 +1,21 @@
 import Navbar from '@/components/pages/HomeNavbar'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Checkbox } from '@/components/ui/checkbox'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Grid, List, Search } from 'lucide-react'
-import { Input } from '@/components/ui/input'
+import { Grid, List } from 'lucide-react'
 import Pagination from '@/components/blocks/pagination'
 import Footer from '@/components/pages/Footer'
 import useProducts from '@/hooks/products/useProducts'
 import ProductItem from './ProductItem'
 
-import { useDebounce } from 'use-debounce'
 import ProductSkeleton from './ProductSkeleton'
 import ExtendedTooltip from '@/components/blocks/ExtendedTooltip'
-import { useProductFiltersStore } from '@/store/products/useProductFiltersStore'
-import { limitOptions } from '@/lib/productLimitOptions'
-import useCategories from '@/hooks/categories/useCategories'
+import Filters from '@/components/pages/products/Filters'
 
 function ProductsPage() {
-  const { limit, setLimit, search, setSearch, categoriesId, setCategoriesId } =
-    useProductFiltersStore()
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
-  const [debouncedSearch] = useDebounce(search, 500)
-  const [debouncedCategories] = useDebounce(categoriesId, 300)
-
-  const { productsQuery, setNextPage, setPrevPage, setPageNumber } = useProducts({
-    search: debouncedSearch,
-    categoriesIds: debouncedCategories,
-  })
-  const { categoriesQuery } = useCategories()
+  const { productsQuery, setNextPage, setPrevPage, setPageNumber } = useProducts({})
 
   return (
     <div>
@@ -52,71 +30,7 @@ function ProductsPage() {
 
         {/* Search and Filters Bar */}
         <div className="flex  gap-4 mb-6 flex-row md:items-center md:justify-between">
-          <div className="flex-1 flex gap-2">
-            <div className="relative w-full max-w-md">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Filtrar por nombre..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <div>
-              <Select
-                defaultValue={limit.toString()}
-                onValueChange={(value) => setLimit(Number(value))}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Mostrar" />
-                </SelectTrigger>
-                <SelectContent>
-                  {limitOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      Mostrar {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start">
-                    {categoriesId.length > 0
-                      ? categoriesId
-                          .map((id) => {
-                            const category = categoriesQuery.data?.find((cat) => cat.id === id)
-                            return category ? category.name : ''
-                          })
-                          .join(', ')
-                      : 'Selecciona categorías'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[200px]">
-                  <div className="flex flex-col gap-2">
-                    {categoriesQuery.data?.map((category) => (
-                      <div key={category.id} className="flex items-center gap-2">
-                        <Checkbox
-                          id={category.id}
-                          checked={categoriesId.includes(category.id)}
-                          onCheckedChange={(checked) => {
-                            const newValue = checked
-                              ? [...(categoriesId || []), category.id]
-                              : (categoriesId || []).filter((val) => val !== category.id)
-                            setCategoriesId(newValue)
-                          }}
-                        />
-                        <label htmlFor={category.id} className="text-sm capitalize">
-                          {category.name}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
+          <Filters />
 
           <div className="flex items-center gap-4">
             <div className="flex border rounded-md">
