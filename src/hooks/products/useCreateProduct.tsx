@@ -1,7 +1,7 @@
 import { createProduct } from '@/actions/products'
-import { useProductFiltersStore } from '@/store/products/useProductFiltersStore'
 import { ProductsPaginatedResponse } from '@/types/product'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useProductsQueryKey } from './useProductsQueryKey'
 
 const emptyPagination = {
   page: 1,
@@ -14,7 +14,7 @@ const emptyPagination = {
 }
 
 function useCreateProduct() {
-  const { page, limit, search, categoriesId, unitiesId } = useProductFiltersStore()
+  const filters = useProductsQueryKey()
   const queryClient = useQueryClient()
 
   const createProductMutation = useMutation({
@@ -22,7 +22,7 @@ function useCreateProduct() {
     onMutate: ({ newData }) => {
       const previousProducts = queryClient.getQueryData<ProductsPaginatedResponse>([
         'products',
-        { page, limit, search, categoriesId, unitiesId },
+        filters,
       ])
       const optimisticProduct = {
         ...newData,
@@ -34,52 +34,43 @@ function useCreateProduct() {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       }
-      queryClient.setQueryData<ProductsPaginatedResponse>(
-        ['products', { page, limit, search, categoriesId, unitiesId }],
-        (oldProducts) => {
-          if (!oldProducts || !oldProducts.objects)
-            return { objects: [optimisticProduct], pagination: emptyPagination }
-          return {
-            ...oldProducts,
-            objects: [...oldProducts.objects, optimisticProduct],
-          }
+      queryClient.setQueryData<ProductsPaginatedResponse>(['products', filters], (oldProducts) => {
+        if (!oldProducts || !oldProducts.objects)
+          return { objects: [optimisticProduct], pagination: emptyPagination }
+        return {
+          ...oldProducts,
+          objects: [...oldProducts.objects, optimisticProduct],
         }
-      )
+      })
       return { optimisticProduct }
     },
     onSuccess: ({ product: newProduct }, _variables, context) => {
-      queryClient.setQueryData<ProductsPaginatedResponse>(
-        ['products', { page, limit, search, categoriesId, unitiesId }],
-        (oldProducts) => {
-          if (!oldProducts || !oldProducts.objects)
-            return {
-              pagination: emptyPagination,
-              objects: [newProduct],
-            }
-
+      queryClient.setQueryData<ProductsPaginatedResponse>(['products', filters], (oldProducts) => {
+        if (!oldProducts || !oldProducts.objects)
           return {
-            ...oldProducts,
-            objects: oldProducts.objects.map((product) =>
-              product.id === context?.optimisticProduct.id ? newProduct : product
-            ),
+            pagination: emptyPagination,
+            objects: [newProduct],
           }
+
+        return {
+          ...oldProducts,
+          objects: oldProducts.objects.map((product) =>
+            product.id === context?.optimisticProduct.id ? newProduct : product
+          ),
         }
-      )
+      })
     },
     onError: (_error, _variables, context) => {
-      queryClient.setQueryData<ProductsPaginatedResponse>(
-        ['products', { page, limit, search, categoriesId, unitiesId }],
-        (oldProducts) => {
-          if (!oldProducts || !oldProducts.objects)
-            return { objects: [], pagination: emptyPagination }
-          return {
-            ...oldProducts,
-            objects: oldProducts.objects.filter(
-              (product) => product.id !== context?.optimisticProduct.id
-            ),
-          }
+      queryClient.setQueryData<ProductsPaginatedResponse>(['products', filters], (oldProducts) => {
+        if (!oldProducts || !oldProducts.objects)
+          return { objects: [], pagination: emptyPagination }
+        return {
+          ...oldProducts,
+          objects: oldProducts.objects.filter(
+            (product) => product.id !== context?.optimisticProduct.id
+          ),
         }
-      )
+      })
     },
   })
 

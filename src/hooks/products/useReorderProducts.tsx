@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { updateProductOrder, updateProductsOrder } from '@/actions/products'
 import { ProductResponse, ProductsPaginatedResponse } from '@/types/product'
-import { useProductFiltersStore } from '@/store/products/useProductFiltersStore'
+import { useProductsQueryKey } from './useProductsQueryKey'
 
 interface Payload {
   id: string
@@ -9,48 +9,39 @@ interface Payload {
 }
 
 export function useReorderProducts() {
-  const { page, limit, search, categoriesId, unitiesId } = useProductFiltersStore()
+  const filters = useProductsQueryKey()
   const queryClient = useQueryClient()
   const reorderMutation = useMutation({
     mutationFn: (payload: Payload[]) => updateProductsOrder(payload),
 
     onMutate: async (newOrder) => {
       await queryClient.cancelQueries({
-        queryKey: ['products', { page, limit, search, categoriesId, unitiesId }],
+        queryKey: ['products', filters],
       })
 
-      const previousData = queryClient.getQueryData<ProductResponse>([
-        'products',
-        { page, limit, search, categoriesId, unitiesId },
-      ])
+      const previousData = queryClient.getQueryData<ProductResponse>(['products', filters])
 
-      queryClient.setQueryData(
-        ['products', { page, limit, search, categoriesId, unitiesId }],
-        (old: ProductsPaginatedResponse) => {
-          if (!old) return old
-          return {
-            ...old,
-            objects: newOrder.map((order) => ({
-              ...old.objects.find((p) => p.id === order.id),
-              displayOrder: order.displayOrder,
-            })),
-          }
+      queryClient.setQueryData(['products', filters], (old: ProductsPaginatedResponse) => {
+        if (!old) return old
+        return {
+          ...old,
+          objects: newOrder.map((order) => ({
+            ...old.objects.find((p) => p.id === order.id),
+            displayOrder: order.displayOrder,
+          })),
         }
-      )
+      })
 
       return { previousData }
     },
     onError: (_error, _newOrder, context) => {
       if (context?.previousData) {
-        queryClient.setQueryData(
-          ['products', { page, limit, search, categoriesId, unitiesId }],
-          context.previousData
-        )
+        queryClient.setQueryData(['products', filters], context.previousData)
       }
     },
     onSettled: () => {
       queryClient.invalidateQueries({
-        queryKey: ['products', { page, limit, search, categoriesId, unitiesId }],
+        queryKey: ['products', filters],
       })
     },
   })
@@ -59,7 +50,7 @@ export function useReorderProducts() {
 }
 
 export function useReorderProduct() {
-  const { page, limit, search, categoriesId, unitiesId } = useProductFiltersStore()
+  const filters = useProductsQueryKey()
   const queryClient = useQueryClient()
 
   const reorderSingleMutation = useMutation({
@@ -67,41 +58,35 @@ export function useReorderProduct() {
 
     onMutate: async (newOrder) => {
       await queryClient.cancelQueries({
-        queryKey: ['products', { page, limit, search, categoriesId, unitiesId }],
+        queryKey: ['products', filters],
       })
 
       const previousData = queryClient.getQueryData<ProductsPaginatedResponse>([
         'products',
-        { page, limit, search, categoriesId, unitiesId },
+        filters,
       ])
 
-      queryClient.setQueryData(
-        ['products', { page, limit, search, categoriesId, unitiesId }],
-        (old: ProductsPaginatedResponse) => {
-          if (!old) return old
+      queryClient.setQueryData(['products', filters], (old: ProductsPaginatedResponse) => {
+        if (!old) return old
 
-          const updatedObjects = old.objects.map((p) => {
-            if (p.id === newOrder.id) {
-              return { ...p, displayOrder: newOrder.displayOrder }
-            }
-            return p
-          })
-
-          return {
-            ...old,
-            objects: updatedObjects,
+        const updatedObjects = old.objects.map((p) => {
+          if (p.id === newOrder.id) {
+            return { ...p, displayOrder: newOrder.displayOrder }
           }
+          return p
+        })
+
+        return {
+          ...old,
+          objects: updatedObjects,
         }
-      )
+      })
 
       return { previousData }
     },
     onError: (_error, _newOrder, context) => {
       if (context?.previousData) {
-        queryClient.setQueryData(
-          ['products', { page, limit, search, categoriesId, unitiesId }],
-          context.previousData
-        )
+        queryClient.setQueryData(['products', filters], context.previousData)
       }
     },
     onSettled: () => {

@@ -6,6 +6,8 @@ interface ProductFiltersState {
   search: string
   unitiesId: string[]
   categoriesId: string[]
+  priceRange: number[]
+  setPriceRange: (priceRange: number[]) => void
   setPage: (page: number) => void
   setLimit: (limit: number) => void
   setSearch: (search: string) => void
@@ -20,10 +22,13 @@ export const useProductFiltersStore = create<ProductFiltersState>((set) => ({
   search: '',
   unitiesId: [],
   categoriesId: [],
+  priceRange: [0, 1700],
+  setPriceRange: (priceRange) => set({ priceRange }),
   setPage: (page) => set({ page }),
   setLimit: (limit) => set({ limit }),
   setSearch: (search) => set({ search }),
   setUnitiesId: (unitiesId) => set({ unitiesId }),
   setCategoriesId: (categoriesId) => set({ categoriesId }),
-  resetFilters: () => set({ page: 1, limit: 16, search: '', categoriesId: [], unitiesId: [] }),
+  resetFilters: () =>
+    set({ page: 1, limit: 16, search: '', categoriesId: [], unitiesId: [], priceRange: [0, 1700] }),
 }))

@@ -1,46 +1,43 @@
 import { deleteProduct } from '@/actions/products'
-import { useProductFiltersStore } from '@/store/products/useProductFiltersStore'
 import { ProductsPaginatedResponse } from '@/types/product'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useProductsQueryKey } from './useProductsQueryKey'
 
 function useDeleteProduct() {
-  const { page, limit, search, categoriesId, unitiesId } = useProductFiltersStore()
+  const filters = useProductsQueryKey()
   const queryClient = useQueryClient()
   const deleteProductMutation = useMutation({
     mutationFn: ({ id }: { id: string }) => deleteProduct({ id }),
     onMutate: async ({ id }) => {
       await queryClient.cancelQueries({
-        queryKey: ['products', { page, limit, search, categoriesId, unitiesId }],
+        queryKey: ['products', filters],
       })
       const previousProducts = queryClient.getQueryData<ProductsPaginatedResponse>([
         'products',
-        { page, limit, search, categoriesId, unitiesId },
+        filters,
       ])
 
-      queryClient.setQueryData<ProductsPaginatedResponse>(
-        ['products', { page, limit, search, categoriesId, unitiesId }],
-        (oldProducts) => {
-          if (!oldProducts || !oldProducts.objects) return oldProducts
-          return {
-            ...oldProducts,
-            objects: oldProducts.objects.filter((product) => product.id !== id),
-          }
+      queryClient.setQueryData<ProductsPaginatedResponse>(['products', filters], (oldProducts) => {
+        if (!oldProducts || !oldProducts.objects) return oldProducts
+        return {
+          ...oldProducts,
+          objects: oldProducts.objects.filter((product) => product.id !== id),
         }
-      )
+      })
 
       return { previousProducts }
     },
     onError: (_error, _variables, context) => {
       if (context?.previousProducts) {
         queryClient.setQueryData<ProductsPaginatedResponse>(
-          ['products', { page, limit, search, categoriesId, unitiesId }],
+          ['products', filters],
           context?.previousProducts
         )
       }
     },
     onSettled: () => {
       queryClient.invalidateQueries({
-        queryKey: ['products', { page, limit, search, categoriesId, unitiesId }],
+        queryKey: ['products', filters],
       })
     },
   })

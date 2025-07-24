@@ -28,6 +28,7 @@ import { useEffect, useState } from 'react'
 import useUnities from '@/hooks/unities/useUnities'
 import { Unity } from '@/types/unity'
 import { Category } from '@/types/category'
+import { Slider } from '@/components/ui/slider'
 
 function RenderMultiSelect({
   label,
@@ -87,6 +88,9 @@ function FiltersDialog() {
   const setCategoriesId = useProductFiltersStore((state) => state.setCategoriesId)
   const unitiesId = useProductFiltersStore((state) => state.unitiesId)
   const setUnitiesId = useProductFiltersStore((state) => state.setUnitiesId)
+  const priceRange = useProductFiltersStore((state) => state.priceRange)
+  const setPriceRange = useProductFiltersStore((state) => state.setPriceRange)
+  const [tempRange, setTempRange] = useState(priceRange)
   const resetFilters = useProductFiltersStore((state) => state.resetFilters)
 
   const { categoriesQuery } = useCategories()
@@ -142,6 +146,24 @@ function FiltersDialog() {
               setLocalData={setUnitiesId}
               queryData={unitiesQuery.data}
             />
+          </div>
+          <div>
+            <h3 className="font-semibold mb-3">Rango de precio</h3>
+            <div className="ps-4">
+              <Slider
+                value={tempRange}
+                onValueChange={setTempRange}
+                onValueCommit={(value) => setPriceRange(value)}
+                max={1000}
+                min={0}
+                step={10}
+                className="w-full"
+              />
+              <div className="flex justify-between text-sm text-muted-foreground mt-2 font-serif">
+                <span>${tempRange[0]}</span>
+                <span>${tempRange[1]}</span>
+              </div>
+            </div>
           </div>
           <Button variant={'secondary'} className="mt-6" onClick={resetFilters}>
             <FilterXIcon />
