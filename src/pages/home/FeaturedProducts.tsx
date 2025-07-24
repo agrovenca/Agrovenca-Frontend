@@ -7,7 +7,7 @@ import ProductSkeleton from '../products/ProductSkeleton'
 
 function FeaturedProducts() {
   const limit = 4
-  const { productsQuery } = useProducts({})
+  const { productsQuery } = useProducts({ fetchWithFilters: false })
 
   return (
     <section className="w-full py-12 md:py-24">
