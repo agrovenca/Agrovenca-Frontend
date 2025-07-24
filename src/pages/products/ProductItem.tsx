@@ -12,6 +12,7 @@ import useCategories from '@/hooks/categories/useCategories'
 import useUnities from '@/hooks/unities/useUnities'
 import { useProductActions } from '@/hooks/products/useActions'
 import useProductPrefetch from '@/hooks/products/useProductPrefetch'
+import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
 
 function ProductItem({
   product,
@@ -52,7 +53,7 @@ function ProductItem({
         <CardContent className="p-0">
           <div className="flex gap-2">
             <Link to={`/products/${product.slug}`} viewTransition>
-              <figure className="relative w-48 h-48 shrink-0">
+              <figure className="relative w-[250px] h-full shrink-0">
                 <img
                   src={firstProductImage?.s3Key}
                   style={{
@@ -61,6 +62,10 @@ function ProductItem({
                   loading="lazy"
                   alt={product.name}
                   className="w-full h-full object-cover aspect-video"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null
+                    e.currentTarget.src = ProductImagePlaceholder
+                  }}
                 />
                 {!inStock && (
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
@@ -168,6 +173,10 @@ function ProductItem({
             }}
             alt={product.name}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 aspect-video"
+            onError={(e) => {
+              e.currentTarget.onerror = null
+              e.currentTarget.src = ProductImagePlaceholder
+            }}
           />
         </figure>
       </Link>

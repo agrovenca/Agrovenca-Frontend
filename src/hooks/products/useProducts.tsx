@@ -1,21 +1,25 @@
 import { getProducts } from '@/actions/products'
 import { useQuery } from '@tanstack/react-query'
 import { useProductsFilterSetters, useProductsQueryKey } from './useProductsQueryKey'
-import { ProductFilterParams } from '@/types/product'
 
 interface Options {
-  priceRange?: number[]
   inStockOnly?: boolean
   enabled?: boolean
+  fetchWithFilters?: boolean
 }
 
-function useProducts({ enabled = true }: Options) {
+function useProducts({ enabled = true, fetchWithFilters = true }: Options) {
   const filters = useProductsQueryKey()
   const { setPage } = useProductsFilterSetters()
+  const initialQueryKey = ['products', filters]
+
+  if (!fetchWithFilters) {
+    initialQueryKey.pop()
+  }
 
   const productsQuery = useQuery({
-    queryKey: ['products', filters],
-    queryFn: () => getProducts(filters as ProductFilterParams),
+    queryKey: initialQueryKey,
+    queryFn: () => getProducts(fetchWithFilters ? filters : {}),
     staleTime: 1000 * 60 * 10,
     enabled,
   })

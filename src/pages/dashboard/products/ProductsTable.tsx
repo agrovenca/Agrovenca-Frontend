@@ -30,8 +30,7 @@ import DeleteProduct from './Delete'
 import { useProductFiltersStore } from '@/store/products/useProductFiltersStore'
 import UpdateProductOrder from './UpdateOrder'
 import { useReorderProducts } from '@/hooks/products/useReorderProducts'
-
-const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
+import { useProductActions } from '@/hooks/products/useActions'
 
 const GetTableHeaders = () => {
   return (
@@ -58,7 +57,8 @@ const GetTableRow = ({
   totalProducts: number
   isDraggable: boolean
 }) => {
-  const firstProductImage = product.images.find((image) => image.displayOrder === 1)?.s3Key
+  const { getFirstProductImage } = useProductActions(product)
+  const firstProductImage = getFirstProductImage(product.images)
 
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: product.id,
@@ -78,10 +78,12 @@ const GetTableRow = ({
         <figure className="w-30 h-30 overflow-hidden rounded-md border relative">
           <img
             className="w-full h-full object-cover"
-            src={
-              product.images.length > 0 ? spaceBaseUrl + firstProductImage : ProductImagePlaceholder
-            }
+            src={firstProductImage?.s3Key}
             alt={`Imagen del producto ${product.name}`}
+            onError={(e) => {
+              e.currentTarget.onerror = null
+              e.currentTarget.src = ProductImagePlaceholder
+            }}
           />
           <span className="absolute top-0 right-0 bg-blue-500 text-white py-0.5 px-2 rounded-full">
             {product.images.length}
