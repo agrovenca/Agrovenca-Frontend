@@ -7,7 +7,7 @@ import ProductSkeleton from '../products/ProductSkeleton'
 
 function FeaturedProducts() {
   const limit = 4
-  const { productsQuery } = useProducts({ limit })
+  const { productsQuery } = useProducts({})
 
   return (
     <section className="w-full py-12 md:py-24">
@@ -30,7 +30,7 @@ function FeaturedProducts() {
               </p>
             </div>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {productsQuery.data.objects.map((product) => (
+              {productsQuery.data.objects.slice(0, limit).map((product) => (
                 <ProductItem key={product.id} product={product} renderMode="card" />
               ))}
             </div>
