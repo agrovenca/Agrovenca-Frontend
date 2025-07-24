@@ -9,23 +9,23 @@ interface Payload {
 }
 
 export function useReorderProducts() {
-  const { page, limit, search } = useProductFiltersStore()
+  const { page, limit, search, categoriesId, unitiesId } = useProductFiltersStore()
   const queryClient = useQueryClient()
   const reorderMutation = useMutation({
     mutationFn: (payload: Payload[]) => updateProductsOrder(payload),
 
     onMutate: async (newOrder) => {
       await queryClient.cancelQueries({
-        queryKey: ['products', { page, limit, search }],
+        queryKey: ['products', { page, limit, search, categoriesId, unitiesId }],
       })
 
       const previousData = queryClient.getQueryData<ProductResponse>([
         'products',
-        { page, limit, search },
+        { page, limit, search, categoriesId, unitiesId },
       ])
 
       queryClient.setQueryData(
-        ['products', { page, limit, search }],
+        ['products', { page, limit, search, categoriesId, unitiesId }],
         (old: ProductsPaginatedResponse) => {
           if (!old) return old
           return {
@@ -42,12 +42,15 @@ export function useReorderProducts() {
     },
     onError: (_error, _newOrder, context) => {
       if (context?.previousData) {
-        queryClient.setQueryData(['products', { page, limit, search }], context.previousData)
+        queryClient.setQueryData(
+          ['products', { page, limit, search, categoriesId, unitiesId }],
+          context.previousData
+        )
       }
     },
     onSettled: () => {
       queryClient.invalidateQueries({
-        queryKey: ['products', { page, limit, search }],
+        queryKey: ['products', { page, limit, search, categoriesId, unitiesId }],
       })
     },
   })
@@ -56,7 +59,7 @@ export function useReorderProducts() {
 }
 
 export function useReorderProduct() {
-  const { page, limit, search } = useProductFiltersStore()
+  const { page, limit, search, categoriesId, unitiesId } = useProductFiltersStore()
   const queryClient = useQueryClient()
 
   const reorderSingleMutation = useMutation({
@@ -64,16 +67,16 @@ export function useReorderProduct() {
 
     onMutate: async (newOrder) => {
       await queryClient.cancelQueries({
-        queryKey: ['products', { page, limit, search }],
+        queryKey: ['products', { page, limit, search, categoriesId, unitiesId }],
       })
 
       const previousData = queryClient.getQueryData<ProductsPaginatedResponse>([
         'products',
-        { page, limit, search },
+        { page, limit, search, categoriesId, unitiesId },
       ])
 
       queryClient.setQueryData(
-        ['products', { page, limit, search }],
+        ['products', { page, limit, search, categoriesId, unitiesId }],
         (old: ProductsPaginatedResponse) => {
           if (!old) return old
 
@@ -95,7 +98,10 @@ export function useReorderProduct() {
     },
     onError: (_error, _newOrder, context) => {
       if (context?.previousData) {
-        queryClient.setQueryData(['products', { page, limit, search }], context.previousData)
+        queryClient.setQueryData(
+          ['products', { page, limit, search, categoriesId, unitiesId }],
+          context.previousData
+        )
       }
     },
     onSettled: () => {

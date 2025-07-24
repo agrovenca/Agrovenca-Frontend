@@ -4,19 +4,21 @@ import { ProductsPaginatedResponse } from '@/types/product'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 function useDeleteProduct() {
-  const { page, limit, search } = useProductFiltersStore()
+  const { page, limit, search, categoriesId, unitiesId } = useProductFiltersStore()
   const queryClient = useQueryClient()
   const deleteProductMutation = useMutation({
     mutationFn: ({ id }: { id: string }) => deleteProduct({ id }),
     onMutate: async ({ id }) => {
-      await queryClient.cancelQueries({ queryKey: ['products', { page, limit, search }] })
+      await queryClient.cancelQueries({
+        queryKey: ['products', { page, limit, search, categoriesId, unitiesId }],
+      })
       const previousProducts = queryClient.getQueryData<ProductsPaginatedResponse>([
         'products',
-        { page, limit, search },
+        { page, limit, search, categoriesId, unitiesId },
       ])
 
       queryClient.setQueryData<ProductsPaginatedResponse>(
-        ['products', { page, limit, search }],
+        ['products', { page, limit, search, categoriesId, unitiesId }],
         (oldProducts) => {
           if (!oldProducts || !oldProducts.objects) return oldProducts
           return {
@@ -31,13 +33,15 @@ function useDeleteProduct() {
     onError: (_error, _variables, context) => {
       if (context?.previousProducts) {
         queryClient.setQueryData<ProductsPaginatedResponse>(
-          ['products', { page, limit, search }],
+          ['products', { page, limit, search, categoriesId, unitiesId }],
           context?.previousProducts
         )
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['products', { page, limit, search }] })
+      queryClient.invalidateQueries({
+        queryKey: ['products', { page, limit, search, categoriesId, unitiesId }],
+      })
     },
   })
 
