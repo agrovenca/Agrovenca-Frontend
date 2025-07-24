@@ -11,23 +11,154 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { SearchIcon } from 'lucide-react'
+import { FilterIcon, FilterXIcon, SearchIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import useUnities from '@/hooks/unities/useUnities'
+import { Unity } from '@/types/unity'
+import { Category } from '@/types/category'
 
-function Filters() {
-  const [localSearch, setLocalSearch] = useState('')
-  const setSearch = useProductFiltersStore((state) => state.setSearch)
+function RenderMultiSelect({
+  label,
+  localData,
+  setLocalData,
+  queryData,
+}: {
+  label: string
+  localData: string[]
+  setLocalData: (idCollection: string[]) => void
+  queryData: Unity[] | Category[] | undefined
+}) {
+  if (!queryData) return
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" className="w-full justify-start">
+          {localData.length > 0
+            ? localData
+                .map((id) => {
+                  const item = queryData.find((i) => i.id === id)
+                  return item ? item.name : ''
+                })
+                .join(', ')
+            : `Selecciona ${label}`}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[200px]">
+        <div className="flex flex-col gap-2">
+          {queryData.map((item) => (
+            <div key={item.id} className="flex items-center gap-2">
+              <Checkbox
+                id={item.id}
+                checked={localData.includes(item.id)}
+                onCheckedChange={(checked) => {
+                  const newValue = checked
+                    ? [...(localData || []), item.id]
+                    : (localData || []).filter((val) => val !== item.id)
+                  setLocalData(newValue)
+                }}
+              />
+              <label htmlFor={item.id} className="text-sm capitalize">
+                {item.name} ({item._count.products})
+              </label>
+            </div>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+function FiltersDialog() {
   const limit = useProductFiltersStore((state) => state.limit)
   const setLimit = useProductFiltersStore((state) => state.setLimit)
   const categoriesId = useProductFiltersStore((state) => state.categoriesId)
   const setCategoriesId = useProductFiltersStore((state) => state.setCategoriesId)
-  const [debouncedSearch] = useDebounce(localSearch, 500)
+  const unitiesId = useProductFiltersStore((state) => state.unitiesId)
+  const setUnitiesId = useProductFiltersStore((state) => state.setUnitiesId)
+  const resetFilters = useProductFiltersStore((state) => state.resetFilters)
 
   const { categoriesQuery } = useCategories()
+  const { unitiesQuery } = useUnities()
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant={'outline'}>
+          <FilterIcon />
+          <span>Filtros</span>
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Filtros</DialogTitle>
+          <DialogDescription>
+            Filtra los productos por categoría y por cantidad de productos por página.
+          </DialogDescription>
+        </DialogHeader>
+
+        <section className="flex flex-col gap-2">
+          <div>
+            <Select
+              value={limit.toString()}
+              defaultValue={limit.toString()}
+              onValueChange={(value) => setLimit(Number(value))}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Mostrar" />
+              </SelectTrigger>
+              <SelectContent>
+                {limitOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    Mostrar {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <RenderMultiSelect
+              label="Categorías"
+              localData={categoriesId}
+              setLocalData={setCategoriesId}
+              queryData={categoriesQuery.data}
+            />
+          </div>
+          <div>
+            <RenderMultiSelect
+              label="Unidades"
+              localData={unitiesId}
+              setLocalData={setUnitiesId}
+              queryData={unitiesQuery.data}
+            />
+          </div>
+          <Button variant={'secondary'} className="mt-6" onClick={resetFilters}>
+            <FilterXIcon />
+            <span>Limpiar filtros</span>
+          </Button>
+        </section>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function Filters() {
+  const [localSearch, setLocalSearch] = useState('')
+  const setSearch = useProductFiltersStore((state) => state.setSearch)
+
+  const [debouncedSearch] = useDebounce(localSearch, 500)
+
   useProducts({})
 
   useEffect(() => {
@@ -45,57 +176,7 @@ function Filters() {
           className="pl-10"
         />
       </div>
-      <div>
-        <Select defaultValue={limit.toString()} onValueChange={(value) => setLimit(Number(value))}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Mostrar" />
-          </SelectTrigger>
-          <SelectContent>
-            {limitOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                Mostrar {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="w-full justify-start">
-              {categoriesId.length > 0
-                ? categoriesId
-                    .map((id) => {
-                      const category = categoriesQuery.data?.find((cat) => cat.id === id)
-                      return category ? category.name : ''
-                    })
-                    .join(', ')
-                : 'Selecciona categorías'}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[200px]">
-            <div className="flex flex-col gap-2">
-              {categoriesQuery.data?.map((category) => (
-                <div key={category.id} className="flex items-center gap-2">
-                  <Checkbox
-                    id={category.id}
-                    checked={categoriesId.includes(category.id)}
-                    onCheckedChange={(checked) => {
-                      const newValue = checked
-                        ? [...(categoriesId || []), category.id]
-                        : (categoriesId || []).filter((val) => val !== category.id)
-                      setCategoriesId(newValue)
-                    }}
-                  />
-                  <label htmlFor={category.id} className="text-sm capitalize">
-                    {category.name} ({category._count.products})
-                  </label>
-                </div>
-              ))}
-            </div>
-          </PopoverContent>
-        </Popover>
-      </div>
+      <FiltersDialog />
     </div>
   )
 }

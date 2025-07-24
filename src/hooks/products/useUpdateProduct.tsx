@@ -11,22 +11,22 @@ interface Props {
 }
 
 function useUpdateProduct() {
-  const { page, limit, search } = useProductFiltersStore()
+  const { page, limit, search, categoriesId, unitiesId } = useProductFiltersStore()
   const queryClient = useQueryClient()
   const updateProductMutation = useMutation({
     mutationFn: ({ id, newData }: Props) => updateProduct({ id, newData }),
     onMutate: async ({ id, newData }) => {
       await queryClient.cancelQueries({
-        queryKey: ['products', { page, limit, search }],
+        queryKey: ['products', { page, limit, search, categoriesId, unitiesId }],
       })
 
       const previousProducts = queryClient.getQueryData<ProductsPaginatedResponse>([
         'products',
-        { page, limit, search },
+        { page, limit, search, categoriesId, unitiesId },
       ])
 
       queryClient.setQueryData<ProductsPaginatedResponse>(
-        ['products', { page, limit, search }],
+        ['products', { page, limit, search, categoriesId, unitiesId }],
         (oldProducts) => {
           if (!oldProducts || !oldProducts.objects) return oldProducts
           return {
@@ -41,11 +41,16 @@ function useUpdateProduct() {
     },
     onError: (_error, _variables, context) => {
       if (context?.previousProducts) {
-        queryClient.setQueryData(['products', { page, limit, search }], context.previousProducts)
+        queryClient.setQueryData(
+          ['products', { page, limit, search, categoriesId, unitiesId }],
+          context.previousProducts
+        )
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['products', { page, limit, search }] })
+      queryClient.invalidateQueries({
+        queryKey: ['products', { page, limit, search, categoriesId, unitiesId }],
+      })
     },
   })
 

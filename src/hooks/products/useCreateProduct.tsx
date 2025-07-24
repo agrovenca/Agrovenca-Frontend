@@ -14,7 +14,7 @@ const emptyPagination = {
 }
 
 function useCreateProduct() {
-  const { page, limit, search } = useProductFiltersStore()
+  const { page, limit, search, categoriesId, unitiesId } = useProductFiltersStore()
   const queryClient = useQueryClient()
 
   const createProductMutation = useMutation({
@@ -22,7 +22,7 @@ function useCreateProduct() {
     onMutate: ({ newData }) => {
       const previousProducts = queryClient.getQueryData<ProductsPaginatedResponse>([
         'products',
-        { page, limit, search },
+        { page, limit, search, categoriesId, unitiesId },
       ])
       const optimisticProduct = {
         ...newData,
@@ -35,7 +35,7 @@ function useCreateProduct() {
         updatedAt: new Date().toISOString(),
       }
       queryClient.setQueryData<ProductsPaginatedResponse>(
-        ['products', { page, limit, search }],
+        ['products', { page, limit, search, categoriesId, unitiesId }],
         (oldProducts) => {
           if (!oldProducts || !oldProducts.objects)
             return { objects: [optimisticProduct], pagination: emptyPagination }
@@ -49,7 +49,7 @@ function useCreateProduct() {
     },
     onSuccess: ({ product: newProduct }, _variables, context) => {
       queryClient.setQueryData<ProductsPaginatedResponse>(
-        ['products', { page, limit, search }],
+        ['products', { page, limit, search, categoriesId, unitiesId }],
         (oldProducts) => {
           if (!oldProducts || !oldProducts.objects)
             return {
@@ -68,7 +68,7 @@ function useCreateProduct() {
     },
     onError: (_error, _variables, context) => {
       queryClient.setQueryData<ProductsPaginatedResponse>(
-        ['products', { page, limit, search }],
+        ['products', { page, limit, search, categoriesId, unitiesId }],
         (oldProducts) => {
           if (!oldProducts || !oldProducts.objects)
             return { objects: [], pagination: emptyPagination }
