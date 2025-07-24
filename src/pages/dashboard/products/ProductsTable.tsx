@@ -11,7 +11,6 @@ import { Product } from '@/types/product'
 import Pagination from '@/components/blocks/pagination'
 import { formatDecimal } from '@/lib/utils'
 import UpdateProduct from './Update'
-import { ExternalLinkIcon } from 'lucide-react'
 import { DndContext, closestCenter } from '@dnd-kit/core'
 
 import { KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core'
@@ -22,15 +21,15 @@ import {
   useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
-import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import ProductImagesPage from './images'
 import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
 import useProducts from '@/hooks/products/useProducts'
 import { Loader } from '@/components/ui/loader'
-import useReorderProducts from '@/hooks/products/useReorderProducts'
 import DeleteProduct from './Delete'
 import { useProductFiltersStore } from '@/store/products/useProductFiltersStore'
+import UpdateProductOrder from './UpdateOrder'
+import { useReorderProducts } from '@/hooks/products/useReorderProducts'
 
 const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
 
@@ -50,7 +49,15 @@ const GetTableHeaders = () => {
   )
 }
 
-const GetTableRow = ({ product, isDraggable }: { product: Product; isDraggable: boolean }) => {
+const GetTableRow = ({
+  product,
+  totalProducts,
+  isDraggable,
+}: {
+  product: Product
+  totalProducts: number
+  isDraggable: boolean
+}) => {
   const firstProductImage = product.images.find((image) => image.displayOrder === 1)?.s3Key
 
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
@@ -99,14 +106,7 @@ const GetTableRow = ({ product, isDraggable }: { product: Product; isDraggable: 
         {!isDraggable && (
           <div className="flex items-center gap-2">
             <ProductImagesPage product={product} />
-            <Button
-              variant={'ghost'}
-              size={'icon'}
-              className="text-yellow-500"
-              title="Ver producto"
-            >
-              <ExternalLinkIcon />
-            </Button>
+            <UpdateProductOrder product={product} maxOrder={totalProducts} />
             <UpdateProduct product={product} />
             <DeleteProduct product={product} />
           </div>
@@ -151,6 +151,9 @@ function ProductsTable({ isDraggable, setIsDraggable }: Props) {
       reorderMutation.mutate(
         reordered.map((p) => ({ id: p.id, displayOrder: p.displayOrder })),
         {
+          onSuccess: ({ message }) => {
+            toast.success(message)
+          },
           onError: () => {
             toast.error('Error al actualizar el orden de los productos')
           },
@@ -189,7 +192,12 @@ function ProductsTable({ isDraggable, setIsDraggable }: Props) {
                   strategy={verticalListSortingStrategy}
                 >
                   {productsQuery.data.objects.map((product) => (
-                    <GetTableRow key={product.id} product={product} isDraggable={isDraggable} />
+                    <GetTableRow
+                      key={product.id}
+                      product={product}
+                      isDraggable={isDraggable}
+                      totalProducts={productsQuery.data.pagination.totalItems}
+                    />
                   ))}
                 </SortableContext>
               ) : (
@@ -208,7 +216,12 @@ function ProductsTable({ isDraggable, setIsDraggable }: Props) {
           <TableBody>
             {productsQuery.isSuccess && productsQuery.data.objects.length ? (
               productsQuery.data.objects.map((product) => (
-                <GetTableRow key={product.id} product={product} isDraggable={isDraggable} />
+                <GetTableRow
+                  key={product.id}
+                  product={product}
+                  isDraggable={isDraggable}
+                  totalProducts={productsQuery.data.pagination.totalItems}
+                />
               ))
             ) : (
               <TableRow>

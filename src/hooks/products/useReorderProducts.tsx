@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { updateProductOrder } from '@/actions/products' // esta sería tu función de API
-import { toast } from 'sonner'
+import { updateProductOrder, updateProductsOrder } from '@/actions/products'
 import { ProductResponse, ProductsPaginatedResponse } from '@/types/product'
 import { useProductFiltersStore } from '@/store/products/useProductFiltersStore'
 
@@ -9,11 +8,11 @@ interface Payload {
   displayOrder: number
 }
 
-function useReorderProducts() {
+export function useReorderProducts() {
   const { page, limit, search } = useProductFiltersStore()
   const queryClient = useQueryClient()
   const reorderMutation = useMutation({
-    mutationFn: (payload: Payload[]) => updateProductOrder(payload),
+    mutationFn: (payload: Payload[]) => updateProductsOrder(payload),
 
     onMutate: async (newOrder) => {
       await queryClient.cancelQueries({
@@ -45,13 +44,7 @@ function useReorderProducts() {
       if (context?.previousData) {
         queryClient.setQueryData(['products', { page, limit, search }], context.previousData)
       }
-      toast.error('Error al actualizar el orden de los productos')
     },
-
-    onSuccess: () => {
-      toast.success('Orden actualizado correctamente')
-    },
-
     onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: ['products', { page, limit, search }],
@@ -62,4 +55,53 @@ function useReorderProducts() {
   return { reorderMutation }
 }
 
-export default useReorderProducts
+export function useReorderProduct() {
+  const { page, limit, search } = useProductFiltersStore()
+  const queryClient = useQueryClient()
+
+  const reorderSingleMutation = useMutation({
+    mutationFn: (payload: Payload) => updateProductOrder(payload),
+
+    onMutate: async (newOrder) => {
+      await queryClient.cancelQueries({
+        queryKey: ['products', { page, limit, search }],
+      })
+
+      const previousData = queryClient.getQueryData<ProductsPaginatedResponse>([
+        'products',
+        { page, limit, search },
+      ])
+
+      queryClient.setQueryData(
+        ['products', { page, limit, search }],
+        (old: ProductsPaginatedResponse) => {
+          if (!old) return old
+
+          const updatedObjects = old.objects.map((p) => {
+            if (p.id === newOrder.id) {
+              return { ...p, displayOrder: newOrder.displayOrder }
+            }
+            return p
+          })
+
+          return {
+            ...old,
+            objects: updatedObjects,
+          }
+        }
+      )
+
+      return { previousData }
+    },
+    onError: (_error, _newOrder, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(['products', { page, limit, search }], context.previousData)
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] })
+    },
+  })
+
+  return { reorderSingleMutation }
+}

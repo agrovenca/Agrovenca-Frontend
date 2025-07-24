@@ -120,10 +120,31 @@ export const deleteProduct = async ({ id }: { id: string }): Promise<ProductResp
   }
 }
 
-export async function updateProductOrder(updatedProducts: { id: string; displayOrder: number }[]) {
+export async function updateProductsOrder(updatedProducts: { id: string; displayOrder: number }[]) {
   try {
     const { data } = await apiWithCredentials.patch<ProductReorderResponse>(`/products/order/`, {
       updatedProducts,
+    })
+    return data
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }
+      throw new Error(errorData.error ?? 'Ocurrió un error desconocido')
+    }
+    throw new Error('Ocurrió un error desconocido')
+  }
+}
+
+export async function updateProductOrder({
+  id,
+  displayOrder,
+}: {
+  id: string
+  displayOrder: number
+}) {
+  try {
+    const { data } = await apiWithCredentials.patch(`/products/orderManual/${id}`, {
+      displayOrder,
     })
     return data
   } catch (error) {
