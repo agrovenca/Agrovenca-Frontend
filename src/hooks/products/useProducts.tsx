@@ -1,6 +1,7 @@
 import { getProducts } from '@/actions/products'
-import { useProductFiltersStore } from '@/store/products/useProductFiltersStore'
 import { useQuery } from '@tanstack/react-query'
+import { useProductsFilterSetters, useProductsQueryKey } from './useProductsQueryKey'
+import { ProductFilterParams } from '@/types/product'
 
 interface Options {
   priceRange?: number[]
@@ -9,17 +10,18 @@ interface Options {
 }
 
 function useProducts({ enabled = true }: Options) {
-  const { search, page, setPage, limit, categoriesId, unitiesId } = useProductFiltersStore()
+  const filters = useProductsQueryKey()
+  const { setPage } = useProductsFilterSetters()
 
   const productsQuery = useQuery({
-    queryKey: ['products', { page, limit, search, categoriesId, unitiesId }],
-    queryFn: () => getProducts({ page, limit, search, categoriesId, unitiesId }),
+    queryKey: ['products', filters],
+    queryFn: () => getProducts(filters as ProductFilterParams),
     staleTime: 1000 * 60 * 10,
     enabled,
   })
 
   const setPrevPage = () => {
-    if (page === 1) return
+    if (filters.page === 1) return
 
     setPage(Number(productsQuery.data?.pagination.previousPage))
   }
@@ -36,7 +38,7 @@ function useProducts({ enabled = true }: Options) {
 
   return {
     productsQuery,
-    page,
+    page: filters.page,
     setPrevPage,
     setNextPage,
     setPageNumber,
