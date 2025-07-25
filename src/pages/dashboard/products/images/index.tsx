@@ -181,8 +181,8 @@ function ProductImagesPage({ product }: Props) {
           <DialogTitle className="flex justify-between flex-wrap gap-2 items-center pt-4">
             <span>Listado de imágenes para este producto</span>
             <RegisterProductImage
-              productId={product.id}
-              onSuccess={(updatedImages) => {
+              product={product}
+              setNewImages={(updatedImages) => {
                 setImages(updatedImages)
               }}
             />

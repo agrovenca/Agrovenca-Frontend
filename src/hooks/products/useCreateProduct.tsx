@@ -2,16 +2,7 @@ import { createProduct } from '@/actions/products'
 import { ProductsPaginatedResponse } from '@/types/product'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useProductsQueryKey } from './useProductsQueryKey'
-
-const emptyPagination = {
-  page: 1,
-  totalItems: 1,
-  totalPages: 1,
-  hasNextPage: false,
-  hasPreviousPage: false,
-  nextPage: null,
-  previousPage: null,
-}
+import { emptyPagination } from '@/lib/productEmptyPagination'
 
 function useCreateProduct() {
   const filters = useProductsQueryKey()

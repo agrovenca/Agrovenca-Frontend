@@ -15,30 +15,27 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { useRef, useState } from 'react'
 import ErrorForm from '@/components/pages/ErrorForm'
-import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { ProductImageSchema } from '@/schemas/products/images'
-import { create } from '@/actions/products/images'
 import { Loader } from '@/components/ui/loader'
 import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { useProductsStore } from '@/store/products/useProductsStore'
 import { ProductImage } from '@/types/product/images'
+import useCreateProductImage from '@/hooks/products/images/useCreateProductImage'
+import { Product } from '@/types/product'
 
 function RegisterProductImage({
-  productId,
-  onSuccess,
+  product,
+  setNewImages,
 }: {
-  productId: string
-  onSuccess?: (newImages: ProductImage[]) => void
+  product: Product
+  setNewImages?: (newImages: ProductImage[]) => void
 }) {
   const [isOpen, setIsOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
-  const products = useProductsStore((state) => state.products)
-  const updateProduct = useProductsStore((state) => state.updateProduct)
-  const errorStatus = useResponseStatusStore((state) => state.errorStatus)
-  const setError = useResponseStatusStore((state) => state.setError)
+  const { createProductImageMutation } = useCreateProductImage({
+    product: product,
+  })
 
   const form = useForm<z.infer<typeof ProductImageSchema>>({
     resolver: zodResolver(ProductImageSchema),
@@ -61,33 +58,27 @@ function RegisterProductImage({
     }
   }
 
-  const onSubmit: SubmitHandler<z.infer<typeof ProductImageSchema>> = async (data) => {
-    setIsLoading(true)
-    try {
-      const res = await create(productId, data)
-
-      if (res.error) {
-        setError(res.error)
+  const onSubmit: SubmitHandler<z.infer<typeof ProductImageSchema>> = async (newImages) => {
+    setIsOpen(false)
+    createProductImageMutation.mutate(
+      { productId: product.id, newImages },
+      {
+        onSuccess: ({ images, message }) => {
+          toast.success(message)
+          form.reset()
+          setSelectedFiles([])
+          setNewImages?.(images)
+        },
+        onError: (err) => {
+          setIsOpen(true)
+          const errorMsg = () => {
+            if (err instanceof Error) return err.message
+            return 'Ocurrió un error. Por favor intenta de nuevo.'
+          }
+          toast.error(errorMsg())
+        },
       }
-
-      if (res.status === 201) {
-        const { message, images, productId: updatedProductId } = res.data
-        toast.success(message)
-
-        form.reset()
-        setSelectedFiles([])
-        setIsOpen(false)
-        const existingProduct = products.find((p) => p.id === updatedProductId)
-        if (existingProduct) {
-          updateProduct({ ...existingProduct, images })
-        }
-        onSuccess?.(images)
-      }
-    } catch (_error) {
-      toast.error('Ocurrió un error. Por favor intenta de nuevo.')
-    } finally {
-      setIsLoading(false)
-    }
+    )
   }
 
   return (
@@ -161,7 +152,9 @@ function RegisterProductImage({
               </div>
             )}
 
-            {errorStatus.error && <ErrorForm message={errorStatus.message} />}
+            {createProductImageMutation.isError && (
+              <ErrorForm message={createProductImageMutation.error.message} />
+            )}
 
             <div className="flex items-center justify-between gap-2">
               <span>
@@ -169,12 +162,18 @@ function RegisterProductImage({
               </span>
               <Button
                 className={
-                  isLoading || !form.formState.isValid ? 'cursor-not-allowed' : 'cursor-pointer'
+                  createProductImageMutation.isPending || !form.formState.isValid
+                    ? 'cursor-not-allowed'
+                    : 'cursor-pointer'
                 }
                 type="submit"
-                disabled={isLoading || !form.formState.isValid}
+                disabled={createProductImageMutation.isPending || !form.formState.isValid}
               >
-                {isLoading ? <Loader size="sm" variant="spinner" /> : 'Guardar'}
+                {createProductImageMutation.isPending ? (
+                  <Loader size="sm" variant="spinner" />
+                ) : (
+                  'Guardar'
+                )}
               </Button>
             </div>
           </form>
