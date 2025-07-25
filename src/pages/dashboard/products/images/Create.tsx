@@ -21,6 +21,7 @@ import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/components/
 import { ProductImage } from '@/types/product/images'
 import useCreateProductImage from '@/hooks/products/images/useCreateProductImage'
 import { Product } from '@/types/product'
+import { pluralize } from '@/lib/utils'
 
 function RegisterProductImage({
   product,
@@ -158,7 +159,9 @@ function RegisterProductImage({
 
             <div className="flex items-center justify-between gap-2">
               <span>
-                <span>{selectedFiles.length}</span> imágenes seleccionadas
+                <span>{selectedFiles.length}</span>
+                {pluralize('im', selectedFiles, 'ágenes', 'agen')}
+                {pluralize('seleccionada', selectedFiles, 's')}
               </span>
               <Button
                 className={
