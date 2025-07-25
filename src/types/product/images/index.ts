@@ -5,3 +5,9 @@ export interface ProductImage {
   displayOrder: number
   productId: string
 }
+
+export interface ProductImageCreateResponse {
+  images: ProductImage[]
+  productId: string
+  message: string
+}

@@ -1,23 +1,35 @@
 import { apiWithCredentials } from '@/actions/api'
 import { ProductImageSchema } from '@/schemas/products/images'
+import { ProductImageCreateResponse } from '@/types/product/images'
 import axios from 'axios'
 import { z } from 'zod'
 
-export const create = async (productId: string, data: z.infer<typeof ProductImageSchema>) => {
+export const createProductImage = async ({
+  productId,
+  newImages,
+}: {
+  productId: string
+  newImages: z.infer<typeof ProductImageSchema>
+}): Promise<ProductImageCreateResponse> => {
   try {
     const formData = new FormData()
-    data.files.forEach((file) => {
+    newImages.files.forEach((file) => {
       formData.append('files', file)
     })
-    const res = await apiWithCredentials.post(`/products/images/${productId}`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
-    return res
+    const { data } = await apiWithCredentials.post<ProductImageCreateResponse>(
+      `/products/images/${productId}`,
+      formData,
+      {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }
+    )
+    return data
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      return error.response?.data || { error: 'An unknown error occurred' }
+      const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }
+      throw new Error(errorData.error ?? 'Ocurrió un error desconocido')
     }
-    return { error: 'An unknown error occurred' }
+    throw new Error('Ocurrió un error desconocido')
   }
 }
 
