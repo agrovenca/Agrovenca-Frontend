@@ -1,6 +1,6 @@
 import { apiWithCredentials } from '@/actions/api'
 import { ProductImageSchema } from '@/schemas/products/images'
-import { ProductImageCreateResponse } from '@/types/product/images'
+import { ProductImageCreateResponse, ProductImageResponse } from '@/types/product/images'
 import axios from 'axios'
 import { z } from 'zod'
 
@@ -49,14 +49,23 @@ export async function updateProductImagesOrder(
   }
 }
 
-export const destroy = async (id: string, productId: string) => {
+export const deleteProductImage = async ({
+  id,
+  productId,
+}: {
+  id: string
+  productId: string
+}): Promise<ProductImageResponse> => {
   try {
-    const res = await apiWithCredentials.delete(`/products/images/${id}/${productId}`)
-    return res
+    const { data } = await apiWithCredentials.delete<ProductImageResponse>(
+      `/products/images/${id}/${productId}`
+    )
+    return data
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      return error.response?.data || { error: 'An unknown error occurred' }
+      const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }
+      throw new Error(errorData.error ?? 'Ocurrió un error desconocido')
     }
-    return { error: 'An unknown error occurred' }
+    throw new Error('Ocurrió un error desconocido')
   }
 }

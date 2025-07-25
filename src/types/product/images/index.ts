@@ -11,3 +11,8 @@ export interface ProductImageCreateResponse {
   productId: string
   message: string
 }
+
+export interface ProductImageResponse {
+  images: ProductImage[]
+  message: string
+}

@@ -18,31 +18,39 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Product } from '@/types/product'
-import { ImagesIcon, TrashIcon } from 'lucide-react'
+import { ImagesIcon, TrashIcon, XIcon } from 'lucide-react'
 import { useState } from 'react'
 import RegisterProductImage from './Create'
 import { ProductImage } from '@/types/product/images'
 import { toast } from 'sonner'
-import { destroy, updateProductImagesOrder } from '@/actions/products/images'
+import { updateProductImagesOrder } from '@/actions/products/images'
 import { useProductsStore } from '@/store/products/useProductsStore'
 import ExtendedTooltip from '@/components/blocks/ExtendedTooltip'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import useDeleteProductImage from '@/hooks/products/images/useDeleteProductImage'
+import { Loader } from '@/components/ui/loader'
 
 const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
 
 type SortableImageProps = {
-  image: ProductImage
   product: Product
+  deleteStatus?: string
+  image: ProductImage
+  deletePending: boolean
   imagesDraggable: boolean
+  setDeleteStatus: (value: string | undefined) => void
   handleDelete({ id, product }: { id: string; product: Product }): Promise<void>
 }
 
 export function SortableImage({
   image,
   product,
-  imagesDraggable,
+  deleteStatus,
   handleDelete,
+  deletePending,
+  setDeleteStatus,
+  imagesDraggable,
 }: SortableImageProps) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: image.id })
 
@@ -60,6 +68,28 @@ export function SortableImage({
       {...sortableProps}
       className="max-w-50 w-full overflow-hidden h-auto border rounded-md relative"
     >
+      {image.id === deleteStatus && (
+        <div className="absolute left-0 top-0 right-0 bottom-0 bg-black/80 z-10 flex flex-col">
+          <div className="flex">
+            <button
+              title="Cancelar eliminación de imagen"
+              className="ms-auto p-1 bg-black text-white rounded-full cursor-pointer mt-1 me-1"
+              onClick={() => setDeleteStatus(undefined)}
+            >
+              <XIcon />
+            </button>
+          </div>
+          <p className="flex justify-center gap-2 items-center flex-1">¿Eliminar imagen?</p>
+          <Button
+            className="mb-2 mx-2 cursor-pointer"
+            title="Confirmar eliminación de imagen"
+            onClick={() => handleDelete({ id: image.id, product })}
+            disabled={deletePending}
+          >
+            {deletePending ? <Loader size="sm" variant="spinner" /> : 'Si, eliminar'}
+          </Button>
+        </div>
+      )}
       <img
         className="object-cover"
         loading="lazy"
@@ -69,7 +99,7 @@ export function SortableImage({
       {!imagesDraggable && (
         <button
           type="button"
-          onClick={() => handleDelete({ id: image.id, product })}
+          onClick={() => setDeleteStatus(image.id)}
           className="absolute bottom-1 right-1 bg-black/50 hover:bg-black text-white rounded-full p-1 transition cursor-pointer"
           title="Eliminar imagen"
         >
@@ -89,10 +119,12 @@ type Props = {
 
 function ProductImagesPage({ product }: Props) {
   const [isOpen, setIsOpen] = useState(false)
-  const [images, setImages] = useState<ProductImage[]>(product.images)
   const [isLoading, setIsLoading] = useState(false)
+  const [deleteStatus, setDeleteStatus] = useState<string | undefined>(undefined)
   const [imagesDraggable, setImagesDraggable] = useState(false)
+  const [images, setImages] = useState<ProductImage[]>(product.images)
 
+  const { deleteProductImageMutation } = useDeleteProductImage()
   const updateProduct = useProductsStore((state) => state.updateProduct)
 
   const sensors = useSensors(
@@ -149,24 +181,23 @@ function ProductImagesPage({ product }: Props) {
   }
 
   async function handleDelete({ id, product }: { id: string; product: Product }) {
-    try {
-      const res = await destroy(id, product.id)
-
-      if (res.error) {
-        throw new Error(res.error)
+    deleteProductImageMutation.mutate(
+      { id, productId: product.id },
+      {
+        onSuccess: ({ message, images }) => {
+          setDeleteStatus(undefined)
+          toast.success(message)
+          setImages(images)
+        },
+        onError: (err) => {
+          const errorMsg = () => {
+            if (err instanceof Error) return err.message
+            return 'Ocurrió un error. Por favor intenta de nuevo.'
+          }
+          toast.error(errorMsg())
+        },
       }
-
-      if (res.status === 200) {
-        const { message, images: reorderedImages } = res.data
-        toast.success(message)
-
-        updateProduct({ ...product, images: reorderedImages })
-        setImages(reorderedImages)
-      }
-    } catch (error) {
-      console.error('Error eliminando la imagen:', error)
-      toast.error('Error al eliminar la imagen')
-    }
+    )
   }
 
   return (
@@ -218,11 +249,14 @@ function ProductImagesPage({ product }: Props) {
                 {images.length > 0 ? (
                   images.map((image) => (
                     <SortableImage
-                      key={image.id}
                       image={image}
+                      key={image.id}
                       product={product}
-                      imagesDraggable={imagesDraggable}
+                      deleteStatus={deleteStatus}
                       handleDelete={handleDelete}
+                      setDeleteStatus={setDeleteStatus}
+                      imagesDraggable={imagesDraggable}
+                      deletePending={deleteProductImageMutation.isPending}
                     />
                   ))
                 ) : (
@@ -236,11 +270,14 @@ function ProductImagesPage({ product }: Props) {
             {images.length > 0 ? (
               images.map((image) => (
                 <SortableImage
-                  key={image.id}
                   image={image}
+                  key={image.id}
                   product={product}
-                  imagesDraggable={imagesDraggable}
+                  deleteStatus={deleteStatus}
                   handleDelete={handleDelete}
+                  setDeleteStatus={setDeleteStatus}
+                  imagesDraggable={imagesDraggable}
+                  deletePending={deleteProductImageMutation.isPending}
                 />
               ))
             ) : (
