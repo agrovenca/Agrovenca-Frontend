@@ -23,15 +23,23 @@ import { useState } from 'react'
 import RegisterProductImage from './Create'
 import { ProductImage } from '@/types/product/images'
 import { toast } from 'sonner'
-import { updateProductImagesOrder } from '@/actions/products/images'
-import { useProductsStore } from '@/store/products/useProductsStore'
 import ExtendedTooltip from '@/components/blocks/ExtendedTooltip'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import useDeleteProductImage from '@/hooks/products/images/useDeleteProductImage'
 import { Loader } from '@/components/ui/loader'
+import useReorderProductImages from '@/hooks/products/images/useReorderProductImages'
 
 const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
+
+export function ReorderLoader() {
+  return (
+    <div className="absolute left-0 top-0 right-0 bottom-0 bg-black/70 z-20 flex justify-center items-center gap-2">
+      <Loader size="md" />
+      <span>Actualizando orden...</span>
+    </div>
+  )
+}
 
 type SortableImageProps = {
   product: Product
@@ -113,19 +121,13 @@ export function SortableImage({
   )
 }
 
-type Props = {
-  product: Product
-}
-
-function ProductImagesPage({ product }: Props) {
+function ProductImagesPage({ product }: { product: Product }) {
   const [isOpen, setIsOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const [deleteStatus, setDeleteStatus] = useState<string | undefined>(undefined)
   const [imagesDraggable, setImagesDraggable] = useState(false)
   const [images, setImages] = useState<ProductImage[]>(product.images)
 
-  const { deleteProductImageMutation } = useDeleteProductImage()
-  const updateProduct = useProductsStore((state) => state.updateProduct)
+  const { reorderImagesMutation } = useReorderProductImages()
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -133,22 +135,6 @@ function ProductImagesPage({ product }: Props) {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   )
-
-  const handleReorder = async (
-    reorderedItems: { id: string; productId: string; displayOrder: number }[]
-  ) => {
-    setIsLoading(true)
-    try {
-      const res = await updateProductImagesOrder(reorderedItems)
-      if (res.error) {
-        throw new Error(res.error)
-      }
-    } catch (_error) {
-      throw new Error('Error al actualizar el orden de las imágenes')
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   async function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
@@ -161,33 +147,17 @@ function ProductImagesPage({ product }: Props) {
       displayOrder: index + 1,
     }))
 
+    setImagesDraggable(false)
     setImages(reordered)
-
-    try {
-      await handleReorder(
-        reordered.map((img) => ({
-          id: img.id,
-          productId: img.productId,
-          displayOrder: img.displayOrder,
-        }))
-      )
-      updateProduct({ ...product, images: reordered })
-      toast.success('Orden actualizado correctamente')
-    } catch (error) {
-      console.error('Error actualizando el orden:', error)
-      toast.error('Error al actualizar el orden de las imágenes')
-      setImages(previousImages)
-    }
-  }
-
-  async function handleDelete({ id, product }: { id: string; product: Product }) {
-    deleteProductImageMutation.mutate(
-      { id, productId: product.id },
+    reorderImagesMutation.mutate(
       {
-        onSuccess: ({ message, images }) => {
-          setDeleteStatus(undefined)
+        payload: reordered.map((image) => ({ id: image.id, displayOrder: image.displayOrder })),
+        productId: product.id,
+      },
+      {
+        onSuccess: ({ message, images: newOrderedImages }) => {
           toast.success(message)
-          setImages(images)
+          setImages(newOrderedImages)
         },
         onError: (err) => {
           const errorMsg = () => {
@@ -195,6 +165,10 @@ function ProductImagesPage({ product }: Props) {
             return 'Ocurrió un error. Por favor intenta de nuevo.'
           }
           toast.error(errorMsg())
+          setImages(previousImages)
+        },
+        onSettled: () => {
+          setImagesDraggable(true)
         },
       }
     )
@@ -244,50 +218,93 @@ function ProductImagesPage({ product }: Props) {
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
           >
-            <SortableContext items={images} strategy={rectSortingStrategy} disabled={isLoading}>
-              <section className="flex flex-wrap justify-evenly gap-4">
-                {images.length > 0 ? (
-                  images.map((image) => (
-                    <SortableImage
-                      image={image}
-                      key={image.id}
-                      product={product}
-                      deleteStatus={deleteStatus}
-                      handleDelete={handleDelete}
-                      setDeleteStatus={setDeleteStatus}
-                      imagesDraggable={imagesDraggable}
-                      deletePending={deleteProductImageMutation.isPending}
-                    />
-                  ))
-                ) : (
-                  <p>No hay imágenes para este producto</p>
-                )}
+            <SortableContext
+              items={images}
+              strategy={rectSortingStrategy}
+              disabled={reorderImagesMutation.isPending}
+            >
+              <section className="flex flex-wrap justify-evenly gap-4 relative">
+                <RenderImages
+                  images={images}
+                  product={product}
+                  setImages={setImages}
+                  deleteStatus={deleteStatus}
+                  setDeleteStatus={setDeleteStatus}
+                  imagesDraggable={imagesDraggable}
+                />
               </section>
             </SortableContext>
           </DndContext>
         ) : (
-          <section className="flex flex-wrap justify-evenly gap-4">
-            {images.length > 0 ? (
-              images.map((image) => (
-                <SortableImage
-                  image={image}
-                  key={image.id}
-                  product={product}
-                  deleteStatus={deleteStatus}
-                  handleDelete={handleDelete}
-                  setDeleteStatus={setDeleteStatus}
-                  imagesDraggable={imagesDraggable}
-                  deletePending={deleteProductImageMutation.isPending}
-                />
-              ))
-            ) : (
-              <p>No hay imágenes para este producto</p>
-            )}
+          <section className="flex flex-wrap justify-evenly gap-4 relative">
+            {reorderImagesMutation.isPending && <ReorderLoader />}
+            <RenderImages
+              images={images}
+              product={product}
+              setImages={setImages}
+              deleteStatus={deleteStatus}
+              setDeleteStatus={setDeleteStatus}
+              imagesDraggable={imagesDraggable}
+            />
           </section>
         )}
       </DialogContent>
     </Dialog>
   )
+}
+
+interface ImageRenderProps {
+  images: ProductImage[]
+  product: Product
+  deleteStatus?: string
+  imagesDraggable: boolean
+  setImages: (value: ProductImage[]) => void
+  setDeleteStatus: (value: string | undefined) => void
+}
+
+const RenderImages = ({
+  images,
+  product,
+  deleteStatus,
+  imagesDraggable,
+  setImages,
+  setDeleteStatus,
+}: ImageRenderProps) => {
+  const { deleteProductImageMutation } = useDeleteProductImage()
+
+  async function handleDelete({ id, product }: { id: string; product: Product }) {
+    deleteProductImageMutation.mutate(
+      { id, productId: product.id },
+      {
+        onSuccess: ({ message, images }) => {
+          setDeleteStatus(undefined)
+          toast.success(message)
+          setImages(images)
+        },
+        onError: (err) => {
+          const errorMsg = () => {
+            if (err instanceof Error) return err.message
+            return 'Ocurrió un error. Por favor intenta de nuevo.'
+          }
+          toast.error(errorMsg())
+        },
+      }
+    )
+  }
+
+  if (images.length === 0) return <p>No hay imágenes para este producto</p>
+  return images.map((image) => (
+    <SortableImage
+      key={image.id}
+      image={image}
+      product={product}
+      deleteStatus={deleteStatus}
+      handleDelete={handleDelete}
+      deletePending={deleteProductImageMutation.isPending}
+      setDeleteStatus={setDeleteStatus}
+      imagesDraggable={imagesDraggable}
+    />
+  ))
 }
 
 export default ProductImagesPage

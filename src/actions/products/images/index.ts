@@ -1,6 +1,10 @@
 import { apiWithCredentials } from '@/actions/api'
 import { ProductImageSchema } from '@/schemas/products/images'
-import { ProductImageCreateResponse, ProductImageResponse } from '@/types/product/images'
+import {
+  ProductImageCreateResponse,
+  ProductImageResponse,
+  ProductImagesReorderResponse,
+} from '@/types/product/images'
 import axios from 'axios'
 import { z } from 'zod'
 
@@ -34,18 +38,23 @@ export const createProductImage = async ({
 }
 
 export async function updateProductImagesOrder(
-  updatedImages: { id: string; productId: string; displayOrder: number }[]
-) {
+  productId: string,
+  updatedImages: { id: string; displayOrder: number }[]
+): Promise<ProductImagesReorderResponse> {
   try {
-    const res = await apiWithCredentials.patch(`/products/images/order/`, {
-      updatedImages,
-    })
-    return res
+    const { data } = await apiWithCredentials.patch<ProductImagesReorderResponse>(
+      `/products/images/order/${productId}`,
+      {
+        updatedImages,
+      }
+    )
+    return data
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      return error.response?.data || { error: 'An unknown error occurred' }
+      const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }
+      throw new Error(errorData.error ?? 'Ocurrió un error desconocido')
     }
-    return { error: 'An unknown error occurred' }
+    throw new Error('Ocurrió un error desconocido')
   }
 }
 
