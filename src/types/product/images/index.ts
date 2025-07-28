@@ -2,17 +2,22 @@ export interface ProductImage {
   id: string
   s3Key: string
   createdAt: string
-  displayOrder: number
   productId: string
+  displayOrder: number
 }
 
 export interface ProductImageCreateResponse {
-  images: ProductImage[]
-  productId: string
   message: string
+  productId: string
+  images: ProductImage[]
 }
 
 export interface ProductImageResponse {
-  images: ProductImage[]
   message: string
+  images: ProductImage[]
+}
+
+export interface ProductImagesReorderResponse {
+  message: string
+  images: ProductImage[]
 }

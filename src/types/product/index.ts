@@ -1,11 +1,6 @@
 import { BaseFilterParams, BasePaginatedResponse } from '../shared'
 import { ProductImage } from './images'
 
-export interface ProductsPaginatedResponse {
-  objects: Product[]
-  pagination: BasePaginatedResponse
-}
-
 export interface Product {
   id: string
   name: string
@@ -32,6 +27,11 @@ export interface ProductFilterParams extends BaseFilterParams {
   unitiesId?: string[]
   priceRange?: number[]
   inStockOnly?: boolean
+}
+
+export interface ProductsPaginatedResponse {
+  objects: Product[]
+  pagination: BasePaginatedResponse
 }
 
 export interface ProductResponse {
