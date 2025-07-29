@@ -1,30 +1,22 @@
-import { useEffect, useState } from 'react'
-import CreateShippingAddress from './Create'
+import { Button } from '@/components/ui/button'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import useShippingAddresses from '@/hooks/shipping/useShippingAddresses'
 import { useAuthStore } from '@/store/auth/useAuthStore'
 import { useShippingAddressStore } from '@/store/shippingAddresses/useAddressesStore'
-import { deleteAddress, getShippingAddresses } from '@/actions/shippingData'
 import { type ShippingAddress } from '@/types/shippingAddress'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import z from 'zod'
-import { useForm } from 'react-hook-form'
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button } from '@/components/ui/button'
+import { useEffect, useState } from 'react'
+import { Form, useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+import z from 'zod'
+import CreateShippingAddress from './Create'
 import Update from './Update'
 import DeleteDialog from '@/components/blocks/DeleteDialog'
+import { deleteAddress } from '@/actions/shippingData'
 import { TrashIcon } from 'lucide-react'
-import { toast } from 'sonner'
 
-function ListAddresses() {
-  const user = useAuthStore((state) => state.user)
-  const addresses = useShippingAddressStore((state) => state.addresses)
+function ListAddresses({ addresses }: { addresses: ShippingAddress[] }) {
   const selectedAddress = useShippingAddressStore((state) => state.selectedAddress)
   const setSelectedAddress = useShippingAddressStore((state) => state.setSelectedAddress)
 
@@ -49,7 +41,7 @@ function ListAddresses() {
     form.reset({ address: '' })
   }
 
-  return addresses.length && user ? (
+  return (
     <Form {...form}>
       <form className="flex gap-2 justify-evenly" id="selectAddressForm">
         <FormField
@@ -120,59 +112,30 @@ function ListAddresses() {
         />
       </form>
     </Form>
-  ) : (
-    <>
-      {user ? (
-        <p>No shipping addresses found.</p>
-      ) : (
-        <p>Please log in to view your shipping addresses.</p>
-      )}
-    </>
   )
 }
 
 function ShippingAddress() {
-  const [isLoading, setIsLoading] = useState(false)
   const user = useAuthStore((state) => state.user)
-  const addresses = useShippingAddressStore((state) => state.addresses)
-  const setAddresses = useShippingAddressStore((state) => state.setAddresses)
   const selectedAddress = useShippingAddressStore((state) => state.selectedAddress)
   const removeAddress = useShippingAddressStore((state) => state.removeAddress)
   const [address, setAddress] = useState<ShippingAddress | null>(null)
 
-  useEffect(() => {
-    const fetchData = async () => {
-      // Fetch shipping address data
-      setIsLoading(true)
-      try {
-        const res = await getShippingAddresses()
-        if (res.status !== 200) {
-          throw new Error('Failed to fetch shipping addresses')
-        }
-        setAddresses(res.data)
-      } catch (error) {
-        console.error(error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    if (user) {
-      fetchData()
-    }
-  }, [user, setAddresses])
+  const { shippingAddressesQuery } = useShippingAddresses({ userId: user?.id ?? '' })
 
   useEffect(() => {
-    setAddress(addresses.find((address) => address.pk === selectedAddress) || null)
-  }, [addresses, selectedAddress])
+    if (!shippingAddressesQuery.data?.length) return
+    setAddress(
+      shippingAddressesQuery.data.find((address) => address.pk === selectedAddress) || null
+    )
+  }, [shippingAddressesQuery, selectedAddress])
 
-  if (isLoading) {
-    return <div>Loading...</div>
-  }
+  if (!user) return <p>Por favor inicia sesión para ver tus direcciones de envío.</p>
+  if (!shippingAddressesQuery.data?.length) return <p>No tienes direcciones de envío guardadas.</p>
 
   return (
     <div>
-      {user ? (
+      {user && (
         <>
           <section className="flex flex-wrap gap-2 items-center mb-2 justify-between">
             <h1>Direcciones de envío</h1>
@@ -195,11 +158,7 @@ function ShippingAddress() {
               )}
             </div>
           </section>
-          <ListAddresses />
-        </>
-      ) : (
-        <>
-          <ListAddresses />
+          <ListAddresses addresses={shippingAddressesQuery.data} />
         </>
       )}
     </div>
