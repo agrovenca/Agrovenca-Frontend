@@ -2,16 +2,21 @@ import axios from 'axios'
 import { apiWithCredentials } from '../api'
 import { z } from 'zod'
 import { AddressCreateSchema, AddressUpdateSchema } from '@/schemas/products/shippingAddress'
+import { ShippingAddress } from '@/types/shippingAddress'
 
-export const getShippingAddresses = async () => {
+export const getShippingAddresses = async ({
+  userId,
+}: {
+  userId: string
+}): Promise<ShippingAddress[]> => {
   try {
-    const res = await apiWithCredentials.get(`/shippings`)
-    return res
+    const { data } = await apiWithCredentials.get(`/shippings/${userId}`)
+    return data
   } catch (error) {
     if (axios.isAxiosError(error)) {
       return error.response?.data || { error: 'An unknown error occurred' }
     }
-    return { error: 'An unknown error occurred' }
+    throw new Error('An unknown error occurred')
   }
 }
 
