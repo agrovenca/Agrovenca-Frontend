@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator'
 import { ChevronDown, ChevronUp, RotateCcw, UploadIcon } from 'lucide-react'
 import { getLocalDateTime, pluralize, productImage } from '@/lib/utils'
 import useOrders from '@/hooks/orders/useOrders'
+import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
 
 function RenderOrderItem({ item }: { item: OrderItem }) {
   return (
@@ -20,6 +21,10 @@ function RenderOrderItem({ item }: { item: OrderItem }) {
         width={60}
         height={60}
         className="rounded-md object-cover"
+        onError={(e) => {
+          e.currentTarget.onerror = null
+          e.currentTarget.src = ProductImagePlaceholder
+        }}
       />
       <div className="flex-1">
         <p className="font-medium">{item.product.name}</p>
@@ -101,13 +106,17 @@ function OrdersPage() {
                     <div className="flex items-center gap-2 mb-4">
                       {order.items.slice(0, 3).map((item, index) => (
                         <div key={item.id} className="relative">
-                          <img
-                            src={productImage(item.product.images)}
-                            alt={item.product.name}
-                            width={40}
-                            height={40}
-                            className="rounded-md object-cover"
-                          />
+                          <figure className="w-[40px] h-[40px] overflow-hidden rounded-md">
+                            <img
+                              src={productImage(item.product.images)}
+                              alt={item.product.name}
+                              className="h-full w-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.onerror = null
+                                e.currentTarget.src = ProductImagePlaceholder
+                              }}
+                            />
+                          </figure>
                           {index === 2 && order.items.length > 3 && (
                             <div className="absolute inset-0 bg-black/50 rounded-md flex items-center justify-center">
                               <span className="text-white text-xs font-medium">

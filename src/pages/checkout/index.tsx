@@ -203,6 +203,7 @@ function CheckOutPage() {
       shippingAddressId: selectedAddress,
       products: cartItems.map((item) => ({
         id: item.productId,
+        name: item.product.name,
         quantity: item.quantity,
         price: Number(getProductPrice(item.product)),
         categoryId: item.product.categoryId,
