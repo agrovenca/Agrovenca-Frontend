@@ -7,8 +7,9 @@ export const OrderCreateSchema = z.object({
   products: z.array(
     z.object({
       id: z.string().uuid(),
-      quantity: z.number().int().positive(),
+      name: z.string(),
       price: z.number().positive(),
+      quantity: z.number().int().positive(),
       categoryId: z.string().uuid().optional(),
     })
   ),

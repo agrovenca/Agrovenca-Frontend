@@ -1,4 +1,4 @@
-import ShippingAddress from '@/pages/checkout/shippingAddress'
+import { ShippingAddress } from '@/types/shippingAddress'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 

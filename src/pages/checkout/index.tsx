@@ -43,7 +43,11 @@ import { getCoupon } from '@/actions/coupons'
 import { CouponType, CouponTypes } from '@/types/coupon'
 import { toast } from 'sonner'
 import { useAppliedCouponStore } from '@/store/coupons/useCouponsStore'
-import { createOrder } from '@/actions/orders'
+import useCreateOrder from '@/hooks/orders/useCreateOrder'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
+import { useAuthStore } from '@/store/auth/useAuthStore'
+import useShippingAddresses from '@/hooks/shipping/useShippingAddresses'
+import { Loader } from '@/components/ui/loader'
 
 const TAX_VALUE = 0.12
 
@@ -74,8 +78,8 @@ const generateNewOrderId = () => {
 }
 
 function CheckOutPage() {
+  useRequireAuth()
   const navigate = useNavigate()
-  const [isLoading, setIsLoading] = useState(false)
   const [invalidItems, setInvalidItems] = useState<InvalidCartItem[]>([])
   const [couponError, setCouponError] = useState('')
   const appliedCoupon = useAppliedCouponStore((state) => state.coupon)
@@ -88,6 +92,13 @@ function CheckOutPage() {
   const clearCart = useCartStore((state) => state.clearCart)
   const selectedAddress = useShippingAddressStore((state) => state.selectedAddress)
   const setSelectedAddress = useShippingAddressStore((state) => state.setSelectedAddress)
+  const user = useAuthStore((state) => state.user)
+  const { shippingAddressesQuery } = useShippingAddresses({ userId: user?.id ?? '' })
+  const shippingAddress = shippingAddressesQuery.data?.find(
+    (address) => address.pk === selectedAddress
+  )
+
+  const { createOrderMutation } = useCreateOrder({ userId: user?.id || '', shippingAddress })
 
   const orderNumber = useMemo(() => {
     return generateNewOrderId() + cartItems.length.toString().padStart(3, '0')
@@ -163,7 +174,6 @@ function CheckOutPage() {
   }
 
   const onSubmitCoupon: SubmitHandler<z.infer<typeof CouponApplySchema>> = async (data) => {
-    setIsLoading(true)
     try {
       const res = await getCoupon(data.code)
       if (res.status !== 200) {
@@ -182,7 +192,6 @@ function CheckOutPage() {
       setCouponError('Error applying coupon. Please try again later.')
     } finally {
       couponForm.reset({ code: '' })
-      setIsLoading(false)
     }
   }
 
@@ -214,23 +223,25 @@ function CheckOutPage() {
       total: Number(getTotal().toFixed(2)),
     }
 
-    try {
-      const res = await createOrder(orderData)
-      if (res.status !== 201) {
-        toast.error(res.error || 'Error generating order')
-        return
+    createOrderMutation.mutate(
+      { newData: orderData },
+      {
+        onSuccess: ({ message }) => {
+          toast.success(message)
+          clearCart()
+          setSelectedAddress('')
+          removeAppliedCoupon()
+          navigate(`/orders/`)
+        },
+        onError: (err) => {
+          const errorMsg = () => {
+            if (err instanceof Error) return err.message
+            return 'Ocurrió un error. Por favor intenta de nuevo.'
+          }
+          toast.error(errorMsg())
+        },
       }
-      const { message } = res.data
-      toast.success(message)
-      clearCart()
-      setSelectedAddress('')
-      removeAppliedCoupon()
-      navigate(`/orders/`)
-      return
-    } catch (error) {
-      console.error('Error generating order:', error)
-      toast.error('Error generating order. Please try again later.')
-    }
+    )
   }
 
   useEffect(() => {
@@ -357,7 +368,7 @@ function CheckOutPage() {
                       type="button"
                       variant="ghost"
                       onClick={removeCoupon}
-                      disabled={isLoading}
+                      disabled={createOrderMutation.isPending}
                       className="text-green-600 hover:text-green-700 font-serif"
                     >
                       Remover
@@ -388,11 +399,15 @@ function CheckOutPage() {
                           type="submit"
                           variant="outline"
                           disabled={
-                            !couponForm.formState.isValid || couponForm.formState.isSubmitting
+                            !couponForm.formState.isValid ||
+                            couponForm.formState.isSubmitting ||
+                            createOrderMutation.isPending
                           }
                           className={
                             'font-serif' +
-                            (couponForm.formState.isValid && !couponForm.formState.isSubmitting)
+                            (couponForm.formState.isValid &&
+                              !couponForm.formState.isSubmitting &&
+                              !createOrderMutation.isPending)
                               ? 'cursor-pointer'
                               : 'cursor-not-allowed'
                           }
@@ -413,15 +428,24 @@ function CheckOutPage() {
             <Button
               type="button"
               onClick={generateOrder}
-              disabled={cartItems.length === 0 || !selectedAddress || isLoading}
+              disabled={cartItems.length === 0 || !selectedAddress || createOrderMutation.isPending}
               className={`bg-blue-500 hover:bg-blue-600 text-white uppercase flex items-center gap-2 group py-6 justify-center w-full tracking-wider ${
-                cartItems.length === 0 || !selectedAddress || isLoading
+                cartItems.length === 0 || !selectedAddress || createOrderMutation.isPending
                   ? 'cursor-not-allowed'
                   : 'cursor-pointer'
               }`}
             >
-              <span>Generar orden</span>
-              <ChevronRightIcon className="transition-transform group-hover:translate-x-1" />
+              {createOrderMutation.isPending ? (
+                <div className="flex gap-2 items-center">
+                  <Loader className="w-5 h-5" />
+                  <span>Creando order...</span>
+                </div>
+              ) : (
+                <>
+                  <span>Generar orden</span>
+                  <ChevronRightIcon className="transition-transform group-hover:translate-x-1" />
+                </>
+              )}
             </Button>
           </div>
           <div className="lg:col-span-1">
