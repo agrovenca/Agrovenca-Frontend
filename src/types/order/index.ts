@@ -105,6 +105,11 @@ export const orderStatusConfig: Record<OrderStatus, StatusConfig> = {
   [OrderStatus.RETURNED]: {
     label: 'Devuelto',
     color: 'bg-orange-100 text-orange-800 border-orange-200',
-    icon: RotateCcw, // Usa el ícono que prefieras para retornos
+    icon: RotateCcw,
   },
+}
+
+export interface OrderResponse {
+  order: Order
+  message: string
 }

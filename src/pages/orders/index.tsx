@@ -11,6 +11,7 @@ import { ChevronDown, ChevronUp, RotateCcw, UploadIcon } from 'lucide-react'
 import { getLocalDateTime, pluralize, productImage } from '@/lib/utils'
 import useOrders from '@/hooks/orders/useOrders'
 import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
+import { useAuthStore } from '@/store/auth/useAuthStore'
 
 function RenderOrderItem({ item }: { item: OrderItem }) {
   return (
@@ -38,7 +39,8 @@ function RenderOrderItem({ item }: { item: OrderItem }) {
 }
 
 function OrdersPage() {
-  const { ordersQuery } = useOrders()
+  const user = useAuthStore((state) => state.user)
+  const { ordersQuery } = useOrders({ userId: user?.id || '' })
   const [expandedOrders, setExpandedOrders] = useState<string[]>([])
 
   const toggleOrderExpansion = (orderId: string) => {
