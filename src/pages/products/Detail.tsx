@@ -47,8 +47,6 @@ function ProductDetail() {
 
   const { productQuery } = useProduct({ slug: slug ?? '' })
   const { productsQuery } = useProducts({
-    categoriesIds: [productQuery.data?.product.categoryId ?? ''],
-    limit: 9,
     enabled: !!productQuery.data,
   })
 

@@ -4,6 +4,7 @@ import { useAuthStore } from '@/store/auth/useAuthStore'
 import { Loader } from '@/components/ui/loader'
 import { getCurrentUser } from '@/actions/auth/getCurrentUser'
 import { useCartSyncAcrossTabs } from '@/hooks/useCartSyncAcrossTabs'
+import { UIUpdateModal } from '@/components/UIUpdateModal'
 
 export const MainLayout = () => {
   const setUser = useAuthStore((state) => state.setUser)
@@ -40,6 +41,7 @@ export const MainLayout = () => {
   } else {
     return (
       <>
+        <UIUpdateModal />
         <Outlet />
       </>
     )

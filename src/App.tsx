@@ -2,6 +2,7 @@ import Footer from './components/pages/Footer'
 import Navbar from './components/pages/HomeNavbar'
 import { Button } from './components/ui/button'
 import Benefits from './pages/home/Benefits'
+import CategoryCarrousel from './pages/home/CategoryCarrousel'
 import FeaturedProducts from './pages/home/FeaturedProducts'
 import Testimonials from './pages/home/Testimonials'
 
@@ -9,10 +10,6 @@ function App() {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
-      <main className="container mx-auto flex-1">
-        <p className="font-serif">Hola</p>
-        <p className="font-decorative">Hola</p>
-      </main>
       {/* Hero Section */}
       <section className="w-full py-12 md:py-24 lg:py-32 bg-[url('/placeholder.svg?height=800&width=1600')] bg-cover bg-center relative">
         <div className="absolute inset-0 bg-black/40"></div>
@@ -37,6 +34,7 @@ function App() {
           </div>
         </div>
       </section>
+      <CategoryCarrousel />
       <FeaturedProducts />
       <Benefits />
       <Testimonials />
