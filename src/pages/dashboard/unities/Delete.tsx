@@ -24,6 +24,7 @@ type Props = {
 function DeleteUnity({ unity, children }: Props) {
   const [isOpen, setIsOpen] = useState(false)
   const { deleteUnityMutation } = useDeleteUnity()
+  const [checked, setChecked] = useState(false)
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -58,7 +59,12 @@ function DeleteUnity({ unity, children }: Props) {
         </DialogHeader>
         <form className="space-y-4" onSubmit={handleSubmit} id="deleteForm">
           <div className="flex items-center space-x-2">
-            <Checkbox id="confirmDeletion" required />
+            <Checkbox
+              id="confirmDeletion"
+              required
+              checked={checked}
+              onCheckedChange={() => setChecked((prev) => !prev)}
+            />
             <label
               htmlFor="confirmDeletion"
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -69,7 +75,16 @@ function DeleteUnity({ unity, children }: Props) {
 
           {deleteUnityMutation.isError && <ErrorForm message={deleteUnityMutation.error.message} />}
 
-          <Button type="submit" disabled={deleteUnityMutation.isPending} form="deleteForm">
+          <Button
+            size={'lg'}
+            type="submit"
+            form="deleteForm"
+            variant={'destructive'}
+            className={`w-full font-serif uppercase ${
+              deleteUnityMutation.isPending || !checked ? 'cursor-not-allowed' : 'cursor-pointer'
+            }`}
+            disabled={deleteUnityMutation.isPending || !checked}
+          >
             {deleteUnityMutation.isPending ? <Loader size="sm" variant="spinner" /> : 'Eliminar'}
           </Button>
         </form>

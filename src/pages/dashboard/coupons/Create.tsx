@@ -352,7 +352,7 @@ function CreateCoupon() {
             <Button
               type="submit"
               disabled={createCouponMutation.isPending || !form.formState.isValid}
-              className={`${
+              className={`w-full uppercase font-serif ${
                 createCouponMutation.isPending || !form.formState.isValid
                   ? 'cursor-not-allowed'
                   : 'cursor-pointer'

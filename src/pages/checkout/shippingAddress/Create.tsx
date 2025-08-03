@@ -288,7 +288,8 @@ function CreateShippingAddress() {
             <Button
               disabled={!form.formState.isValid || isLoading}
               type="submit"
-              className="bg-blue-500 dark:hover:bg-blue-600 text-white font-serif ml-auto cursor-pointer"
+              size={'lg'}
+              className="w-full uppercase bg-blue-500 dark:hover:bg-blue-600 text-white font-serif ml-auto cursor-pointer"
             >
               {isLoading ? <Loader size="sm" variant="spinner" /> : 'Guardar datos'}
             </Button>

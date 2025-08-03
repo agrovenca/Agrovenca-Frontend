@@ -138,15 +138,17 @@ function Update({ category }: Props) {
               <Button
                 type="button"
                 variant={'secondary'}
+                className="flex-1 font-serif uppercase"
                 onClick={() => form.reset({ ...category })}
               >
                 Restablecer
               </Button>
               <Button
                 className={
-                  updateCategoryMutation.isPending || !form.formState.isValid
+                  'flex-1 font-serif uppercase ' +
+                  (updateCategoryMutation.isPending || !form.formState.isValid
                     ? 'cursor-not-allowed'
-                    : 'cursor-pointer'
+                    : 'cursor-pointer')
                 }
                 type="submit"
                 disabled={updateCategoryMutation.isPending || !form.formState.isValid}

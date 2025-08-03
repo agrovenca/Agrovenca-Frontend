@@ -369,13 +369,17 @@ function UpdateCoupon({ coupon }: Props) {
             <Button
               type="submit"
               disabled={updateCouponMutation.isPending || !form.formState.isValid}
-              className={`${
+              className={`w-full uppercase font-serif ${
                 updateCouponMutation.isPending || !form.formState.isValid
                   ? 'cursor-not-allowed'
                   : 'cursor-pointer'
               }`}
             >
-              {updateCouponMutation.isPending ? <Loader size="sm" variant="spinner" /> : 'Guardar'}
+              {updateCouponMutation.isPending ? (
+                <Loader size="sm" variant="spinner" />
+              ) : (
+                'Actualizar'
+              )}
             </Button>
           </form>
         </Form>

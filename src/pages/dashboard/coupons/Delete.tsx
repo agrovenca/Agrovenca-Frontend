@@ -24,6 +24,7 @@ type Props = {
 function DeleteCoupon({ coupon, children }: Props) {
   const [isOpen, setIsOpen] = useState(false)
   const { deleteCouponMutation } = useDeleteCoupon()
+  const [checked, setChecked] = useState(false)
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -58,7 +59,12 @@ function DeleteCoupon({ coupon, children }: Props) {
         </DialogHeader>
         <form className="space-y-4" onSubmit={handleSubmit} id="deleteForm">
           <div className="flex items-center space-x-2">
-            <Checkbox id="confirmDeletion" required />
+            <Checkbox
+              id="confirmDeletion"
+              required
+              checked={checked}
+              onCheckedChange={() => setChecked((prev) => !prev)}
+            />
             <label
               htmlFor="confirmDeletion"
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -71,7 +77,16 @@ function DeleteCoupon({ coupon, children }: Props) {
             <ErrorForm message={deleteCouponMutation.error.message} />
           )}
 
-          <Button type="submit" disabled={deleteCouponMutation.isPending} form="deleteForm">
+          <Button
+            size={'lg'}
+            type="submit"
+            form="deleteForm"
+            variant={'destructive'}
+            className={`w-full font-serif uppercase ${
+              deleteCouponMutation.isPending || !checked ? 'cursor-not-allowed' : 'cursor-pointer'
+            }`}
+            disabled={deleteCouponMutation.isPending || !checked}
+          >
             {deleteCouponMutation.isPending ? <Loader size="sm" variant="spinner" /> : 'Eliminar'}
           </Button>
         </form>

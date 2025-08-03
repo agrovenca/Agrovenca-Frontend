@@ -138,14 +138,20 @@ function Update({ unity }: Props) {
             )}
 
             <div className="flex items-center gap-2 justify-end">
-              <Button type="button" variant={'secondary'} onClick={() => form.reset({ ...unity })}>
+              <Button
+                type="button"
+                variant={'secondary'}
+                className="flex-1 uppercase font-serif"
+                onClick={() => form.reset({ ...unity })}
+              >
                 Restablecer
               </Button>
               <Button
                 className={
-                  updateUnityMutation.isPending || !form.formState.isValid
+                  'flex-1 uppercase font-serif ' +
+                  (updateUnityMutation.isPending || !form.formState.isValid
                     ? 'cursor-not-allowed'
-                    : 'cursor-pointer'
+                    : 'cursor-pointer')
                 }
                 type="submit"
                 disabled={updateUnityMutation.isPending}

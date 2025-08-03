@@ -55,7 +55,7 @@ function UpdateProductOrder({ product, maxOrder, children }: Props) {
             variant={'ghost'}
             size={'icon'}
             className="text-yellow-500 cursor-pointer"
-            title="Ver producto"
+            title="Actualizar orden numérico"
           >
             <HashIcon />
           </Button>

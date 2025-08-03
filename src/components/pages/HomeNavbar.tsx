@@ -39,7 +39,7 @@ function Navbar() {
   ]
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b backdrop-blur supports-[backdrop-filter]:bgprimary/60 bg-primary/95">
       <div className="container flex h-16 items-center justify-between mx-auto">
         <Link to={'/'} className="flex items-center gap-2">
           <Leaf className="h-6 w-6 text-green-600" />
@@ -53,8 +53,8 @@ function Navbar() {
               viewTransition
               // className={"text-sm font-medium hover:text-primary"}
               className={({ isActive }) =>
-                (isActive ? 'text-primary' : 'text-muted-foreground') +
-                ' text-sm font-medium hover:text-primary'
+                (isActive ? 'text-primary-foreground' : 'text-secondary') +
+                ' text-sm font-medium hover:text-primary-foreground'
               }
             >
               {item.name}

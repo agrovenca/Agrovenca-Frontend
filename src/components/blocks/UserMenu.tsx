@@ -23,7 +23,7 @@ const navItems = [
     icon: <UserIcon />,
   },
   {
-    name: 'Ordenes',
+    name: 'Mis pedidos',
     link: '/orders',
     icon: <LayersIcon />,
   },
@@ -52,7 +52,7 @@ export default function UserMenu({ user }: Props) {
           <DropdownMenuItem>
             <Link to="/dashboard" className="flex gap-2 items-center">
               <SettingsIcon />
-              <span>Dashboard</span>
+              <span>Administración</span>
             </Link>
           </DropdownMenuItem>
         )}

@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { HeartIcon, HeartOffIcon, XIcon } from 'lucide-react'
+import { CheckCircleIcon, HeartIcon, HeartOffIcon } from 'lucide-react'
 
 import { useCartStore } from '@/store/cart/useCartStore'
 import { Product } from '@/types/product'
@@ -13,6 +13,29 @@ import useUnities from '@/hooks/unities/useUnities'
 import { useProductActions } from '@/hooks/products/useActions'
 import useProductPrefetch from '@/hooks/products/useProductPrefetch'
 import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
+
+function RenderSaveButtons({ product }: { product: Product }) {
+  const { handleSaveItem, handleUnSaveItem, isProductSaved } = useProductActions(product)
+  return isProductSaved ? (
+    <Button
+      size="icon"
+      variant="destructive"
+      className="h-9 w-9 cursor-pointer"
+      onClick={() => handleUnSaveItem({ productId: product.id })}
+    >
+      <HeartOffIcon className="h-4 w-4" />
+    </Button>
+  ) : (
+    <Button
+      size="icon"
+      variant="secondary"
+      className="h-9 w-9 cursor-pointer"
+      onClick={() => handleSaveItem({ product })}
+    >
+      <HeartIcon className="h-4 w-4" />
+    </Button>
+  )
+}
 
 function ProductItem({
   product,
@@ -30,13 +53,7 @@ function ProductItem({
   const { unitiesQuery } = useUnities()
   const { prefetch } = useProductPrefetch()
 
-  const {
-    handleRemoveCartItem,
-    handleSaveItem,
-    handleUnSaveItem,
-    isProductSaved,
-    getFirstProductImage,
-  } = useProductActions(product as Product)
+  const { getFirstProductImage } = useProductActions(product as Product)
 
   const isProductInCart = useCartStore((state) =>
     state.items.some((item) => item.productId === product.id)
@@ -114,41 +131,14 @@ function ProductItem({
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  {isProductSaved ? (
-                    <Button
-                      size="icon"
-                      variant="destructive"
-                      className="h-8 w-8 cursor-pointer"
-                      onClick={() => handleUnSaveItem({ productId: product.id })}
-                    >
-                      <HeartOffIcon className="h-4 w-4" />
-                    </Button>
-                  ) : (
-                    <Button
-                      size="icon"
-                      variant="secondary"
-                      className="h-8 w-8 cursor-pointer"
-                      onClick={() => handleSaveItem({ product })}
-                    >
-                      <HeartIcon className="h-4 w-4" />
-                    </Button>
-                  )}
+                  <RenderSaveButtons product={product} />
                   {isProductInCart ? (
-                    <Button
-                      size="sm"
-                      className="bg-red-500 hover:bg-red-600 cursor-pointer text-white"
-                      disabled={!inStock}
-                      onClick={() => handleRemoveCartItem({ productId: product.id })}
-                    >
-                      <XIcon className="h-4 w-4 mr-2 font-bold" />
-                      Remover
+                    <Button size="lg" className="bg-primary/90" disabled>
+                      <CheckCircleIcon className="h-4 w-4 font-bold" />
+                      <span className="font-serif uppercase">En el carrito</span>
                     </Button>
                   ) : (
-                    <AddCartItem
-                      contentText={'Agregar al carrito'}
-                      size={'default'}
-                      product={product}
-                    />
+                    <AddCartItem contentText={'Agregar al carrito'} size={'lg'} product={product} />
                   )}
                 </div>
               </div>
@@ -162,7 +152,7 @@ function ProductItem({
   return (
     <div
       onMouseEnter={() => prefetch({ slug: product.slug })}
-      className="group animate-fadeIn relative mx-auto overflow-hidden rounded-lg border bg-background p-2 flex flex-col transition-colors hover:border-primary h-full max-w-sm w-full"
+      className="group animate-fadeIn relative mx-auto overflow-hidden ag-white-bg ag-secondary-border border rounded-lg shadow-sm p-2 flex bg-cream flex-col transition-colors hover:border-primary h-full max-w-sm w-full"
     >
       <Link to={`/products/${product.slug}`} viewTransition>
         <figure className="aspect-square overflow-hidden rounded-md flex-1 h-[300px] w-full">
@@ -186,25 +176,7 @@ function ProductItem({
         </div>
       )}
       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-        {isProductSaved ? (
-          <Button
-            size="icon"
-            variant="destructive"
-            className="h-8 w-8 cursor-pointer"
-            onClick={() => handleUnSaveItem({ productId: product.id })}
-          >
-            <HeartOffIcon className="h-4 w-4" />
-          </Button>
-        ) : (
-          <Button
-            size="icon"
-            variant="secondary"
-            className="h-8 w-8 cursor-pointer"
-            onClick={() => handleSaveItem({ product })}
-          >
-            <HeartIcon className="h-4 w-4" />
-          </Button>
-        )}
+        <RenderSaveButtons product={product} />
       </div>
       <Separator />
       <div className="p-4 flex flex-col gap-2 h-full">
@@ -217,14 +189,9 @@ function ProductItem({
         </div>
         <div className="mt-auto pt-2">
           {isProductInCart ? (
-            <Button
-              size="lg"
-              className="bg-red-500 hover:bg-red-600 cursor-pointer text-white font-serif w-full"
-              disabled={!inStock}
-              onClick={() => handleRemoveCartItem({ productId: product.id })}
-            >
-              <XIcon className="h-4 w-4 mr-1 font-bold" />
-              Remover de carrito
+            <Button size={'lg'} className="bg-primary/80 w-full" disabled>
+              <CheckCircleIcon />
+              <span className="font-serif uppercase">En el carrito</span>
             </Button>
           ) : (
             <AddCartItem contentText={'Agregar'} size={'lg'} product={product} className="w-full" />

@@ -39,6 +39,7 @@ function CategoryCarrousel() {
 
   return (
     <div className="container mx-auto my-8">
+      <h3 className="text-lg text-center mb-4">¿Buscas alguna categoría en específico?</h3>
       <Carousel plugins={[Autoplay({ delay: 2000, stopOnMouseEnter: true })]}>
         <CarouselContent>
           {categoriesQuery.isFetching ? (
