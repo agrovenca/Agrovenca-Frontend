@@ -131,10 +131,12 @@ function CreateCategory() {
             )}
 
             <Button
+              size={'lg'}
               className={
-                createCategoryMutation.isPending || !form.formState.isValid
+                'w-full uppercase font-serif ' +
+                (createCategoryMutation.isPending || !form.formState.isValid
                   ? 'cursor-not-allowed'
-                  : 'cursor-pointer'
+                  : 'cursor-pointer')
               }
               type="submit"
               disabled={createCategoryMutation.isPending || !form.formState.isValid}

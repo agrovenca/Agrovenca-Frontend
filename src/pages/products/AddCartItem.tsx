@@ -48,7 +48,7 @@ function AddCartItem({ product, contentText, size, className = '' }: Props) {
       <DialogTrigger asChild>
         <Button
           size={size}
-          className={`bg-green-600 hover:bg-green-700 cursor-pointer font-serif ${className}`}
+          className={`bg-primary cursor-pointer font-serif ${className}`}
           disabled={!inStock}
         >
           <ShoppingCart className="h-4 w-4 mr-1" />

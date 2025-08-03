@@ -11,7 +11,7 @@ function BenefitCard({
   description: string
 }) {
   return (
-    <Card>
+    <Card className="transition-all hover:scale-95">
       <CardContent className="p-6 flex flex-col items-center text-center gap-4">
         {icon}
         <h3 className="text-xl font-bold">{title}</h3>

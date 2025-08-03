@@ -16,6 +16,7 @@ import UpdateCartItem from '../products/UpdateCartItem'
 import { Link } from 'react-router'
 import { useAuthStore } from '@/store/auth/useAuthStore'
 import { productImage } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
 
 function CartPage() {
   const user = useAuthStore((state) => state.user)
@@ -32,8 +33,13 @@ function CartPage() {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button size={'icon'} variant={'ghost'} title="Carrito de compras">
+        <Button size={'icon'} variant={'ghost'} title="Carrito de compras" className="relative">
           <ShoppingCartIcon />
+          {items.length > 0 && (
+            <Badge className="absolute bg-primary-foreground text-black top-0 right-0 translate-x-1/2 -translate-y-1/2 h-5 min-w-5 rounded-full px-1 font-mono tabular-nums">
+              {items.length}
+            </Badge>
+          )}
         </Button>
       </SheetTrigger>
       <SheetContent>

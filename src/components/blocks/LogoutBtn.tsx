@@ -40,10 +40,11 @@ function LogoutBtn({ showIcon }: Props) {
       onClick={handleEvent}
       title="Logout"
       size={'sm'}
+      variant={'outline'}
       className="cursor-pointer w-full flex items-center gap-2"
     >
       <LogOutIcon />
-      <span>Logout</span>
+      <span>Cerrar sesión</span>
     </Button>
   )
 }

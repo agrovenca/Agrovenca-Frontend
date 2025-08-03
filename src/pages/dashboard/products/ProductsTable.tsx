@@ -31,6 +31,7 @@ import { useProductFiltersStore } from '@/store/products/useProductFiltersStore'
 import UpdateProductOrder from './UpdateOrder'
 import { useReorderProducts } from '@/hooks/products/useReorderProducts'
 import { useProductActions } from '@/hooks/products/useActions'
+import { Badge } from '@/components/ui/badge'
 
 const GetTableHeaders = () => {
   return (
@@ -85,24 +86,22 @@ const GetTableRow = ({
               e.currentTarget.src = ProductImagePlaceholder
             }}
           />
-          <span className="absolute top-0 right-0 bg-blue-500 text-white py-0.5 px-2 rounded-full">
+          <Badge className="absolute bg-primary top-0 right-0 text-primary-foreground h-5 min-w-5 rounded-full px-1 font-mono tabular-nums">
             {product.images.length}
-          </span>
+          </Badge>
         </figure>
       </TableCell>
       <TableCell>{product.name}</TableCell>
       <TableCell>
-        <span className="py-1 px-3 rounded-md bg-gray-200 dark:bg-gray-700">{product.stock}</span>
+        <Badge className="py-1 px-3 w-full max-w-20">{product.stock}</Badge>
       </TableCell>
       <TableCell>
-        <span className="py-1 px-3 rounded-md bg-gray-200 dark:bg-gray-700">
-          $ {formatDecimal(product.price)}
-        </span>
+        <Badge className="py-1 px-3 w-full max-w-24">$ {formatDecimal(product.price)}</Badge>
       </TableCell>
       <TableCell>
-        <span className="py-1 px-3 rounded-md bg-gray-200 dark:bg-gray-700">
+        <Badge className="py-1 px-3 w-full max-w-24" variant={'secondary'}>
           $ {formatDecimal(product.secondPrice)}
-        </span>
+        </Badge>
       </TableCell>
       <TableCell className="text-right">
         {!isDraggable && (

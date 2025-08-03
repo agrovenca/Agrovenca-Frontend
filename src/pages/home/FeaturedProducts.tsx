@@ -6,7 +6,7 @@ import ProductItem from '../products/ProductItem'
 import ProductSkeleton from '../products/ProductSkeleton'
 
 function FeaturedProducts() {
-  const limit = 4
+  const limit = 3
   const { productsQuery } = useProducts({ fetchWithFilters: false })
 
   return (
@@ -29,9 +29,11 @@ function FeaturedProducts() {
                 Nuestros productos agrícolas más vendidos esta temporada
               </p>
             </div>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {productsQuery.data.objects.slice(0, limit).map((product) => (
-                <ProductItem key={product.id} product={product} renderMode="card" />
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {productsQuery.data.objects.slice(0, limit).map((product, idx) => (
+                <div key={product.id} className={idx === 1 ? '-translate-y-4' : ''}>
+                  <ProductItem product={product} renderMode="card" />
+                </div>
               ))}
             </div>
           </>

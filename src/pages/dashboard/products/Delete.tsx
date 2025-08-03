@@ -24,6 +24,7 @@ type Props = {
 function DeleteProduct({ product, children }: Props) {
   const [isOpen, setIsOpen] = useState(false)
   const { deleteProductMutation } = useDeleteProduct()
+  const [checked, setChecked] = useState(false)
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -58,7 +59,12 @@ function DeleteProduct({ product, children }: Props) {
         </DialogHeader>
         <form className="space-y-4" onSubmit={handleSubmit} id="deleteForm">
           <div className="flex items-center space-x-2">
-            <Checkbox id="confirmDeletion" required />
+            <Checkbox
+              id="confirmDeletion"
+              required
+              checked={checked}
+              onCheckedChange={() => setChecked((prev) => !prev)}
+            />
             <label
               htmlFor="confirmDeletion"
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -71,9 +77,26 @@ function DeleteProduct({ product, children }: Props) {
             <ErrorForm message={deleteProductMutation.error.message} />
           )}
 
-          <Button type="submit" disabled={deleteProductMutation.isPending} form="deleteForm">
-            {deleteProductMutation.isPending ? <Loader size="sm" variant="spinner" /> : 'Eliminar'}
-          </Button>
+          <div className="flex">
+            <Button
+              size={'lg'}
+              type="submit"
+              form="deleteForm"
+              variant={'destructive'}
+              className={`w-full font-serif uppercase ${
+                deleteProductMutation.isPending || !checked
+                  ? 'cursor-not-allowed'
+                  : 'cursor-pointer'
+              }`}
+              disabled={deleteProductMutation.isPending || !checked}
+            >
+              {deleteProductMutation.isPending ? (
+                <Loader size="sm" variant="spinner" />
+              ) : (
+                'Eliminar'
+              )}
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

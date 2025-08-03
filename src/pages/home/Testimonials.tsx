@@ -2,7 +2,7 @@ import { Card, CardContent } from '@/components/ui/card'
 
 function TestimonialCard({ quote, author, role }: { quote: string; author: string; role: string }) {
   return (
-    <Card>
+    <Card className="transition-all hover:scale-95">
       <CardContent className="p-6 flex flex-col gap-4">
         <p className="italic text-muted-foreground">"{quote}"</p>
         <div>

@@ -92,9 +92,18 @@ function DeleteDialog({
 
           {errorStatus.error && <ErrorForm message={errorStatus.message} />}
 
-          <Button type="submit" disabled={isLoading} form="deleteForm">
-            {isLoading ? <Loader size="sm" variant="spinner" /> : 'Eliminar'}
-          </Button>
+          <div className="flex">
+            <Button
+              type="submit"
+              disabled={isLoading}
+              variant={'destructive'}
+              form="deleteForm"
+              size={'lg'}
+              className="w-full font-serif uppercase"
+            >
+              {isLoading ? <Loader size="sm" variant="spinner" /> : 'Eliminar'}
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

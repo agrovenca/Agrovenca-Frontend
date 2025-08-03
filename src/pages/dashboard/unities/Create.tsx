@@ -129,9 +129,10 @@ function CreateUnity() {
             <Button
               type="submit"
               className={
-                createUnityMutation.isPending || !form.formState.isValid
+                'w-full uppercase font-serif ' +
+                (createUnityMutation.isPending || !form.formState.isValid
                   ? 'cursor-not-allowed'
-                  : 'cursor-pointer'
+                  : 'cursor-pointer')
               }
               disabled={createUnityMutation.isPending || !form.formState.isValid}
             >

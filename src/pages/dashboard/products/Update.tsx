@@ -331,23 +331,23 @@ function UpdateProduct({ product }: Props) {
                 <ErrorForm message={updateProductMutation.error.message} />
               )}
 
-              <div className="flex flex-col items-center gap-2 justify-end">
+              <div className="flex items-center gap-2 justify-end">
                 <Button
                   type="button"
                   variant={'secondary'}
                   onClick={() => form.reset({ ...product })}
-                  className="w-full uppercase"
+                  className="flex-1 uppercase font-serif"
                 >
                   Restablecer
                 </Button>
                 <Button
                   type="submit"
                   disabled={updateProductMutation.isPending}
-                  className={`${
+                  className={`flex-1 uppercase font-serif ${
                     updateProductMutation.isPending || !form.formState.isValid
                       ? 'cursor-not-allowed'
                       : 'cursor-pointer'
-                  } w-full uppercase`}
+                  }`}
                 >
                   {updateProductMutation.isPending ? (
                     <Loader size="sm" variant="spinner" />

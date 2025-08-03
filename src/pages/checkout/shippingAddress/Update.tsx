@@ -314,7 +314,7 @@ function Update({ address }: Props) {
                 type="reset"
                 variant={'secondary'}
                 disabled={isLoading}
-                className="cursor-pointer"
+                className="flex-1 font-serif uppercase cursor-pointer"
                 onClick={onReset}
               >
                 Restablecer
@@ -324,7 +324,8 @@ function Update({ address }: Props) {
                 disabled={isLoading || !form.formState.isValid}
                 form={`updateForm-${address.pk}`}
                 className={
-                  isLoading || !form.formState.isValid ? 'cursor-not-allowed' : 'cursor-pointer'
+                  'flex-1 font-serif uppercase ' +
+                  (isLoading || !form.formState.isValid ? 'cursor-not-allowed' : 'cursor-pointer')
                 }
               >
                 {isLoading ? <Loader size="sm" variant="spinner" /> : 'Guardar'}
