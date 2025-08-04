@@ -59,7 +59,7 @@ function ChangePassword() {
       <form className="w-full max-w-screen-2xl mx-auto space-y-4" onSubmit={handleSubmit(onSubmit)}>
         <div className="flex-1">
           <Label htmlFor="currentPassword" className="mb-2">
-            Current password
+            Actual contraseña
           </Label>
           <Input
             id="currentPassword"
@@ -71,15 +71,15 @@ function ChangePassword() {
         </div>
         <div className="flex gap-6 items-start justify-center flex-wrap">
           <div className="flex-1">
-            <Label htmlFor="password" className="mb-2">
-              New password
+            <Label htmlFor="password" className="mb-2 text-nowrap">
+              Nueva contraseña
             </Label>
             <Input id="password" type="password" placeholder="••••••" {...register('password')} />
             {errors.password && <ErrorForm message={errors.password.message || ''} />}
           </div>
           <div className="flex-1">
-            <Label htmlFor="passwordConfirm" className="mb-2">
-              Confirm new password
+            <Label htmlFor="passwordConfirm" className="mb-2 text-nowrap">
+              Confirmar nueva contraseña
             </Label>
             <Input
               id="passwordConfirm"
@@ -114,7 +114,7 @@ function ChangePassword() {
         {errorStatus.error && <ErrorForm message={errorStatus.message} />}
 
         <Button className="w-full" type="submit" disabled={isLoading}>
-          {isLoading ? 'Loading...' : 'Update'}
+          {isLoading ? 'Loading...' : 'Actualizar'}
         </Button>
       </form>
     </section>

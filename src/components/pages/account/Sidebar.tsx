@@ -30,13 +30,13 @@ type MenuItem = {
 
 const menuItems: MenuItem[] = [
   {
-    name: 'Profile',
+    name: 'Perfil',
     path: '/account/profile',
     icon: <User2Icon />,
     asLink: true,
   },
   {
-    name: 'Change Password',
+    name: 'Cambiar contraseña',
     path: '/account/change-password',
     icon: <Ellipsis />,
     asLink: true,

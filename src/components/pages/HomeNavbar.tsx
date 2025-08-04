@@ -40,7 +40,7 @@ function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b backdrop-blur supports-[backdrop-filter]:bgprimary/60 bg-primary/95">
-      <div className="container flex h-16 items-center justify-between mx-auto">
+      <div className="container flex h-16 items-center justify-between mx-auto px-2 md:px-0">
         <Link to={'/'} className="flex items-center gap-2">
           <Leaf className="h-6 w-6 text-green-600" />
           <span className="text-xl font-bold">Agrovenca</span>

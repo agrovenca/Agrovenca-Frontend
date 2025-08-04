@@ -72,7 +72,7 @@ function SavedProductsPage() {
           <HeartIcon />
         </Button>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent className="w-4/4">
         <SheetHeader>
           <SheetTitle>Lista de favoritos</SheetTitle>
           <SheetDescription>Productos que anteriormente has marcado como favorito</SheetDescription>

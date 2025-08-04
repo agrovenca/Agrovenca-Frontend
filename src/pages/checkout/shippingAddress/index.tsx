@@ -69,12 +69,12 @@ function ListAddresses({ addresses }: { addresses: ShippingAddress[] }) {
                     toast.success(`Dirección de envío seleccionada: ${getAddressByPk(val)?.alias}`)
                     field.onChange(val)
                   }}
-                  className="flex gap-2 justify-evenly"
+                  className="flex gap-2 justify-evenly flex-wrap"
                 >
                   {addresses.length &&
                     addresses.map((address) => (
                       <FormItem
-                        className="flex flex-col max-w-md w-full items-center gap-3 border p-4 mb-4 rounded-lg transition hover:scale-[1.01] font-serif"
+                        className="flex flex-col max-w-sm w-full items-start gap-3 border p-4 mb-4 rounded-lg transition hover:scale-[1.01] font-serif"
                         key={address.pk}
                       >
                         <div className="flex items-start gap-3 flex-1">
@@ -146,7 +146,7 @@ function ShippingAddress() {
         <>
           <section className="flex flex-wrap gap-2 items-center mb-2 justify-between">
             <h1>Direcciones de envío</h1>
-            <div className="flex gap-2 items-center flex-wrap">
+            <div className="flex gap-2 items-center flex-wrap justify-center">
               <CreateShippingAddress />
               {address && (
                 <>

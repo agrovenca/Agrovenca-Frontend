@@ -68,16 +68,16 @@ export default function LoginPage() {
         </Button>
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
-            <span style={{ viewTransitionName: 'loginTransitionTitle' }}>Login</span>
+            <span style={{ viewTransitionName: 'loginTransitionTitle' }}>Iniciar sesión</span>
           </CardTitle>
           <CardDescription className="text-center">
-            Enter your email and password to login to your account
+            Ingresa tu email y contraseña para iniciar sesión
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Correo electrónico</Label>
               <Input
                 id="email"
                 type="email"
@@ -89,15 +89,21 @@ export default function LoginPage() {
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">Contraseña</Label>
                 <Link
                   to="/auth/forgot-password"
                   className="text-sm font-medium text-primary hover:underline"
                 >
-                  Forgot password?
+                  ¿Olvidaste tu contraseña?
                 </Link>
               </div>
-              <Input id="password" type="password" {...register('password')} defaultValue={''} />
+              <Input
+                id="password"
+                placeholder="••••••••"
+                type="password"
+                {...register('password')}
+                defaultValue={''}
+              />
               {errors.password && <ErrorForm message={errors.password.message || ''} />}
             </div>
 
@@ -123,17 +129,17 @@ export default function LoginPage() {
           {errorStatus.error && <ErrorForm message={errorStatus.message} />}
 
           <Button className="w-full" type="submit" disabled={isLoading}>
-            {isLoading ? 'Loading...' : 'Login'}
+            {isLoading ? 'Loading...' : 'Ingresar'}
           </Button>
           <div className="text-center text-sm">
-            Don&apos;t have an account?{' '}
+            ¿No tienes una cuenta?{' '}
             <Link
               to="/auth/register"
               viewTransition
               style={{ viewTransitionName: 'registerTransitionTitle' }}
               className="font-medium text-primary hover:underline"
             >
-              Register
+              Regístrate
             </Link>
           </div>
         </CardFooter>

@@ -15,7 +15,7 @@ function AuthLayout() {
       dark:bg-[linear-gradient(to_right,#1a202c_1px,transparent_1px),linear-gradient(to_bottom,#1a202c_1px,transparent_1px)] dark:bg-[size:6rem_4rem]
       "
         ></div>
-        <div className="h-screen flex items-center justify-center gap-4">
+        <div className="h-screen flex items-center justify-center gap-4 mx-2">
           <Outlet />
         </div>
       </div>
