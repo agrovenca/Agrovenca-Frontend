@@ -1,5 +1,5 @@
 import Navbar from '@/components/pages/HomeNavbar'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Grid, List } from 'lucide-react'
@@ -11,16 +11,24 @@ import ProductItem from './ProductItem'
 import ProductSkeleton from './ProductSkeleton'
 import ExtendedTooltip from '@/components/blocks/ExtendedTooltip'
 import Filters from '@/components/pages/products/Filters'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 function ProductsPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
+  const isMobile = useIsMobile()
   const { productsQuery, setNextPage, setPrevPage, setPageNumber } = useProducts({})
+
+  useEffect(() => {
+    if (isMobile) {
+      setViewMode('grid')
+    }
+  }, [isMobile])
 
   return (
     <div>
       <Navbar />
-      <section className="container mx-auto py-4 px-2">
+      <section className="container mx-auto py-4 px-2 md:px-4">
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">Products</h1>
           <p className="text-muted-foreground mt-2">
@@ -29,10 +37,10 @@ function ProductsPage() {
         </div>
 
         {/* Search and Filters Bar */}
-        <div className="flex  gap-4 mb-6 flex-row md:items-center md:justify-between">
+        <div className="flex gap-4 mb-6 flex-row md:items-center md:justify-between">
           <Filters />
 
-          <div className="flex items-center gap-4">
+          <div className="items-center gap-4 hidden md:flex">
             <div className="flex border rounded-md">
               <ExtendedTooltip content={'Ver tarjetas'}>
                 <Button
@@ -64,19 +72,11 @@ function ProductsPage() {
             <div className="space-y-4"></div>
             {/* Products Grid/List */}
             {productsQuery.isFetching ? (
-              viewMode === 'grid' ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {[...Array(8)].map((_, idx) => (
-                    <ProductSkeleton key={idx} renderMode="card" />
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {[...Array(8)].map((_, idx) => (
-                    <ProductSkeleton key={idx} renderMode="listItem" />
-                  ))}
-                </div>
-              )
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {[...Array(8)].map((_, idx) => (
+                  <ProductSkeleton key={idx} />
+                ))}
+              </div>
             ) : productsQuery.isSuccess && productsQuery.data.objects.length ? (
               viewMode === 'grid' ? (
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
