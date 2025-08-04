@@ -17,7 +17,7 @@ createRoot(document.getElementById('root')!).render(
       <ReactQueryDevtools initialIsOpen={false} />
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <RouterProvider router={Router} />
-        <Toaster />
+        <Toaster richColors />
       </ThemeProvider>
     </QueryClientProvider>
   </StrictMode>

@@ -29,6 +29,7 @@ import useUnities from '@/hooks/unities/useUnities'
 import { Unity } from '@/types/unity'
 import { Category } from '@/types/category'
 import { Slider } from '@/components/ui/slider'
+import { toast } from 'sonner'
 
 function RenderMultiSelect({
   label,
@@ -96,8 +97,17 @@ function FiltersDialog() {
   const { categoriesQuery } = useCategories()
   const { unitiesQuery } = useUnities()
 
+  const handleReset = () => {
+    resetFilters()
+    toast.info('Filtros reseteados')
+  }
+
   return (
-    <Dialog>
+    <Dialog
+      onOpenChange={(isOpen) => {
+        if (!isOpen) toast.success('Filtros aplicados')
+      }}
+    >
       <DialogTrigger asChild>
         <Button variant={'outline'}>
           <FilterIcon />
@@ -165,7 +175,7 @@ function FiltersDialog() {
               </div>
             </div>
           </div>
-          <Button variant={'secondary'} className="mt-6" onClick={resetFilters}>
+          <Button variant={'secondary'} className="mt-6" onClick={handleReset}>
             <FilterXIcon />
             <span>Limpiar filtros</span>
           </Button>
@@ -185,6 +195,7 @@ function Filters() {
 
   useEffect(() => {
     setSearch(debouncedSearch)
+    toast.info(`Resultados encontrados para: ${debouncedSearch}`)
   }, [debouncedSearch, setSearch])
 
   return (
