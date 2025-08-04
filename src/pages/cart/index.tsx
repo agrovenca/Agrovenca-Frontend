@@ -109,7 +109,7 @@ function CartPage() {
           )}
         </Button>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent className="w-4/4">
         <SheetHeader>
           <SheetTitle>Carrito de compras</SheetTitle>
           <SheetDescription>Productos que están en tu carrito de compras</SheetDescription>

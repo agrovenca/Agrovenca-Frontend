@@ -75,7 +75,7 @@ function ResetPasswordConfirmPage() {
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold text-center">Restablecer contraseña</CardTitle>
         <CardDescription className="text-center">
-          Por favor ingresa tu nueva contraseña y confirmala.
+          Por favor ingresa tu nueva contraseña 2 veces para confirmar.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -87,12 +87,7 @@ function ResetPasswordConfirmPage() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel htmlFor="newPassword">Nueva contraseña</FormLabel>
-                  <Input
-                    id="newPassword"
-                    type="password"
-                    placeholder="Nueva contraseña"
-                    {...field}
-                  />
+                  <Input id="newPassword" type="password" placeholder="••••••••" {...field} />
                   <FormMessage />
                 </FormItem>
               )}
@@ -106,7 +101,7 @@ function ResetPasswordConfirmPage() {
                   <Input
                     id="newPasswordConfirm"
                     type="password"
-                    placeholder="Nueva contraseña (confirmar)"
+                    placeholder="••••••••"
                     {...field}
                   />
                   <FormMessage />

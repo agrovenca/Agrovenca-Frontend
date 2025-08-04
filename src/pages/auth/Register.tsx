@@ -70,39 +70,49 @@ function Register() {
             className="text-2xl font-bold text-center"
             style={{ viewTransitionName: 'registerTransitionTitle' }}
           >
-            Register
+            Regístrate
           </CardTitle>
           <CardDescription className="text-center">
-            Create an account to get started
+            Crea una cuenta para empezar a usar la plataforma
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName">First name</Label>
+                <Label htmlFor="firstName">Nombre(s)</Label>
                 <Input id="firstName" placeholder="John" {...register('name')} />
                 {errors.name && <ErrorForm message={errors.name.message || ''} />}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName">Last name</Label>
+                <Label htmlFor="lastName">Apellido(s)</Label>
                 <Input id="lastName" placeholder="Doe" {...register('lastName')} />
                 {errors.lastName && <ErrorForm message={errors.lastName.message || ''} />}
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Correo electrónico</Label>
               <Input id="email" type="email" placeholder="m@example.com" {...register('email')} />
               {errors.email && <ErrorForm message={errors.email.message || ''} />}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" {...register('password')} />
+              <Label htmlFor="password">Contraseña</Label>
+              <Input
+                id="password"
+                placeholder="••••••••"
+                type="password"
+                {...register('password')}
+              />
               {errors.password && <ErrorForm message={errors.password.message || ''} />}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="passwordConfirm">Confirm Password</Label>
-              <Input id="passwordConfirm" type="password" {...register('passwordConfirm')} />
+              <Label htmlFor="passwordConfirm">Confirma contraseña</Label>
+              <Input
+                id="passwordConfirm"
+                placeholder="••••••••"
+                type="password"
+                {...register('passwordConfirm')}
+              />
               {errors.passwordConfirm && (
                 <ErrorForm message={errors.passwordConfirm.message || ''} />
               )}
@@ -129,16 +139,16 @@ function Register() {
           {errorStatus.error && <ErrorForm message={errorStatus.message} />}
 
           <Button className="w-full" type="submit" disabled={isLoading}>
-            {isLoading ? 'Loading...' : 'Register'}
+            {isLoading ? 'Loading...' : 'Registrarme'}
           </Button>
           <div className="text-center text-sm">
-            Already have an account?{' '}
+            ¿Ya tienes una cuenta?{' '}
             <Link
               to="/auth/login"
               viewTransition
               className="font-medium text-primary hover:underline"
             >
-              <span style={{ viewTransitionName: 'loginTransitionTitle' }}>Login</span>
+              <span style={{ viewTransitionName: 'loginTransitionTitle' }}>Ingresa</span>
             </Link>
           </div>
         </CardFooter>

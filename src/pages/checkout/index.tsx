@@ -295,14 +295,14 @@ function CheckOutPage() {
   return (
     <div>
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between mx-auto">
+        <div className="container flex h-16 items-center justify-between px-2 mx-auto">
           <Link to={'/'} className="flex items-center gap-2">
             <Leaf className="h-6 w-6 text-green-600" />
             <span className="text-xl font-bold">Agrovenca</span>
           </Link>
           <div className="flex items-center gap-4">
             <LockIcon className="w-5 h-5" />
-            <span className="text-sm text-muted-foreground">Secure Checkout</span>
+            <span className="text-sm text-muted-foreground">Pago Seguro</span>
           </div>
           <ModeToggle />
         </div>
@@ -316,7 +316,8 @@ function CheckOutPage() {
           Volver a los productos
         </Link>
         <h2 className="my-4 text-2xl text-center">
-          Número de orden <span className="text-yellow-500">{orderNumber}</span>
+          <span className="text-nowrap">Número de orden</span>{' '}
+          <span className="text-yellow-500 text-nowrap">{orderNumber}</span>
         </h2>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">

@@ -99,9 +99,7 @@ function ResetPasswordValidatePage() {
                       </InputOTPGroup>
                     </InputOTP>
                   </FormControl>
-                  <FormDescription>
-                    Ingresa el código de seguridad que te enviamos por correo electrónico.
-                  </FormDescription>
+                  <FormDescription></FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
