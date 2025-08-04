@@ -14,7 +14,7 @@ function BenefitCard({
     <Card className="transition-all hover:scale-95">
       <CardContent className="p-6 flex flex-col items-center text-center gap-4">
         {icon}
-        <h3 className="text-xl font-bold">{title}</h3>
+        <h3 className="text-xl font-bold text-primary uppercase">{title}</h3>
         <p className="text-sm text-muted-foreground">{description}</p>
       </CardContent>
     </Card>
@@ -37,17 +37,17 @@ function Benefits() {
           </div>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <BenefitCard
-              icon={<Truck className="h-10 w-10 text-green-600" />}
+              icon={<Truck className="h-10 w-10 text-primary" />}
               title="Fast Delivery"
               description="We deliver your products within 24-48 hours of ordering"
             />
             <BenefitCard
-              icon={<ShieldCheck className="h-10 w-10 text-green-600" />}
+              icon={<ShieldCheck className="h-10 w-10 text-primary" />}
               title="Quality Guarantee"
               description="All our products are quality checked and certified"
             />
             <BenefitCard
-              icon={<Users className="h-10 w-10 text-green-600" />}
+              icon={<Users className="h-10 w-10 text-primary" />}
               title="Direct from Farmers"
               description="We source directly from local farmers, ensuring fair prices"
             />

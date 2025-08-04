@@ -3,11 +3,6 @@ import { useState } from 'react'
 import { useCartStore } from '@/store/cart/useCartStore'
 import { useSavedStore } from '@/store/products/useSavedStore'
 import { Product } from '@/types/product'
-import { ProductImage } from '@/types/product/images'
-
-import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
-
-const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
 
 export function useProductActions(product?: Product) {
   const [quantity, setQuantity] = useState(1)
@@ -53,17 +48,6 @@ export function useProductActions(product?: Product) {
     (savedProduct) => savedProduct.id === (product?.id ?? '')
   )
 
-  const getFirstProductImage = (images: ProductImage[]) => {
-    if (images.length === 0) {
-      return { id: 0, s3Key: ProductImagePlaceholder }
-    }
-    const image = images.find((image) => image.displayOrder === 1)
-
-    if (image) {
-      return { ...image, s3Key: spaceBaseUrl + image.s3Key }
-    }
-  }
-
   return {
     quantity,
     setQuantity,
@@ -73,6 +57,5 @@ export function useProductActions(product?: Product) {
     handleSaveItem,
     handleUnSaveItem,
     isProductSaved,
-    getFirstProductImage,
   }
 }

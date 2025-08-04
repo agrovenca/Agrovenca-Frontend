@@ -81,8 +81,13 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 
-  --primary: oklch(55.781% 0.16877 142.911); /* Forest Green */
-  --secondary: oklch(96.357% 0.03268 107.057); /* Warm Beige */
+  --primary: oklch(75.257% 0.16132 123.89); /* Forest Green */
+  --primary-hover: rgba(154, 191, 59, 0.8); /* Forest Green */
+  --secondary: #000; /* Warm Beige */
+  --secondary-foreground: #fff;
+  --border: rgb(226 226 210);
+  --button-primary: oklch(62.3% 0.214 259.815);
+  --button-primary-hover: rgba(43, 127, 255, 0.9);
 }
 
 .dark {
@@ -119,8 +124,33 @@
   --sidebar-ring: oklch(0.556 0 0);
 
   --primary: oklch(65% 0.15 142.911); /* Brighter Forest Green */
-  --primary-foreground: rgb(255 255 255);
+  --primary-foreground: oklch(100% 0.00011 271.152);
   --secondary: oklch(30% 0.02 107.057); /* Dark Warm Beige */
+  --border: oklch(
+    35.289% 0.01672 107.272
+  ); /* Darkened Beige-Gray (dark mode) */
+}
+
+.button-primary {
+  cursor: pointer;
+  font-family: var(--font-serif);
+  background-color: var(--primary);
+
+  &:hover {
+    background-color: var(--primary-hover);
+  }
+  @apply transition-colors;
+}
+
+.button-secondary {
+  cursor: pointer;
+  font-family: var(--font-serif);
+  background-color: var(--primary);
+
+  &:hover {
+    background-color: var(--primary-hover);
+  }
+  @apply transition-colors;
 }
 
 @layer base {

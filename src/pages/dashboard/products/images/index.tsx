@@ -29,6 +29,8 @@ import { Switch } from '@/components/ui/switch'
 import useDeleteProductImage from '@/hooks/products/images/useDeleteProductImage'
 import { Loader } from '@/components/ui/loader'
 import useReorderProductImages from '@/hooks/products/images/useReorderProductImages'
+import { Badge } from '@/components/ui/badge'
+import { productImagePlaceholder } from '@/lib/utils'
 
 const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
 
@@ -99,10 +101,14 @@ export function SortableImage({
         </div>
       )}
       <img
-        className="object-cover"
+        className="object-cover w-full h-full"
         loading="lazy"
         src={spaceBaseUrl + image.s3Key}
         alt={`Imagen número ${image.displayOrder} del producto ${product.name}`}
+        onError={(e) => {
+          e.currentTarget.onerror = null
+          e.currentTarget.src = productImagePlaceholder
+        }}
       />
       {!imagesDraggable && (
         <button
@@ -114,9 +120,9 @@ export function SortableImage({
           <TrashIcon size={16} />
         </button>
       )}
-      <span className="absolute top-0 right-0 bg-blue-500 text-white py-0.5 px-2 rounded-full">
+      <Badge className="absolute bg-primary top-0 right-0 text-primary-foreground h-6 min-w-6 rounded-full py-3 font-mono tabular-nums">
         {image.displayOrder}
-      </span>
+      </Badge>
     </figure>
   )
 }

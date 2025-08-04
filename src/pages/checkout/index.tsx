@@ -5,7 +5,6 @@ import { Separator } from '@/components/ui/separator'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 import { useCartStore } from '@/store/cart/useCartStore'
-import { Product } from '@/types/product'
 import {
   ArrowLeftIcon,
   ChevronRightIcon,
@@ -17,12 +16,11 @@ import {
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
-import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
 import { validateCart } from '@/actions/products'
 import { CartItem } from '@/types/cart'
 import UpdateCartItem from '../products/UpdateCartItem'
 import { Button } from '@/components/ui/button'
-import { pluralize } from '@/lib/utils'
+import { getFirstProductImage, pluralize, productImagePlaceholder } from '@/lib/utils'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -48,6 +46,7 @@ import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { useAuthStore } from '@/store/auth/useAuthStore'
 import useShippingAddresses from '@/hooks/shipping/useShippingAddresses'
 import { Loader } from '@/components/ui/loader'
+import { getProductPrice } from '@/lib/getProductPrice'
 
 const TAX_VALUE = 0.12
 
@@ -103,10 +102,6 @@ function CheckOutPage() {
   const orderNumber = useMemo(() => {
     return generateNewOrderId() + cartItems.length.toString().padStart(3, '0')
   }, [cartItems.length])
-
-  const getProductPrice = (product: Product) =>
-    product.secondPrice && product.secondPrice != 0 ? product.secondPrice : product.price
-  const productImage = (product: Product) => product.images[0]?.s3Key || ProductImagePlaceholder
 
   const couponForm = useForm<z.infer<typeof CouponApplySchema>>({
     resolver: zodResolver(CouponApplySchema),
@@ -473,54 +468,57 @@ function CheckOutPage() {
               <CardContent className="space-y-4">
                 {/* Cart Items */}
                 <div className="space-y-3">
-                  {cartItems.map((item) => (
-                    <div key={item.productId} className="flex items-start gap-3 relative">
-                      <div className="flex items-center gap-3">
-                        <div className="relative">
-                          <img
-                            loading="lazy"
-                            alt={item.product.name}
-                            src={productImage(item.product)}
-                            className="rounded-md object-cover w-15 h-15"
-                            onError={(e) => {
-                              e.currentTarget.onerror = null
-                              e.currentTarget.src = ProductImagePlaceholder
-                            }}
-                          />
-                          <Badge className="absolute font-serif -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-green-600">
-                            {item.quantity}
-                          </Badge>
+                  {cartItems.map((item) => {
+                    const firstImage = getFirstProductImage(item.product.images)
+                    return (
+                      <div key={item.productId} className="flex items-start gap-3 relative">
+                        <div className="flex items-center gap-3">
+                          <div className="relative">
+                            <img
+                              loading="lazy"
+                              alt={item.product.name}
+                              src={firstImage.s3Key}
+                              className="rounded-md object-cover w-15 h-15"
+                              onError={(e) => {
+                                e.currentTarget.onerror = null
+                                e.currentTarget.src = productImagePlaceholder
+                              }}
+                            />
+                            <Badge className="absolute font-serif -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-green-600">
+                              {item.quantity}
+                            </Badge>
+                          </div>
+                          <div className="w-full flex-1">
+                            <p className="font-medium text-sm">{item.product.name}</p>
+                            <p className="text-sm text-muted-foreground font-serif">
+                              ${Number(getProductPrice(item.product)).toFixed(2)} cada uno
+                            </p>
+                          </div>
                         </div>
-                        <div className="w-full flex-1">
-                          <p className="font-medium text-sm">{item.product.name}</p>
-                          <p className="text-sm text-muted-foreground font-serif">
-                            ${Number(getProductPrice(item.product)).toFixed(2)} cada uno
+                        <div className="ml-auto flex gap-2">
+                          <p className="font-medium font-serif">
+                            ${(getProductPrice(item.product) * item.quantity).toFixed(2)}
                           </p>
+                          <Popover>
+                            <PopoverTrigger className="">
+                              <EllipsisIcon />
+                            </PopoverTrigger>
+                            <PopoverContent className="flex justify-center items-center gap-4 flex-col w-fit">
+                              <UpdateCartItem iconOnly={false} item={item} />
+                              <Button
+                                className="cursor-pointer w-full"
+                                variant={'destructive'}
+                                onClick={() => deleteItem(item.productId)}
+                              >
+                                <TrashIcon className="w-5 h-5" />
+                                <span>Eliminar</span>
+                              </Button>
+                            </PopoverContent>
+                          </Popover>
                         </div>
                       </div>
-                      <div className="ml-auto flex gap-2">
-                        <p className="font-medium font-serif">
-                          ${(getProductPrice(item.product) * item.quantity).toFixed(2)}
-                        </p>
-                        <Popover>
-                          <PopoverTrigger className="">
-                            <EllipsisIcon />
-                          </PopoverTrigger>
-                          <PopoverContent className="flex justify-center items-center gap-4 flex-col w-fit">
-                            <UpdateCartItem iconOnly={false} item={item} />
-                            <Button
-                              className="cursor-pointer w-full"
-                              variant={'destructive'}
-                              onClick={() => deleteItem(item.productId)}
-                            >
-                              <TrashIcon className="w-5 h-5" />
-                              <span>Eliminar</span>
-                            </Button>
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
 
                 <Separator />

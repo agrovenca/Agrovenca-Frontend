@@ -8,20 +8,57 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import { Product } from '@/types/product'
 import { HeartIcon, TrashIcon } from 'lucide-react'
-import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
 import { Link } from 'react-router'
 import { useSavedStore } from '@/store/products/useSavedStore'
-import { productImage } from '@/lib/utils'
+import { getFirstProductImage, productImagePlaceholder } from '@/lib/utils'
+import { getProductPrice } from '@/lib/getProductPrice'
+import { Product } from '@/types/product'
+
+function RenderSavedItem({ product }: { product: Product }) {
+  const firstImage = getFirstProductImage(product.images)
+  const removeProduct = useSavedStore((state) => state.removeProduct)
+
+  return (
+    <div className="flex gap-2 p-4 rounded-md bg-slate-200 dark:bg-gray-800">
+      <Link to={`/products/${product.id}`} viewTransition>
+        <figure className="w-12 h-12 overflow-hidden rounded-md">
+          <img
+            style={{
+              viewTransitionName: `ProductImage-${firstImage.id}`,
+            }}
+            loading="lazy"
+            alt="Imagen del producto"
+            src={firstImage.s3Key}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.currentTarget.onerror = null
+              e.currentTarget.src = productImagePlaceholder
+            }}
+          />
+        </figure>
+      </Link>
+      <div className="flex gap-2 justify-between flex-1">
+        <div className="flex-1">
+          <p>{product.name}</p>
+          <span>${Number(getProductPrice(product)).toFixed(2)}</span>
+        </div>
+        <div className="flex gap-2 flex-col">
+          <button
+            className="w-5 h-5 transition text-red-500 hover:text-red-600 cursor-pointer"
+            onClick={() => removeProduct(product.id)}
+          >
+            <TrashIcon className="w-full h-full" />
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function SavedProductsPage() {
   const products = useSavedStore((state) => state.products)
   const clear = useSavedStore((state) => state.clear)
-  const removeProduct = useSavedStore((state) => state.removeProduct)
-
-  const getProductPrice = (product: Product) =>
-    product.secondPrice ? product.secondPrice : product.price
 
   return (
     <Sheet>
@@ -43,44 +80,7 @@ function SavedProductsPage() {
         <section className="px-4 flex flex-col gap-2">
           {products.length <= 0
             ? 'No hay productos favoritos'
-            : products.map((product) => (
-                <div
-                  key={product.id}
-                  className="flex gap-2 p-4 rounded-md bg-slate-200 dark:bg-gray-800"
-                >
-                  <Link to={`/products/${product.id}`} viewTransition>
-                    <figure className="w-12 h-12 overflow-hidden rounded-md">
-                      <img
-                        style={{
-                          viewTransitionName: `ProductImage-${productImage(product.images)}`,
-                        }}
-                        loading="lazy"
-                        alt="Imagen del producto"
-                        src={productImage(product.images)}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.onerror = null
-                          e.currentTarget.src = ProductImagePlaceholder
-                        }}
-                      />
-                    </figure>
-                  </Link>
-                  <div className="flex gap-2 justify-between flex-1">
-                    <div className="flex-1">
-                      <p>{product.name}</p>
-                      <span>${Number(getProductPrice(product)).toFixed(2)}</span>
-                    </div>
-                    <div className="flex gap-2 flex-col">
-                      <button
-                        className="w-5 h-5 transition text-red-500 hover:text-red-600 cursor-pointer"
-                        onClick={() => removeProduct(product.id)}
-                      >
-                        <TrashIcon className="w-full h-full" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+            : products.map((product) => <RenderSavedItem key={product.id} product={product} />)}
         </section>
         <SheetFooter>
           <Button

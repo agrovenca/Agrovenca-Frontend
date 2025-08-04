@@ -12,7 +12,7 @@ import useCategories from '@/hooks/categories/useCategories'
 import useUnities from '@/hooks/unities/useUnities'
 import { useProductActions } from '@/hooks/products/useActions'
 import useProductPrefetch from '@/hooks/products/useProductPrefetch'
-import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
+import { getFirstProductImage, productImagePlaceholder } from '@/lib/utils'
 
 function RenderSaveButtons({ product }: { product: Product }) {
   const { handleSaveItem, handleUnSaveItem, isProductSaved } = useProductActions(product)
@@ -53,13 +53,11 @@ function ProductItem({
   const { unitiesQuery } = useUnities()
   const { prefetch } = useProductPrefetch()
 
-  const { getFirstProductImage } = useProductActions(product as Product)
-
   const isProductInCart = useCartStore((state) =>
     state.items.some((item) => item.productId === product.id)
   )
 
-  const firstProductImage = getFirstProductImage(product.images)
+  const firstImage = getFirstProductImage(product.images)
 
   if (renderMode === 'listItem') {
     return (
@@ -72,16 +70,16 @@ function ProductItem({
             <Link to={`/products/${product.slug}`} viewTransition>
               <figure className="relative w-[250px] h-full shrink-0">
                 <img
-                  src={firstProductImage?.s3Key}
+                  src={firstImage.s3Key}
                   style={{
-                    viewTransitionName: `ProductImage-${firstProductImage?.id}`,
+                    viewTransitionName: `ProductImage-${firstImage.id}`,
                   }}
                   loading="lazy"
                   alt={product.name}
                   className="w-full h-full object-cover aspect-video"
                   onError={(e) => {
                     e.currentTarget.onerror = null
-                    e.currentTarget.src = ProductImagePlaceholder
+                    e.currentTarget.src = productImagePlaceholder
                   }}
                 />
                 {!inStock && (
@@ -157,15 +155,15 @@ function ProductItem({
       <Link to={`/products/${product.slug}`} viewTransition>
         <figure className="aspect-square overflow-hidden rounded-md flex-1 h-[300px] w-full">
           <img
-            src={firstProductImage?.s3Key}
+            src={firstImage.s3Key}
             style={{
-              viewTransitionName: `ProductImage-${firstProductImage?.id}`,
+              viewTransitionName: `ProductImage-${firstImage.id}`,
             }}
             alt={product.name}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 aspect-video"
             onError={(e) => {
               e.currentTarget.onerror = null
-              e.currentTarget.src = ProductImagePlaceholder
+              e.currentTarget.src = productImagePlaceholder
             }}
           />
         </figure>

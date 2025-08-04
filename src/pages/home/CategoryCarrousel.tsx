@@ -26,7 +26,7 @@ function CategoryItem({ category }: { category: Category }) {
       <button
         type="button"
         onClick={() => handleClick(category.id)}
-        className="p-4 w-full cursor-pointer rounded-md font-semibold text-white bg-green-600 hover:bg-green-500 dark:bg-slate-700 dark:hover:bg-slate-600 transition text-center uppercase font-serif tracking-wider"
+        className="p-4 w-full cursor-pointer rounded-md font-semibold text-white bg-primary dark:bg-slate-700 dark:hover:bg-slate-600 transition text-center uppercase font-serif tracking-wider"
       >
         {category.name}
       </button>
@@ -40,7 +40,7 @@ function CategoryCarrousel() {
   return (
     <div className="container mx-auto my-8">
       <h3 className="text-lg text-center mb-4">¿Buscas alguna categoría en específico?</h3>
-      <Carousel plugins={[Autoplay({ delay: 2000, stopOnMouseEnter: true })]}>
+      <Carousel plugins={[Autoplay({ delay: 2000, stopOnMouseEnter: true })]} opts={{ loop: true }}>
         <CarouselContent>
           {categoriesQuery.isFetching ? (
             <div className="flex gap-2 items-center">

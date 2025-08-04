@@ -10,7 +10,6 @@ import Navbar from '@/components/pages/HomeNavbar'
 import { Loader } from '@/components/ui/loader'
 
 import { Product } from '@/types/product'
-// import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -26,7 +25,7 @@ import {
   Truck,
 } from 'lucide-react'
 import { useCartStore } from '@/store/cart/useCartStore'
-import { parseFormattedText } from '@/lib/utils'
+import { getFirstProductImage, parseFormattedText, productImagePlaceholder } from '@/lib/utils'
 import LiteYouTubeEmbed from 'react-lite-youtube-embed'
 import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css'
 import Footer from '@/components/pages/Footer'
@@ -60,7 +59,6 @@ function ProductDetail() {
     handleSaveItem,
     handleUnSaveItem,
     isProductSaved,
-    getFirstProductImage,
   } = useProductActions(product as Product)
 
   const inStock = product?.stock ?? 0 > 0
@@ -70,7 +68,7 @@ function ProductDetail() {
   const savingPrice = Number(productPrice - productSecondPrice).toFixed(2)
   const savingPercentage = Number(100 - (productSecondPrice * 100) / productPrice).toFixed(2)
 
-  const firstProductImage = getFirstProductImage(product?.images ?? [])
+  const firstImage = getFirstProductImage(product?.images ?? [])
 
   const parsed = parseFormattedText(product?.description)
   const getRecommendedProducts = (products: Product[], currentProductId: string) => {
@@ -98,15 +96,6 @@ function ProductDetail() {
     })
   }, [api])
 
-  // useEffect(() => {
-  //   // Espera al siguiente frame para montar el carrusel (evita el "doble render")
-  //   const id = requestAnimationFrame(() => {
-  //     setShowCarousel(true)
-  //   })
-
-  //   return () => cancelAnimationFrame(id)
-  // }, [])
-
   if (productQuery.isFetching || !product) {
     return (
       <div className="flex items-center justify-center h-full w-full gap-2">
@@ -126,9 +115,9 @@ function ProductDetail() {
               <figure className="w-full h-full overflow-hidden rounded-md">
                 <img
                   loading="lazy"
-                  src={firstProductImage?.s3Key}
+                  src={firstImage.s3Key}
                   style={{
-                    viewTransitionName: `ProductImage-${firstProductImage?.id}`,
+                    viewTransitionName: `ProductImage-${firstImage.id}`,
                   }}
                   alt="Imagen ejemplo del producto"
                   className="w-full h-full object-cover aspect-video"
@@ -144,14 +133,16 @@ function ProductDetail() {
                           <img
                             style={{
                               viewTransitionName:
-                                image.id === firstProductImage?.id
-                                  ? `ProductImage-${image.id}`
-                                  : undefined,
+                                image.id === firstImage.id ? `ProductImage-${image.id}` : undefined,
                             }}
                             loading="lazy"
                             src={spaceBaseUrl + image.s3Key}
                             className="w-full h-full object-cover aspect-video"
                             alt={`Imagen número ${image.displayOrder} del producto`}
+                            onError={(e) => {
+                              e.currentTarget.onerror = null
+                              e.currentTarget.src = productImagePlaceholder
+                            }}
                           />
                         </figure>
                       </CarouselItem>

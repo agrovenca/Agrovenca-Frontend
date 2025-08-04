@@ -21,14 +21,10 @@ function App() {
             Discover premium quality agricultural products sourced directly from local farmers.
           </p>
           <div className="flex flex-col gap-2 min-[400px]:flex-row">
-            <Button size="lg" className="bg-green-600 hover:bg-green-700">
+            <Button size="lg" className="button-primary">
               Shop Now
             </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="text-white border-white hover:bg-white hover:text-black"
-            >
+            <Button size="lg" variant="secondary" className="">
               Learn More
             </Button>
           </div>

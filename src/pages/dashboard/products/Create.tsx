@@ -38,6 +38,7 @@ import { Separator } from '@/components/ui/separator'
 import useCategories from '@/hooks/categories/useCategories'
 import useUnities from '@/hooks/unities/useUnities'
 import useCreateProduct from '@/hooks/products/useCreateProduct'
+import Documentation from './Documentation'
 
 function CreateProduct() {
   const [charCount, setCharCount] = useState(0)
@@ -343,39 +344,7 @@ function CreateProduct() {
             </form>
           </Form>
           <Separator />
-          <section className="flex flex-col gap-2">
-            <div className="p-4 bg-slate-100 dark:bg-gray-800 border rounded-lg">
-              <h3 className="text-lg font-semibold mb-4 font-sans">Id de video</h3>
-              <p className="mb-2 font-serif">
-                El id de video es el que aparece en la url del video de youtube.
-              </p>
-              <div className="font-serif">
-                <p className="text-sm text-muted-foreground">
-                  Por ejemplo, si la url del video es:{' '}
-                </p>
-                <p className="italic text-blue-400">https://www.youtube.com/watch?v=1234567890</p>
-                entonces el id de video es <span className="font-bold">1234567890</span>.
-              </div>
-            </div>
-            <div className="p-4 bg-slate-100 dark:bg-gray-800 border rounded-lg">
-              <h3 className="text-lg font-semibold mb-4 font-sans">Segundo precio</h3>
-              <p className="mb-2 font-serif">
-                El segundo precio es un precio opcional que puedes usar para mostrar un precio
-                diferente al precio normal.
-              </p>
-              <div className="font-serif">
-                <p className="text-sm text-muted-foreground">
-                  Por ejemplo, si el precio es <span className="font-semibold">10.00</span> y el
-                  segundo precio es <span className="font-semibold">5.00</span>, el usuario verá el
-                  precio del producto de esta forma:
-                </p>
-                <p>
-                  <span className="font-bold text-red-500">5.00</span>{' '}
-                  <span className="line-through text-muted-foreground">10.00</span>
-                </p>
-              </div>
-            </div>
-          </section>
+          <Documentation />
         </section>
       </SheetContent>
     </Sheet>

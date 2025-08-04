@@ -6,7 +6,7 @@ function TestimonialCard({ quote, author, role }: { quote: string; author: strin
       <CardContent className="p-6 flex flex-col gap-4">
         <p className="italic text-muted-foreground">"{quote}"</p>
         <div>
-          <p className="font-medium">{author}</p>
+          <p className="font-medium text-primary">{author}</p>
           <p className="text-sm text-muted-foreground">{role}</p>
         </div>
       </CardContent>

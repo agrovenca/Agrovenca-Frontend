@@ -77,11 +77,7 @@ function Navbar() {
               size={'icon'}
               title="Iniciar sesión"
             >
-              <Link
-                viewTransition
-                to="/auth/login"
-                className="text-sm font-medium text-muted-foreground hover:text-primary"
-              >
+              <Link viewTransition to="/auth/login" className="text-sm font-medium">
                 <UserRound />
               </Link>
             </Button>
@@ -133,11 +129,11 @@ function Navbar() {
                         </span>
                       </Link>
                     </Button>
-                    <Button asChild variant={'default'}>
+                    <Button asChild>
                       <Link
                         viewTransition
                         to="/auth/register"
-                        className="text-sm font-medium text-muted-foreground hover:text-primary"
+                        className="button-primary text-sm font-medium "
                       >
                         <UserRound />
                         <span style={{ viewTransitionName: 'registerTransitionTitle' }}>

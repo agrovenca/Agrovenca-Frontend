@@ -46,11 +46,7 @@ function AddCartItem({ product, contentText, size, className = '' }: Props) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button
-          size={size}
-          className={`bg-primary cursor-pointer font-serif ${className}`}
-          disabled={!inStock}
-        >
+        <Button size={size} className={`button-primary ${className}`} disabled={!inStock}>
           <ShoppingCart className="h-4 w-4 mr-1" />
           {contentText}
         </Button>
@@ -76,7 +72,7 @@ function AddCartItem({ product, contentText, size, className = '' }: Props) {
             </p>
           </div>
           <Button
-            className="w-full bg-blue-500 text-white hover:bg-blue-600"
+            className="w-full button-primary"
             disabled={isValid}
             title={isValid ? 'Agregar al carrito' : 'Cantidad inválida'}
             type="submit"

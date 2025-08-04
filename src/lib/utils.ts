@@ -5,6 +5,7 @@ import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png
 import { ProductImage } from '@/types/product/images'
 
 const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
+export const productImagePlaceholder = ProductImagePlaceholder
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -139,8 +140,18 @@ export function generateRandomHexString(length = 6) {
     .toUpperCase()
 }
 
-export const productImage = (productImage: ProductImage[]) =>
-  productImage.length ? spaceBaseUrl + productImage[0].s3Key : ProductImagePlaceholder
+export const getFirstProductImage = (images: ProductImage[]) => {
+  if (images.length === 0) {
+    return { id: 0, s3Key: ProductImagePlaceholder }
+  }
+  const image = images.find((image) => image.displayOrder === 1)
+
+  if (image) {
+    return { ...image, s3Key: spaceBaseUrl + image.s3Key }
+  }
+
+  return { id: 0, s3Key: ProductImagePlaceholder }
+}
 
 export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms))

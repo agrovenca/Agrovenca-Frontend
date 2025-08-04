@@ -8,23 +8,28 @@ import { OrderItem, OrderStatus, orderStatusConfig } from '@/types/order'
 import { useState } from 'react'
 import { Separator } from '@/components/ui/separator'
 import { ChevronDown, ChevronUp, RotateCcw, UploadIcon } from 'lucide-react'
-import { getLocalDateTime, pluralize, productImage } from '@/lib/utils'
+import {
+  getLocalDateTime,
+  pluralize,
+  getFirstProductImage,
+  productImagePlaceholder,
+} from '@/lib/utils'
 import useOrders from '@/hooks/orders/useOrders'
-import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
 import { useAuthStore } from '@/store/auth/useAuthStore'
 
 function RenderOrderItem({ item }: { item: OrderItem }) {
+  const firstImage = getFirstProductImage(item.product.images)
   return (
     <div key={item.id} className="flex items-center gap-3">
       <img
-        src={productImage(item.product.images)}
+        src={firstImage.s3Key}
         alt={item.product.name}
         width={60}
         height={60}
         className="rounded-md object-cover"
         onError={(e) => {
           e.currentTarget.onerror = null
-          e.currentTarget.src = ProductImagePlaceholder
+          e.currentTarget.src = productImagePlaceholder
         }}
       />
       <div className="flex-1">
@@ -106,28 +111,31 @@ function OrdersPage() {
                   {/* Order Items Preview */}
                   <CardContent className="pt-0">
                     <div className="flex items-center gap-2 mb-4">
-                      {order.items.slice(0, 3).map((item, index) => (
-                        <div key={item.id} className="relative">
-                          <figure className="w-[40px] h-[40px] overflow-hidden rounded-md">
-                            <img
-                              src={productImage(item.product.images)}
-                              alt={item.product.name}
-                              className="h-full w-full object-cover"
-                              onError={(e) => {
-                                e.currentTarget.onerror = null
-                                e.currentTarget.src = ProductImagePlaceholder
-                              }}
-                            />
-                          </figure>
-                          {index === 2 && order.items.length > 3 && (
-                            <div className="absolute inset-0 bg-black/50 rounded-md flex items-center justify-center">
-                              <span className="text-white text-xs font-medium">
-                                +{order.items.length - 3}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      ))}
+                      {order.items.slice(0, 3).map((item, index) => {
+                        const firstImage = getFirstProductImage(item.product.images)
+                        return (
+                          <div key={item.id} className="relative">
+                            <figure className="w-[40px] h-[40px] overflow-hidden rounded-md">
+                              <img
+                                src={firstImage.s3Key}
+                                alt={item.product.name}
+                                className="h-full w-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.onerror = null
+                                  e.currentTarget.src = productImagePlaceholder
+                                }}
+                              />
+                            </figure>
+                            {index === 2 && order.items.length > 3 && (
+                              <div className="absolute inset-0 bg-black/50 rounded-md flex items-center justify-center">
+                                <span className="text-white text-xs font-medium">
+                                  +{order.items.length - 3}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
                       <div className="flex-1">
                         <p className="text-sm font-medium">
                           {order.items[0].product.name}
