@@ -3,13 +3,14 @@ import { Link } from 'react-router-dom'
 import FacebookIcon from '../icons/Facebook'
 import InstagramIcon from '../icons/Instagram'
 import WhatsAppIcon from '../icons/WhatsApp'
+import { ModeToggle } from '../mode-toggle'
 
 function Footer() {
   return (
     <>
       {/* Footer */}
       <footer className="w-full border-t py-6 md:py-12">
-        <div className="container flex flex-col gap-8 md:flex-row md:gap-12 mx-auto">
+        <div className="container flex flex-col gap-8 px-8 md:flex-row md:gap-12 md:mx-auto">
           <div className="flex flex-col gap-2 md:w-1/4">
             <div className="flex items-center gap-2">
               <Leaf className="h-6 w-6 text-green-600" />
@@ -18,6 +19,9 @@ function Footer() {
             <p className="text-sm text-muted-foreground">
               La mejor tienda de productos agrícolas y ganaderos de Venezuela.
             </p>
+            <div className="hidden md:block">
+              <ModeToggle />
+            </div>
           </div>
           <div className="grid flex-1 sm:grid-cols-2 gap-8 md:grid-cols-3">
             <div className="flex flex-col gap-2">
@@ -65,7 +69,7 @@ function Footer() {
           </div>
         </div>
         <div className="container mt-8 border-t pt-6 mx-auto">
-          <p className="text-center text-sm text-muted-foreground flex gap-2 justify-center">
+          <p className="text-center text-sm text-muted-foreground flex gap-2 justify-center flex-wrap">
             <span>
               © 2023 - {new Date().getFullYear()} Agrovenca. Todos los derechos reservados.
             </span>

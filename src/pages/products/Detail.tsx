@@ -149,25 +149,27 @@ function ProductDetail() {
                     ))}
                   </CarouselContent>
                   <div className="flex gap-2 justify-center items-baseline mt-2">
-                    <CarouselPrevious className="relative left-0 top-0 translate-none" />
-                    <CarouselNext className="relative left-0 top-0 translate-none" />
+                    <CarouselPrevious className="relative size-6 md:size-8 left-0 top-0 translate-none" />
+                    <CarouselNext className="relative size-6 md:size-8 left-0 top-0 translate-none" />
                   </div>
                 </Carousel>
-                <div className="text-muted-foreground py-2 text-center text-sm">
+                <div className="text-muted-foreground py-2 text-center text-xs md:text-sm">
                   Imagen {current} de {count}
                 </div>
               </div>
             )}
           </section>
-          <section className="p-4 rounded-xs col-span-1 md:col-span-2">
+          <section className="p-2 md:p-4 rounded-xs col-span-1 md:col-span-2">
             <div className="flex flex-col gap-2">
-              <h1 className="font-bold text-4xl">{product.name}</h1>
+              <h1 className="font-bold text-xl md:text-4xl">{product.name}</h1>
               <div className="py-4">
                 {productSecondPrice && productSecondPrice > 0 ? (
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-2xl font-bold">${productSecondPrice.toFixed(2)}</span>
-                      <span className="text-lg text-muted-foreground line-through">
+                      <span className="text-lg md:text-2xl font-bold">
+                        ${productSecondPrice.toFixed(2)}
+                      </span>
+                      <span className="text-sm md:text-lg text-muted-foreground line-through">
                         ${productPrice.toFixed(2)}
                       </span>
                     </div>
@@ -336,23 +338,23 @@ function ProductDetail() {
           </div>
         )}
         {productsQuery.isFetching ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8 mx-4 md:mx-0">
             {[...Array(4)].map((_, idx) => (
-              <ProductSkeleton key={idx} renderMode="card" />
+              <ProductSkeleton key={idx} />
             ))}
           </div>
         ) : (
           productsQuery.isSuccess &&
           productsQuery.data.objects.length && (
             <section className="my-6 mx-auto">
-              <h4 className="font-bold text-3xl mb-8 text-center">
+              <h4 className="font-bold text-xl md:text-3xl mb-8 text-center">
                 Productos recomendados (
                 {getRecommendedProducts(productsQuery.data.objects, product.id).length})
               </h4>
               <Carousel opts={{ align: 'start', loop: true }} className="px-4">
                 <div className="flex gap-2 justify-center items-baseline my-4">
-                  <CarouselPrevious className="relative left-0 top-0 translate-none" />
-                  <CarouselNext className="relative left-0 top-0 translate-none" />
+                  <CarouselPrevious className="relative size-6 md:size-8 left-0 top-0 translate-none" />
+                  <CarouselNext className="relative size-6 md:size-8 left-0 top-0 translate-none" />
                 </div>
                 <CarouselContent>
                   {getRecommendedProducts(productsQuery.data.objects, product.id).map((product) => (

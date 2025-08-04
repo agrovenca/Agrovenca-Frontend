@@ -22,11 +22,11 @@ function CategoryItem({ category }: { category: Category }) {
   }
 
   return (
-    <CarouselItem className="basis-1/4">
+    <CarouselItem className="basis-4/4 md:basis-1/4">
       <button
         type="button"
         onClick={() => handleClick(category.id)}
-        className="p-4 w-full cursor-pointer rounded-md font-semibold text-white bg-primary dark:bg-slate-700 dark:hover:bg-slate-600 transition text-center uppercase font-serif tracking-wider"
+        className="p-4 w-full text-sm md:text-lg cursor-pointer rounded-md font-semibold text-white bg-primary dark:bg-slate-700 dark:hover:bg-slate-600 transition text-center uppercase font-serif tracking-wider"
       >
         {category.name}
       </button>
@@ -40,8 +40,11 @@ function CategoryCarrousel() {
   return (
     <div className="container mx-auto my-8">
       <h3 className="text-lg text-center mb-4">¿Buscas alguna categoría en específico?</h3>
-      <Carousel plugins={[Autoplay({ delay: 2000, stopOnMouseEnter: true })]} opts={{ loop: true }}>
-        <CarouselContent>
+      <Carousel
+        plugins={[Autoplay({ delay: 2000, stopOnMouseEnter: true })]}
+        opts={{ loop: true, align: 'center' }}
+      >
+        <CarouselContent className="px-4 md:p-0">
           {categoriesQuery.isFetching ? (
             <div className="flex gap-2 items-center">
               <Loader size="sm" /> <span>Cargando...</span>
@@ -52,8 +55,12 @@ function CategoryCarrousel() {
             ))
           )}
         </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
+        <div className="flex gap-2 justify-center items-baseline mt-6 md:hidden">
+          <CarouselPrevious className="relative md:hidden" />
+          <CarouselNext className="relative md:hidden" />
+        </div>
+        <CarouselPrevious className="hidden md:block" />
+        <CarouselNext className="hidden md:block" />
       </Carousel>
     </div>
   )

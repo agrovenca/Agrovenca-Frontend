@@ -13,9 +13,9 @@ function FeaturedProducts() {
     <section className="w-full py-12 md:py-24">
       <div className="container space-y-12 mx-auto">
         {productsQuery.isFetching && (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mx-4 md:mx-0">
             {[...Array(limit)].map((_, idx) => (
-              <ProductSkeleton key={idx} renderMode="card" />
+              <ProductSkeleton key={idx} />
             ))}
           </div>
         )}
@@ -29,7 +29,7 @@ function FeaturedProducts() {
                 Nuestros productos agrícolas más vendidos esta temporada
               </p>
             </div>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mx-4 md:mx-0">
               {productsQuery.data.objects.slice(0, limit).map((product, idx) => (
                 <div key={product.id} className={idx === 1 ? '-translate-y-4' : ''}>
                   <ProductItem product={product} renderMode="card" />

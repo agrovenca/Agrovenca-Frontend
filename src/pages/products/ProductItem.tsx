@@ -63,12 +63,12 @@ function ProductItem({
     return (
       <Card
         onMouseEnter={() => prefetch({ slug: product.slug })}
-        className="overflow-x-scroll overflow-y-hidden sm:overflow-hidden py-0 animate-fadeIn"
+        className="overflow-x-scroll max-w-md md:max-w-full overflow-y-hidden sm:overflow-hidden py-0 animate-fadeIn"
       >
         <CardContent className="p-0">
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-col md:flex-row">
             <Link to={`/products/${product.slug}`} viewTransition>
-              <figure className="relative w-[250px] h-full shrink-0">
+              <figure className="relative w-full md:w-[250px] h-full shrink-0">
                 <img
                   src={firstImage.s3Key}
                   style={{
@@ -113,7 +113,7 @@ function ProductItem({
                 </div>
               </div>
 
-              <p className="text-muted-foreground mb-4">{product.description}</p>
+              <p className="text-muted-foreground mb-4 line-clamp-4">{product.description}</p>
 
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-3">
@@ -179,8 +179,8 @@ function ProductItem({
       <Separator />
       <div className="p-4 flex flex-col gap-2 h-full">
         <div className="flex-1">
-          <h3 className="font-medium">{product.name}</h3>
-          <p className="text-sm text-muted-foreground mb-3 line-clamp-2 font-serif">
+          <h3 className="font-medium text-lg md:text-xl">{product.name}</h3>
+          <p className="text-sm md:text-base text-muted-foreground mb-3 line-clamp-2 font-serif">
             {product.description}
           </p>
           <p className="text-sm text-muted-foreground">${priceToShow.toFixed(2)}</p>

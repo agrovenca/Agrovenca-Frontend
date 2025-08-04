@@ -52,7 +52,7 @@ function Pagination({
 
   return (
     <div className="flex flex-col gap-2 items-center mt-4">
-      <div className="flex items-center font-serif">
+      <div className="flex items-center font-serif flex-wrap">
         <span>Mostrando</span>
         <Badge className="mx-1" variant={'outline'}>
           {(currentPage - 1) * limit + 1}{' '}

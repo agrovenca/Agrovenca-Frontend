@@ -28,7 +28,7 @@ function Testimonials() {
               Hear from our satisfied customers about their experience
             </p>
           </div>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 mx-4 md:mx-0">
             <TestimonialCard
               quote="The quality of produce I receive is consistently excellent. It's like having a farmers market delivered to my doorstep!"
               author="Sarah Johnson"

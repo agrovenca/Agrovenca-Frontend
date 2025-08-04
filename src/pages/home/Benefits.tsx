@@ -35,7 +35,7 @@ function Benefits() {
               We're committed to providing the best agricultural products with exceptional service
             </p>
           </div>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mx-4 md:mx-0">
             <BenefitCard
               icon={<Truck className="h-10 w-10 text-primary" />}
               title="Fast Delivery"
