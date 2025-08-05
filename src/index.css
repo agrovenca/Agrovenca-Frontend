@@ -82,13 +82,13 @@
   --sidebar-ring: oklch(0.708 0 0);
 
   --primary: oklch(75.257% 0.16132 123.89); /* Forest Green */
-  --primary-hover: rgba(154, 191, 59, 0.8); /* Forest Green */
-  --secondary: #000; /* Warm Beige */
-  --secondary-foreground: #fff;
+  --primary-hover: oklch(75.257% 0.16132 123.89 / 0.8); /* Forest Green */
+  --secondary: oklch(0% 0 0); /* Warm Beige */
+  --secondary-foreground: oklch(100% 0.00011 271.152);
   --border: rgb(226 226 210);
   --button-primary: oklch(62.3% 0.214 259.815);
-  --button-primary-hover: rgba(43, 127, 255, 0.9);
-  --sidebar: #f5f5dc; /* Forest Green */
+  --button-primary-hover: oklch(61.874% 0.20682 259.248 / 0.9);
+  --sidebar: oklch(96.357% 0.03268 107.057); /* Forest Green */
 }
 
 .dark {

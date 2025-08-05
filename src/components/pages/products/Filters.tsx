@@ -195,7 +195,6 @@ function Filters() {
 
   useEffect(() => {
     setSearch(debouncedSearch)
-    toast.info(`Resultados encontrados para: ${debouncedSearch}`)
   }, [debouncedSearch, setSearch])
 
   return (

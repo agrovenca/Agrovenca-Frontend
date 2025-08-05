@@ -26,7 +26,7 @@ function CategoryItem({ category }: { category: Category }) {
       <button
         type="button"
         onClick={() => handleClick(category.id)}
-        className="p-4 w-full text-sm md:text-lg cursor-pointer rounded-md font-semibold text-white bg-primary dark:bg-slate-700 dark:hover:bg-slate-600 transition text-center uppercase font-serif tracking-wider"
+        className="p-4 w-full text-sm md:text-lg cursor-pointer rounded-md font-semibold text-white bg-primary dark:bg-muted/70 dark:hover:bg-muted/40 transition text-center uppercase font-serif tracking-wider shadow-[0_0_4px_rgba(189,11,11,0.4)] hover:shadow-[0_0_8px_rgba(189,11,11,0.6)] border-none outline-none dark:shadow-white/70 dark:shadow-md dark:hover:shadow-none dark:hover:scale-[98%] dark:hover:shadow-white duration-300"
       >
         {category.name}
       </button>
@@ -44,7 +44,7 @@ function CategoryCarrousel() {
         plugins={[Autoplay({ delay: 2000, stopOnMouseEnter: true })]}
         opts={{ loop: true, align: 'center' }}
       >
-        <CarouselContent className="px-4 md:p-0">
+        <CarouselContent className="px-4 md:p-0 my-4">
           {categoriesQuery.isFetching ? (
             <div className="flex gap-2 items-center">
               <Loader size="sm" /> <span>Cargando...</span>

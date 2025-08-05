@@ -63,7 +63,7 @@ function ProductItem({
     return (
       <Card
         onMouseEnter={() => prefetch({ slug: product.slug })}
-        className="overflow-x-scroll max-w-md md:max-w-full overflow-y-hidden sm:overflow-hidden py-0 animate-fadeIn"
+        className="overflow-x-scroll max-w-md md:max-w-full overflow-y-hidden sm:overflow-hidden py-0 animate-fadeIn bg-[#fafae6] dark:bg-transparent"
       >
         <CardContent className="p-0">
           <div className="flex gap-2 flex-col md:flex-row">

@@ -96,6 +96,10 @@ function ProductDetail() {
     })
   }, [api])
 
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
+
   if (productQuery.isFetching || !product) {
     return (
       <div className="flex items-center justify-center h-full w-full gap-2">
