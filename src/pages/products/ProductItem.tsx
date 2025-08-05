@@ -150,7 +150,7 @@ function ProductItem({
   return (
     <div
       onMouseEnter={() => prefetch({ slug: product.slug })}
-      className="group animate-fadeIn relative mx-auto overflow-hidden ag-white-bg ag-secondary-border border rounded-lg shadow-sm p-2 flex bg-cream flex-col transition-colors hover:border-primary h-full max-w-sm w-full"
+      className="group animate-fadeIn relative mx-auto overflow-hidden border rounded-lg shadow-sm p-2 flex bg-[#fafae6] dark:bg-transparent flex-col transition-colors hover:border-primary h-full max-w-sm w-full"
     >
       <Link to={`/products/${product.slug}`} viewTransition>
         <figure className="aspect-square overflow-hidden rounded-md flex-1 h-[300px] w-full">

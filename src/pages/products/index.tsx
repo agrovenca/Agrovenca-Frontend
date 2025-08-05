@@ -30,9 +30,9 @@ function ProductsPage() {
       <Navbar />
       <section className="container mx-auto py-4 px-2 md:px-4">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight">Products</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Productos</h1>
           <p className="text-muted-foreground mt-2">
-            Discover our wide range of fresh agricultural products
+            Descubre nuestra amplia gama de productos agrícolas frescos
           </p>
         </div>
 

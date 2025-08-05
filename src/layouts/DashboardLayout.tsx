@@ -25,7 +25,6 @@ function DashboardLayout() {
           </SidebarProvider>
         </section>
         <section className="w-full p-6 max-w-screen-2xl mx-auto">
-          layout
           <Outlet />
         </section>
       </section>

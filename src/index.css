@@ -88,6 +88,7 @@
   --border: rgb(226 226 210);
   --button-primary: oklch(62.3% 0.214 259.815);
   --button-primary-hover: rgba(43, 127, 255, 0.9);
+  --sidebar: #f5f5dc; /* Forest Green */
 }
 
 .dark {
