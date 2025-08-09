@@ -12,7 +12,7 @@ import useCategories from '@/hooks/categories/useCategories'
 import useUnities from '@/hooks/unities/useUnities'
 import { useProductActions } from '@/hooks/products/useActions'
 import useProductPrefetch from '@/hooks/products/useProductPrefetch'
-import { getFirstProductImage, productImagePlaceholder } from '@/lib/utils'
+import ProductImage from '@/components/pages/products/ProductImage'
 
 function RenderSaveButtons({ product }: { product: Product }) {
   const { handleSaveItem, handleUnSaveItem, isProductSaved } = useProductActions(product)
@@ -57,8 +57,6 @@ function ProductItem({
     state.items.some((item) => item.productId === product.id)
   )
 
-  const firstImage = getFirstProductImage(product.images)
-
   if (renderMode === 'listItem') {
     return (
       <Card
@@ -69,19 +67,7 @@ function ProductItem({
           <div className="flex gap-2 flex-col md:flex-row">
             <Link to={`/products/${product.slug}`} viewTransition>
               <figure className="relative w-full md:w-[250px] h-full shrink-0">
-                <img
-                  src={firstImage.s3Key}
-                  style={{
-                    viewTransitionName: `ProductImage-${firstImage.id}`,
-                  }}
-                  loading="lazy"
-                  alt={product.name}
-                  className="w-full h-full object-cover aspect-video"
-                  onError={(e) => {
-                    e.currentTarget.onerror = null
-                    e.currentTarget.src = productImagePlaceholder
-                  }}
-                />
+                <ProductImage product={product} className="w-full h-full" />
                 {!inStock && (
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                     <Badge variant="secondary">Out of Stock</Badge>
@@ -154,17 +140,9 @@ function ProductItem({
     >
       <Link to={`/products/${product.slug}`} viewTransition>
         <figure className="aspect-square overflow-hidden rounded-md flex-1 h-[300px] w-full">
-          <img
-            src={firstImage.s3Key}
-            style={{
-              viewTransitionName: `ProductImage-${firstImage.id}`,
-            }}
-            alt={product.name}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 aspect-video"
-            onError={(e) => {
-              e.currentTarget.onerror = null
-              e.currentTarget.src = productImagePlaceholder
-            }}
+          <ProductImage
+            product={product}
+            className="h-full w-full transition-transform duration-300 group-hover:scale-105"
           />
         </figure>
       </Link>

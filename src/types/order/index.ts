@@ -11,6 +11,7 @@ export interface Order {
   discount: string
   total: string
   status: OrderStatus
+  paymentStatus: PaymentStatus
   createdAt: string
   updatedAt: string
   items: OrderItem[]
@@ -61,6 +62,13 @@ export enum OrderStatus {
   RETURNED = 'RETURNED',
 }
 
+export enum PaymentStatus {
+  PENDING = 'PENDING',
+  PAID = 'PAID',
+  REFUNDED = 'REFUNDED',
+  FAILED = 'FAILED',
+}
+
 export const OrderStatusLabels: Record<OrderStatus, string> = {
   [OrderStatus.PENDING]: 'Pendiente',
   [OrderStatus.PROCESSING]: 'Procesando',
@@ -68,6 +76,13 @@ export const OrderStatusLabels: Record<OrderStatus, string> = {
   [OrderStatus.DELIVERED]: 'Entregado',
   [OrderStatus.CANCELLED]: 'Cancelado',
   [OrderStatus.RETURNED]: 'Devuelto',
+}
+
+export const PaymentStatusLabels: Record<PaymentStatus, string> = {
+  [PaymentStatus.PENDING]: 'Pendiente',
+  [PaymentStatus.PAID]: 'Pagado',
+  [PaymentStatus.REFUNDED]: 'Devuelto',
+  [PaymentStatus.FAILED]: 'Fallido',
 }
 
 type StatusConfig = {
@@ -106,6 +121,29 @@ export const orderStatusConfig: Record<OrderStatus, StatusConfig> = {
     label: 'Devuelto',
     color: 'bg-orange-100 text-orange-800 border-orange-200',
     icon: RotateCcw,
+  },
+}
+
+export const paymentStatusConfig: Record<PaymentStatus, StatusConfig> = {
+  [PaymentStatus.PENDING]: {
+    label: 'Pendiente',
+    color: 'bg-gray-100 text-gray-800 border-gray-200',
+    icon: Clock,
+  },
+  [PaymentStatus.PAID]: {
+    label: 'Pagado',
+    color: 'bg-green-100 text-green-800 border-green-200',
+    icon: CheckCircle,
+  },
+  [PaymentStatus.REFUNDED]: {
+    label: 'Devuelto',
+    color: 'bg-orange-100 text-orange-800 border-orange-200',
+    icon: RotateCcw,
+  },
+  [PaymentStatus.FAILED]: {
+    label: 'Fallido',
+    color: 'bg-red-100 text-red-800 border-red-200',
+    icon: Package,
   },
 }
 

@@ -34,6 +34,7 @@ import useProducts from '@/hooks/products/useProducts'
 import useProduct from '@/hooks/products/useProduct'
 import { useProductActions } from '@/hooks/products/useActions'
 import ProductSkeleton from './ProductSkeleton'
+import ProductImage from '@/components/pages/products/ProductImage'
 
 const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
 
@@ -117,15 +118,7 @@ function ProductDetail() {
           <section className="p-4 rounded-xs col-span-1 sm:col-span-2 md:col-span-3">
             {!product.images?.length ? (
               <figure className="w-full h-full overflow-hidden rounded-md">
-                <img
-                  loading="lazy"
-                  src={firstImage.s3Key}
-                  style={{
-                    viewTransitionName: `ProductImage-${firstImage.id}`,
-                  }}
-                  alt="Imagen ejemplo del producto"
-                  className="w-full h-full object-cover aspect-video"
-                />
+                <ProductImage product={product} className="w-full h-full" />
               </figure>
             ) : (
               <div className="border rounded-md">

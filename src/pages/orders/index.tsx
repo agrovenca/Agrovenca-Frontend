@@ -4,34 +4,19 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/ui/loader'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { OrderItem, OrderStatus, orderStatusConfig } from '@/types/order'
+import { OrderItem, OrderStatus, orderStatusConfig, PaymentStatus } from '@/types/order'
 import { useState } from 'react'
 import { Separator } from '@/components/ui/separator'
-import { ChevronDown, ChevronUp, RotateCcw, UploadIcon } from 'lucide-react'
-import {
-  getLocalDateTime,
-  pluralize,
-  getFirstProductImage,
-  productImagePlaceholder,
-} from '@/lib/utils'
+import { ChevronDown, ChevronUp, UploadIcon } from 'lucide-react'
+import { getLocalDateTime, pluralize } from '@/lib/utils'
 import useOrders from '@/hooks/orders/useOrders'
 import { useAuthStore } from '@/store/auth/useAuthStore'
+import ProductImage from '@/components/pages/products/ProductImage'
 
 function RenderOrderItem({ item }: { item: OrderItem }) {
-  const firstImage = getFirstProductImage(item.product.images)
   return (
     <div key={item.id} className="flex items-center gap-3">
-      <img
-        src={firstImage.s3Key}
-        alt={item.product.name}
-        width={60}
-        height={60}
-        className="rounded-md object-cover"
-        onError={(e) => {
-          e.currentTarget.onerror = null
-          e.currentTarget.src = productImagePlaceholder
-        }}
-      />
+      <ProductImage product={item.product} className="w-[60px] h-[60px] rounded-md" />
       <div className="flex-1">
         <p className="font-medium">{item.product.name}</p>
         <p className="text-sm text-muted-foreground">
@@ -111,31 +96,20 @@ function OrdersPage() {
                   {/* Order Items Preview */}
                   <CardContent className="pt-0">
                     <div className="flex items-center gap-2 mb-4">
-                      {order.items.slice(0, 3).map((item, index) => {
-                        const firstImage = getFirstProductImage(item.product.images)
-                        return (
-                          <div key={item.id} className="relative">
-                            <figure className="w-[40px] h-[40px] overflow-hidden rounded-md">
-                              <img
-                                src={firstImage.s3Key}
-                                alt={item.product.name}
-                                className="h-full w-full object-cover"
-                                onError={(e) => {
-                                  e.currentTarget.onerror = null
-                                  e.currentTarget.src = productImagePlaceholder
-                                }}
-                              />
-                            </figure>
-                            {index === 2 && order.items.length > 3 && (
-                              <div className="absolute inset-0 bg-black/50 rounded-md flex items-center justify-center">
-                                <span className="text-white text-xs font-medium">
-                                  +{order.items.length - 3}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        )
-                      })}
+                      {order.items.slice(0, 3).map((item, index) => (
+                        <div key={item.id} className="relative">
+                          <figure className="w-[40px] h-[40px] overflow-hidden rounded-md">
+                            <ProductImage product={item.product} className="w-full h-full" />
+                          </figure>
+                          {index === 2 && order.items.length > 3 && (
+                            <div className="absolute inset-0 bg-black/50 rounded-md flex items-center justify-center">
+                              <span className="text-white text-xs font-medium">
+                                +{order.items.length - 3}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      ))}
                       <div className="flex-1">
                         <p className="text-sm font-medium">
                           {order.items[0].product.name}
@@ -212,16 +186,12 @@ function OrdersPage() {
 
                         {/* Order Actions */}
                         <div className="flex flex-wrap gap-2">
-                          {order.status === OrderStatus.PENDING && (
+                          {order.paymentStatus === PaymentStatus.PENDING && (
                             <Button variant="outline" size="sm">
-                              <RotateCcw className="h-4 w-4 mr-1" />
-                              Reordenar
+                              <UploadIcon className="h-4 w-4 mr-1" />
+                              Subir comprobante de pago
                             </Button>
                           )}
-                          <Button variant="outline" size="sm">
-                            <UploadIcon className="h-4 w-4 mr-1" />
-                            Subir comprobante de pago
-                          </Button>
                           {order.status === OrderStatus.DELIVERED && (
                             <Button variant="outline" size="sm">
                               Descargar factura
