@@ -9,7 +9,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { Product } from '@/types/product'
 import Pagination from '@/components/blocks/pagination'
-import { formatDecimal, getFirstProductImage, productImagePlaceholder } from '@/lib/utils'
+import { formatDecimal } from '@/lib/utils'
 import UpdateProduct from './Update'
 import { DndContext, closestCenter } from '@dnd-kit/core'
 
@@ -30,6 +30,7 @@ import { useProductFiltersStore } from '@/store/products/useProductFiltersStore'
 import UpdateProductOrder from './UpdateOrder'
 import { useReorderProducts } from '@/hooks/products/useReorderProducts'
 import { Badge } from '@/components/ui/badge'
+import ProductImage from '@/components/pages/products/ProductImage'
 
 const GetTableHeaders = () => {
   return (
@@ -56,8 +57,6 @@ const GetTableRow = ({
   totalProducts: number
   isDraggable: boolean
 }) => {
-  const firstImage = getFirstProductImage(product.images)
-
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: product.id,
   })
@@ -74,15 +73,7 @@ const GetTableRow = ({
       <TableCell>{product.displayOrder}</TableCell>
       <TableCell>
         <figure className="w-30 h-30 overflow-hidden rounded-md border relative">
-          <img
-            className="w-full h-full object-cover"
-            src={firstImage.s3Key}
-            alt={`Imagen del producto ${product.name}`}
-            onError={(e) => {
-              e.currentTarget.onerror = null
-              e.currentTarget.src = productImagePlaceholder
-            }}
-          />
+          <ProductImage product={product} className="w-full h-full" />
           <Badge className="absolute bg-primary top-0 right-0 text-primary-foreground h-5 min-w-5 rounded-full px-1 font-mono tabular-nums">
             {product.images.length}
           </Badge>

@@ -1,6 +1,6 @@
 import { createOrder } from '@/actions/orders'
 import { OrderCreateSchema } from '@/schemas/orders'
-import { Order, OrderStatus } from '@/types/order'
+import { Order, OrderStatus, PaymentStatus } from '@/types/order'
 import { ShippingAddress } from '@/types/shippingAddress'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
@@ -17,6 +17,7 @@ const getOptimisticOrder = (
     shippingId: newData.shippingAddressId,
     couponId: sharedId,
     status: OrderStatus.PENDING,
+    paymentStatus: PaymentStatus.PENDING,
     updatedAt: new Date().toISOString(),
     createdAt: new Date().toISOString(),
     items: newData.products.map((product) => ({
@@ -27,21 +28,6 @@ const getOptimisticOrder = (
       product: { name: product.name, images: [] },
     })),
     shipping: shippingAddress as ShippingAddress,
-    // shipping: {
-    //   pk: sharedId,
-    //   alias: '',
-    //   name: '',
-    //   lastName: '',
-    //   email: '',
-    //   phone: '',
-    //   address_line_1: '',
-    //   country: '',
-    //   state: '',
-    //   city: '',
-    //   isDefault: false,
-    //   createdAt: new Date().toISOString(),
-    //   userId,
-    // },
     coupon: {
       code: newData.couponId || sharedId,
       discount: newData.discount,

@@ -13,32 +13,19 @@ import { ShoppingCartIcon, TrashIcon } from 'lucide-react'
 import UpdateCartItem from '../products/UpdateCartItem'
 import { Link } from 'react-router'
 import { useAuthStore } from '@/store/auth/useAuthStore'
-import { getFirstProductImage, productImagePlaceholder } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { CartItem } from '@/types/cart'
 import { getProductPrice } from '@/lib/getProductPrice'
+import ProductImage from '@/components/pages/products/ProductImage'
 
 function RenderCartItem({ item }: { item: CartItem }) {
   const deleteItem = useCartStore((state) => state.deleteItem)
-  const firstImage = getFirstProductImage(item.product.images)
 
   return (
     <div className="flex gap-2 p-4 rounded-md bg-slate-200 dark:bg-gray-800">
       <Link to={`/products/${item.productId}`} viewTransition>
         <figure className="w-12 h-12 overflow-hidden rounded-md">
-          <img
-            style={{
-              viewTransitionName: `ProductImage-${firstImage.id}`,
-            }}
-            loading="lazy"
-            alt="Imagen del producto"
-            src={firstImage.s3Key}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              e.currentTarget.onerror = null
-              e.currentTarget.src = productImagePlaceholder
-            }}
-          />
+          <ProductImage product={item.product} className="w-full h-full" />
         </figure>
       </Link>
       <div className="flex gap-2 justify-between flex-1">
