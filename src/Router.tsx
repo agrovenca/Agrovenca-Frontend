@@ -21,6 +21,7 @@ import ProductDetail from './pages/products/Detail'
 import CheckOutPage from './pages/checkout'
 import UserOrdersPage from './pages/orders'
 import OrdersPage from './pages/dashboard/orders'
+import DahsboardIndex from './pages/dashboard'
 
 export const Router = createBrowserRouter([
   {
@@ -104,6 +105,10 @@ export const Router = createBrowserRouter([
         path: '/dashboard',
         element: <DashboardLayout />,
         children: [
+          {
+            index: true,
+            element: <DahsboardIndex />,
+          },
           {
             path: 'users',
             element: <UsersDashboardPage />,

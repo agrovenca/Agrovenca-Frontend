@@ -92,7 +92,7 @@ function CreateCoupon() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="ms-auto bg-blue-500 text-white dark:hover:bg-blue-600 cursor-pointer flex gap-2 items-center">
+        <Button className="ms-auto bg-primary cursor-pointer flex gap-2 items-center">
           <PlusIcon />
           <span>Crear cupón</span>
         </Button>
