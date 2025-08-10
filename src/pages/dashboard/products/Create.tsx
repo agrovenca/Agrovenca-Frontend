@@ -104,7 +104,7 @@ function CreateProduct() {
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button className="flex items-center gap-2 bg-yellow-400 text-black hover:text-white">
+        <Button className="flex items-center gap-2 bg-primary">
           <PlusIcon />
           <span>Crear</span>
         </Button>

@@ -94,11 +94,12 @@ function AppSidebar({ user }: Props) {
   const isActive = (currentPath: string, itemPath: string) => {
     return currentPath === itemPath
   }
-  const activeClassName = 'font-bold underline bg-primary/50'
+  const activeClassName =
+    'font-bold bg-blue-300/20 dark:bg-blue-400/30 border-r-4 border-blue-600 transition hover:bg-blue-400/20 text-blue-500 dark:text-blue-500 hover:text-blue-700'
 
   return (
     <Sidebar>
-      <SidebarContent>
+      <SidebarContent className="bg-white dark:bg-black">
         <SidebarGroup>
           <SidebarMenu>
             <SidebarMenuButton asChild className={`flex items-center gap-2`}>
@@ -113,7 +114,7 @@ function AppSidebar({ user }: Props) {
                 {item.asLink ? (
                   <SidebarMenuButton
                     asChild
-                    className={`flex items-center gap-2 hover:bg-primary/50 text-black dark:text-white ${
+                    className={`font-serif tracking-wide flex items-center gap-2 hover:bg-blue-300/20 text-black dark:text-white py-5 ${
                       isActive(location.pathname, item.path) ? activeClassName : ''
                     }`}
                   >
