@@ -19,9 +19,7 @@ import { toast } from 'sonner'
 import z from 'zod'
 import CreateShippingAddress from './Create'
 import Update from './Update'
-import DeleteDialog from '@/components/blocks/DeleteDialog'
-import { deleteAddress } from '@/actions/shippingData'
-import { TrashIcon } from 'lucide-react'
+import DeleteAddress from './Delete'
 
 function ListAddresses({ addresses }: { addresses: ShippingAddress[] }) {
   const selectedAddress = useShippingAddressStore((state) => state.selectedAddress)
@@ -125,7 +123,6 @@ function ListAddresses({ addresses }: { addresses: ShippingAddress[] }) {
 function ShippingAddress() {
   const user = useAuthStore((state) => state.user)
   const selectedAddress = useShippingAddressStore((state) => state.selectedAddress)
-  const removeAddress = useShippingAddressStore((state) => state.removeAddress)
   const [address, setAddress] = useState<ShippingAddress | null>(null)
 
   const { shippingAddressesQuery } = useShippingAddresses({ userId: user?.id ?? '' })
@@ -138,7 +135,6 @@ function ShippingAddress() {
   }, [shippingAddressesQuery, selectedAddress])
 
   if (!user) return <p>Por favor inicia sesión para ver tus direcciones de envío.</p>
-  if (!shippingAddressesQuery.data?.length) return <p>No tienes direcciones de envío guardadas.</p>
 
   return (
     <div>
@@ -151,21 +147,16 @@ function ShippingAddress() {
               {address && (
                 <>
                   <Update address={address} />
-                  <DeleteDialog
-                    description="Estás a punto de eliminar esta dirección de envío"
-                    action={() => deleteAddress({ pk: address.pk })}
-                    callback={() => removeAddress(address.pk)}
-                  >
-                    <Button variant={'destructive'} className="cursor-pointer">
-                      <TrashIcon />
-                      <span>Eliminar</span>
-                    </Button>
-                  </DeleteDialog>
+                  <DeleteAddress address={address} userId={user.id} />
                 </>
               )}
             </div>
           </section>
-          <ListAddresses addresses={shippingAddressesQuery.data} />
+          {shippingAddressesQuery.data?.length ? (
+            <ListAddresses addresses={shippingAddressesQuery.data} />
+          ) : (
+            <p>No tienes direcciones de envío guardadas.</p>
+          )}
         </>
       )}
     </div>

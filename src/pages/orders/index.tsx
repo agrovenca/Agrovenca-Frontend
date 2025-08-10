@@ -9,7 +9,7 @@ import { useState } from 'react'
 import { Separator } from '@/components/ui/separator'
 import { ChevronDown, ChevronUp, UploadIcon } from 'lucide-react'
 import { getLocalDateTime, pluralize } from '@/lib/utils'
-import useOrders from '@/hooks/orders/useOrders'
+import useUserOrders from '@/hooks/orders/useUserOrders'
 import { useAuthStore } from '@/store/auth/useAuthStore'
 import ProductImage from '@/components/pages/products/ProductImage'
 
@@ -28,9 +28,9 @@ function RenderOrderItem({ item }: { item: OrderItem }) {
   )
 }
 
-function OrdersPage() {
+function UserOrdersPage() {
   const user = useAuthStore((state) => state.user)
-  const { ordersQuery } = useOrders({ userId: user?.id || '' })
+  const { useOrdersQuery } = useUserOrders({ userId: user?.id || '' })
   const [expandedOrders, setExpandedOrders] = useState<string[]>([])
 
   const toggleOrderExpansion = (orderId: string) => {
@@ -43,15 +43,15 @@ function OrdersPage() {
     <div>
       <Navbar />
       <section className="container mx-auto py-4 px-2 min-h-screen">
-        {ordersQuery.isFetching && (
+        {useOrdersQuery.isFetching && (
           <div className="flex items-center justify-center gap-2">
             <Loader />
             <span>Cargando...</span>
           </div>
         )}
-        {ordersQuery.isSuccess && ordersQuery.data.length ? (
+        {useOrdersQuery.isSuccess && useOrdersQuery.data.length ? (
           <div className="flex flex-col gap-4">
-            {ordersQuery.data.map((order) => {
+            {useOrdersQuery.data.map((order) => {
               const isExpanded = expandedOrders.includes(order.id)
               const OrderIcon = orderStatusConfig[order.status].icon
               return (
@@ -214,4 +214,4 @@ function OrdersPage() {
   )
 }
 
-export default OrdersPage
+export default UserOrdersPage

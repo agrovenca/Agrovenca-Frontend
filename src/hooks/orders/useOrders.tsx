@@ -1,10 +1,10 @@
-import { getOrdersByUser } from '@/actions/orders'
+import { getAllOrders } from '@/actions/orders'
 import { useQuery } from '@tanstack/react-query'
 
-function useOrders({ userId }: { userId: string }) {
+function useOrders() {
   const ordersQuery = useQuery({
-    queryKey: ['orders', userId],
-    queryFn: () => getOrdersByUser({ userId }),
+    queryKey: ['orders'],
+    queryFn: () => getAllOrders(),
     staleTime: 1000 * 60 * 60,
   })
 

@@ -1,5 +1,6 @@
 import { Clock, Truck, CheckCircle, Package, RotateCcw } from 'lucide-react'
 import { ProductImage } from '../product/images'
+import { User } from '../auth/user'
 
 export interface Order {
   id: string
@@ -10,13 +11,19 @@ export interface Order {
   subtotal: string
   discount: string
   total: string
-  status: OrderStatus
-  paymentStatus: PaymentStatus
   createdAt: string
   updatedAt: string
+  user: {
+    id: User['id']
+    name: User['name']
+    lastName: User['lastName']
+    email: User['email']
+  }
+  coupon: Coupon
   items: OrderItem[]
   shipping: Shipping
-  coupon: Coupon
+  status: OrderStatus
+  paymentStatus: PaymentStatus
 }
 
 export interface OrderItem {

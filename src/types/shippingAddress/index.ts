@@ -13,3 +13,8 @@ export interface ShippingAddress {
   createdAt: string
   userId: string
 }
+
+export interface ShippingResponse {
+  address: ShippingAddress
+  message: string
+}

@@ -19,7 +19,8 @@ import ResetPasswordConfirmPage from './pages/auth/ResetPasswordConfirm'
 import ProductsPage from './pages/products'
 import ProductDetail from './pages/products/Detail'
 import CheckOutPage from './pages/checkout'
-import OrdersPage from './pages/orders'
+import UserOrdersPage from './pages/orders'
+import OrdersPage from './pages/dashboard/orders'
 
 export const Router = createBrowserRouter([
   {
@@ -57,7 +58,7 @@ export const Router = createBrowserRouter([
       },
       {
         path: '/orders',
-        element: <OrdersPage />,
+        element: <UserOrdersPage />,
       },
       {
         path: '/auth',
@@ -122,6 +123,10 @@ export const Router = createBrowserRouter([
           {
             path: 'coupons',
             element: <CouponsDashboardPage />,
+          },
+          {
+            path: 'orders',
+            element: <OrdersPage />,
           },
         ],
       },
