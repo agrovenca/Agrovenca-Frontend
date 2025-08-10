@@ -32,25 +32,24 @@ import { AddressCreateSchema, Country, CountryStates } from '@/schemas/products/
 import z from 'zod'
 
 import { useAuthStore } from '@/store/auth/useAuthStore'
-import { useShippingAddressStore } from '@/store/shippingAddresses/useAddressesStore'
-import { createAddress } from '@/actions/shippingData'
 import { Loader } from '@/components/ui/loader'
+import useCreateShippingAddress from '@/hooks/shipping/useCreateShippingAddress'
+import { toast } from 'sonner'
 
 function CreateShippingAddress() {
   const [isOpen, setIsOpen] = useState(false)
   const [charCount, setCharCount] = useState(0)
-  const [isLoading, setIsLoading] = useState(false)
 
   const user = useAuthStore((state) => state.user)
-  const addAddress = useShippingAddressStore((state) => state.addAddress)
+  const { createShippingAddressMutation } = useCreateShippingAddress({ userId: user?.id ?? '' })
 
   const form = useForm<z.infer<typeof AddressCreateSchema>>({
     resolver: zodResolver(AddressCreateSchema),
     defaultValues: {
       alias: '',
-      name: '',
-      lastName: '',
-      email: '',
+      name: user?.name,
+      lastName: user?.lastName,
+      email: user?.email,
       phone: '',
       address_line_1: '',
       country: 'Venezuela',
@@ -62,26 +61,28 @@ function CreateShippingAddress() {
   const country = form.watch('country') as Country
   const stateOptions = country ? [...CountryStates[country]] : []
 
-  const onSubmit: SubmitHandler<z.infer<typeof AddressCreateSchema>> = async (data) => {
+  const onSubmit: SubmitHandler<z.infer<typeof AddressCreateSchema>> = async (newData) => {
     if (!user) {
       return
     }
 
     // If user is logged in, submit the form data
-    setIsLoading(true)
-    try {
-      const res = await createAddress({ data })
-      if (res.status !== 201) {
-        throw new Error('Failed to create shipping address')
+    setIsOpen(false)
+    createShippingAddressMutation.mutate(
+      { newData },
+      {
+        onSuccess: ({ message }) => {
+          toast.success(message)
+          form.reset()
+        },
+        onError: (err) => {
+          setIsOpen(true)
+          const errorMsg =
+            err instanceof Error ? err.message : 'Ocurrió un error. Por favor intenta de nuevo.'
+          toast.error(errorMsg)
+        },
       }
-      addAddress(res.data.address)
-    } catch (error) {
-      console.error('Error creating shipping address:', error)
-    } finally {
-      setIsLoading(false)
-      form.reset()
-      setIsOpen(false)
-    }
+    )
   }
 
   return (
@@ -286,12 +287,16 @@ function CreateShippingAddress() {
               />
             </div>
             <Button
-              disabled={!form.formState.isValid || isLoading}
+              disabled={!form.formState.isValid || createShippingAddressMutation.isPending}
               type="submit"
               size={'lg'}
               className="w-full uppercase bg-blue-500 dark:hover:bg-blue-600 text-white font-serif ml-auto cursor-pointer"
             >
-              {isLoading ? <Loader size="sm" variant="spinner" /> : 'Guardar datos'}
+              {createShippingAddressMutation.isPending ? (
+                <Loader size="sm" variant="spinner" />
+              ) : (
+                'Guardar datos'
+              )}
             </Button>
           </form>
         </Form>

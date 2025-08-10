@@ -2,7 +2,7 @@ import axios from 'axios'
 import { apiWithCredentials } from '../api'
 import { z } from 'zod'
 import { AddressCreateSchema, AddressUpdateSchema } from '@/schemas/products/shippingAddress'
-import { ShippingAddress } from '@/types/shippingAddress'
+import { ShippingAddress, ShippingResponse } from '@/types/shippingAddress'
 
 export const getShippingAddresses = async ({
   userId,
@@ -10,54 +10,62 @@ export const getShippingAddresses = async ({
   userId: string
 }): Promise<ShippingAddress[]> => {
   try {
-    const { data } = await apiWithCredentials.get(`/shippings/${userId}`)
+    const { data } = await apiWithCredentials.get<ShippingAddress[]>(`/shippings/${userId}`)
     return data
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      return error.response?.data || { error: 'An unknown error occurred' }
+      const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }
+      throw new Error(errorData.error ?? 'Ocurrió un error desconocido')
     }
-    throw new Error('An unknown error occurred')
+    throw new Error('Ocurrió un error desconocido')
   }
 }
 
-export const createAddress = async ({ data }: { data: z.infer<typeof AddressCreateSchema> }) => {
+export const createAddress = async ({
+  newData,
+}: {
+  newData: z.infer<typeof AddressCreateSchema>
+}): Promise<ShippingResponse> => {
   try {
-    const res = await apiWithCredentials.post(`/shippings`, data)
-    return res
+    const { data } = await apiWithCredentials.post<ShippingResponse>(`/shippings`, newData)
+    return data
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      return error.response?.data || { error: 'An unknown error occurred' }
+      const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }
+      throw new Error(errorData.error ?? 'Ocurrió un error desconocido')
     }
-    return { error: 'An unknown error occurred' }
+    throw new Error('Ocurrió un error desconocido')
   }
 }
 
 export const updateAddress = async ({
   pk,
-  data,
+  newData,
 }: {
   pk: string
-  data: z.infer<typeof AddressUpdateSchema>
-}) => {
+  newData: z.infer<typeof AddressUpdateSchema>
+}): Promise<ShippingResponse> => {
   try {
-    const res = await apiWithCredentials.patch(`/shippings/${pk}`, data)
-    return res
+    const { data } = await apiWithCredentials.patch(`/shippings/${pk}`, newData)
+    return data
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      return error.response?.data || { error: 'An unknown error occurred' }
+      const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }
+      throw new Error(errorData.error ?? 'Ocurrió un error desconocido')
     }
-    return { error: 'An unknown error occurred' }
+    throw new Error('Ocurrió un error desconocido')
   }
 }
 
-export const deleteAddress = async ({ pk }: { pk: string }) => {
+export const deleteAddress = async ({ pk }: { pk: string }): Promise<ShippingResponse> => {
   try {
-    const res = await apiWithCredentials.delete(`/shippings/${pk}`)
-    return res
+    const { data } = await apiWithCredentials.delete<ShippingResponse>(`/shippings/${pk}`)
+    return data
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      return error.response?.data || { error: 'An unknown error occurred' }
+      const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }
+      throw new Error(errorData.error ?? 'Ocurrió un error desconocido')
     }
-    return { error: 'An unknown error occurred' }
+    throw new Error('Ocurrió un error desconocido')
   }
 }

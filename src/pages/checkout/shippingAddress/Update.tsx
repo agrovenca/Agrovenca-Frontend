@@ -32,15 +32,14 @@ import { toast } from 'sonner'
 import { useCallback, useEffect, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { ShippingAddress } from '@/types/shippingAddress'
 import {
   AddressUpdateSchema,
   CountryStates,
   type Country,
 } from '@/schemas/products/shippingAddress'
-import { updateAddress } from '@/actions/shippingData'
-import { useShippingAddressStore } from '@/store/shippingAddresses/useAddressesStore'
+import useUpdateShippingAddress from '@/hooks/shipping/useUpdateShippingAddress'
+import { useAuthStore } from '@/store/auth/useAuthStore'
 
 type Props = {
   address: ShippingAddress
@@ -48,12 +47,10 @@ type Props = {
 
 function Update({ address }: Props) {
   const [isOpen, setIsOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const [charCount, setCharCount] = useState(address.address_line_1?.length || 0)
 
-  const updateAddressStore = useShippingAddressStore((state) => state.updateAddress)
-  const errorStatus = useResponseStatusStore((state) => state.errorStatus)
-  const setError = useResponseStatusStore((state) => state.setError)
+  const user = useAuthStore((state) => state.user)
+  const { updateShippingAddressMutation } = useUpdateShippingAddress({ userId: user?.id ?? '' })
 
   const form = useForm<z.infer<typeof AddressUpdateSchema>>({
     resolver: zodResolver(AddressUpdateSchema),
@@ -68,29 +65,23 @@ function Update({ address }: Props) {
     setCharCount(address.address_line_1?.length || 0)
   }, [address, form])
 
-  const onSubmit: SubmitHandler<z.infer<typeof AddressUpdateSchema>> = async (data) => {
-    setIsLoading(true)
-    try {
-      const res = await updateAddress({ pk: address.pk, data })
-
-      if (res.error) {
-        setError(res.error)
+  const onSubmit: SubmitHandler<z.infer<typeof AddressUpdateSchema>> = async (newData) => {
+    setIsOpen(false)
+    updateShippingAddressMutation.mutate(
+      { pk: address.pk, newData },
+      {
+        onSuccess: ({ message }) => {
+          toast.success(message)
+          onReset()
+          setCharCount(0)
+        },
+        onError: (err) => {
+          const errorMsg =
+            err instanceof Error ? err.message : 'Ocurrió un error. Por favor intenta de nuevo.'
+          toast.error(errorMsg)
+        },
       }
-
-      if (res.status === 200) {
-        const { message, address: updatedAddress } = res.data
-        toast.success(message)
-
-        updateAddressStore(updatedAddress)
-        onReset()
-        setCharCount(0)
-        setIsOpen(false)
-      }
-    } catch (_error) {
-      toast.error('Ocurrió un error. Por favor intenta de nuevo.')
-    } finally {
-      setIsLoading(false)
-    }
+    )
   }
 
   useEffect(() => {
@@ -307,13 +298,15 @@ function Update({ address }: Props) {
               />
             </div>
 
-            {errorStatus.error && <ErrorForm message={errorStatus.message} />}
+            {updateShippingAddressMutation.isError && (
+              <ErrorForm message={updateShippingAddressMutation.error.message} />
+            )}
 
             <div className="flex items-center gap-2 justify-end">
               <Button
                 type="reset"
                 variant={'secondary'}
-                disabled={isLoading}
+                disabled={updateShippingAddressMutation.isPending}
                 className="flex-1 font-serif uppercase cursor-pointer"
                 onClick={onReset}
               >
@@ -321,14 +314,20 @@ function Update({ address }: Props) {
               </Button>
               <Button
                 type="submit"
-                disabled={isLoading || !form.formState.isValid}
+                disabled={updateShippingAddressMutation.isPending || !form.formState.isValid}
                 form={`updateForm-${address.pk}`}
                 className={
                   'flex-1 font-serif uppercase ' +
-                  (isLoading || !form.formState.isValid ? 'cursor-not-allowed' : 'cursor-pointer')
+                  (updateShippingAddressMutation.isPending || !form.formState.isValid
+                    ? 'cursor-not-allowed'
+                    : 'cursor-pointer')
                 }
               >
-                {isLoading ? <Loader size="sm" variant="spinner" /> : 'Guardar'}
+                {updateShippingAddressMutation.isPending ? (
+                  <Loader size="sm" variant="spinner" />
+                ) : (
+                  'Guardar'
+                )}
               </Button>
             </div>
           </form>

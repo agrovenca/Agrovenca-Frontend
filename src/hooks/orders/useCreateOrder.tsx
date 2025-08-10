@@ -20,6 +20,10 @@ const getOptimisticOrder = (
     paymentStatus: PaymentStatus.PENDING,
     updatedAt: new Date().toISOString(),
     createdAt: new Date().toISOString(),
+    tax: newData.tax.toString(),
+    subtotal: newData.subtotal.toString(),
+    discount: newData.discount.toString(),
+    total: newData.total.toString(),
     items: newData.products.map((product) => ({
       id: sharedId,
       productId: product.id,
@@ -32,10 +36,12 @@ const getOptimisticOrder = (
       code: newData.couponId || sharedId,
       discount: newData.discount,
     },
-    tax: newData.tax.toString(),
-    subtotal: newData.subtotal.toString(),
-    discount: newData.discount.toString(),
-    total: newData.total.toString(),
+    user: {
+      id: userId,
+      name: '',
+      lastName: '',
+      email: '',
+    },
   }
 }
 

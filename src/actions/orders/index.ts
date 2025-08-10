@@ -32,3 +32,15 @@ export const getOrdersByUser = async ({ userId }: { userId: string }): Promise<O
     throw new Error('An unknown error occurred')
   }
 }
+
+export const getAllOrders = async (): Promise<Order[]> => {
+  try {
+    const { data } = await apiWithCredentials.get<Order[]>(`/orders`)
+    return data
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      return error.response?.data || { error: 'An unknown error occurred' }
+    }
+    throw new Error('An unknown error occurred')
+  }
+}
