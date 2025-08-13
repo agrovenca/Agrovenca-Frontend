@@ -26,33 +26,30 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { UserFilterParams } from '@/types/auth/user'
+import { UserFilterParams } from '@/types/user'
+import { limitOptions } from '@/lib/productLimitOptions'
+import { useUserFiltersStore } from '@/store/users/useUserFiltersStore'
 
-interface UserFiltersProps {
-  initialSearch: string
-  initialLimit: number
-  initialIsActive: UserFilterParams['isActive']
-  handleSubmit: (params: UserFilterParams) => void
+interface Props {
+  handleFilterSubmit: (params: UserFilterParams) => void
 }
 
-export default function UserFilters({
-  initialSearch,
-  initialLimit,
-  initialIsActive,
-  handleSubmit,
-}: UserFiltersProps) {
+export default function UserFilters({ handleFilterSubmit }: Props) {
+  const limit = useUserFiltersStore((state) => state.limit)
+  const search = useUserFiltersStore((state) => state.search)
+  const isActive = useUserFiltersStore((state) => state.isActive)
   const form = useForm({
     defaultValues: {
-      search: initialSearch,
-      limit: initialLimit,
-      isActive: initialIsActive,
+      limit,
+      search,
+      isActive,
     },
   })
 
   const handleReset = () => {
     const defaultValues = { search: '', limit: 10, categoryId: '', isActive: undefined }
     form.reset(defaultValues)
-    handleSubmit(defaultValues)
+    handleFilterSubmit(defaultValues)
   }
 
   return (
@@ -71,7 +68,7 @@ export default function UserFilters({
         <Form {...form}>
           <form
             className="w-full flex flex-col justify-between gap-4 mb-4"
-            onSubmit={form.handleSubmit(handleSubmit)}
+            onSubmit={form.handleSubmit(handleFilterSubmit)}
           >
             <FormField
               control={form.control}
@@ -102,9 +99,9 @@ export default function UserFilters({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {[1, 2, 3].map((value) => (
-                        <SelectItem key={value} value={value.toString()}>
-                          {value} por página
+                      {limitOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          Mostrar {option.label}
                         </SelectItem>
                       ))}
                     </SelectContent>

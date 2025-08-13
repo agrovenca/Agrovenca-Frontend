@@ -1,6 +1,7 @@
 import { apiWithCredentials } from '@/actions/api'
 import { UserAccountSettingsSchema } from '@/schemas/user'
-import { UserFilterParams, UsersPaginatedResponse } from '@/types/auth/user'
+import { UsersPaginatedResponse } from '@/types/auth/user'
+import { UserFilterParams } from '@/types/user'
 import axios from 'axios'
 import { z } from 'zod'
 
@@ -9,7 +10,7 @@ export const getAllUsers = async (params?: UserFilterParams): Promise<UsersPagin
 
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
-      if (value) {
+      if (value !== undefined && value !== null) {
         url.searchParams.append(key, value.toString())
       }
     })

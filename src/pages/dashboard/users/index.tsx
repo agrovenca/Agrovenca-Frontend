@@ -11,44 +11,38 @@ import { Button } from '@/components/ui/button'
 import { RefreshCwIcon } from 'lucide-react'
 import { getLocalDateTime, getUserRole } from '@/lib/utils'
 import { Loader } from '@/components/ui/loader'
-import { User, UserFilterParams } from '@/types/auth/user'
+import { User } from '@/types/auth/user'
+import { UserFilterParams } from '@/types/user'
 import { Badge } from '@/components/ui/badge'
 import { useAuthStore } from '@/store/auth/useAuthStore'
 import Pagination from '@/components/blocks/pagination'
 import AccountOptions from './SettingsAccount'
 import UserFilters from './UserFilters'
 import useUsers from '@/hooks/users/useUsers'
+import { useUserFiltersStore } from '@/store/users/useUserFiltersStore'
 
 function UsersDashboardPage() {
   const [data, setData] = useState<User[]>([])
-  const [search, setSearch] = useState('')
-  const [limit, setLimit] = useState(10)
-  const [isActive, setIsActive] = useState<UserFilterParams['isActive']>()
+
+  const setLimit = useUserFiltersStore((state) => state.setLimit)
+  const setSearch = useUserFiltersStore((state) => state.setSearch)
+  const setIsActive = useUserFiltersStore((state) => state.setIsActive)
 
   const currentUser = useAuthStore((state) => state.user) as User
 
-  const { usersQuery, setNextPage, setPrevPage, setPageNumber } = useUsers({
-    search,
-    limit,
-    isActive,
-  })
+  const { usersQuery, setNextPage, setPrevPage, setPageNumber } = useUsers({})
 
   const handleFilterSubmit = (params: UserFilterParams) => {
-    setSearch(String(params.search))
-    setLimit(Number(params.limit))
     setIsActive(params.isActive)
+    setLimit(Number(params.limit))
+    setSearch(String(params.search))
   }
 
   return (
     <>
       <div className="w-full flex justify-between gap-4 mb-4">
         <div className="pt-4 flex-1">
-          <UserFilters
-            initialSearch={search}
-            initialLimit={limit}
-            initialIsActive={isActive}
-            handleSubmit={handleFilterSubmit}
-          />
+          <UserFilters handleFilterSubmit={handleFilterSubmit} />
         </div>
         <div className="flex items-center gap-2">
           <Button

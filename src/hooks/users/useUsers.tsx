@@ -1,24 +1,24 @@
 import { getAllUsers } from '@/actions/users'
 import { useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useUsersFilterSetters, useUsersQueryKey } from './useUsersQueryKey'
 
-interface Options {
-  search: string
-  limit: number
-  isActive?: 'active' | 'inactive'
+interface Props {
+  fetchAll?: boolean
 }
 
-function useUsers({ search, limit, isActive }: Options) {
-  const [page, setPage] = useState(1)
+function useUsers({ fetchAll }: Props) {
+  const filters = useUsersQueryKey()
+  const { setPage } = useUsersFilterSetters()
 
   const usersQuery = useQuery({
-    queryKey: ['users', { page, search, limit, isActive }],
-    queryFn: () => getAllUsers({ page, search, limit, isActive }),
+    queryKey: ['users', filters],
+    queryFn: () => getAllUsers(fetchAll ? { search: '', limit: 0 } : filters),
     staleTime: 1000 * 60 * 60,
   })
 
   const setPrevPage = () => {
-    if (page === 1) return
+    if (filters.page === 1) return
+
     setPage(Number(usersQuery.data?.pagination.previousPage))
   }
 
@@ -33,7 +33,7 @@ function useUsers({ search, limit, isActive }: Options) {
 
   return {
     usersQuery,
-    page,
+    page: filters.page,
     setPrevPage,
     setNextPage,
     setPageNumber,
