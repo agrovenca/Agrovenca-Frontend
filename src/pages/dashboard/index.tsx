@@ -1,3 +1,6 @@
+import ExtendedTooltip from '@/components/blocks/ExtendedTooltip'
+import ErrorForm from '@/components/pages/ErrorForm'
+import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -6,27 +9,36 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
 import useOrders from '@/hooks/orders/useOrders'
 import useProducts from '@/hooks/products/useProducts'
 import useUsers from '@/hooks/users/useUsers'
+import { useAuthStore } from '@/store/auth/useAuthStore'
 import { OrderStatus } from '@/types/order'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { PercentIcon } from 'lucide-react'
 import { ReactNode, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import z from 'zod'
 
 interface Options {
   label: string
-  onClick: () => void
-  isActive: boolean
   children: ReactNode
 }
 
-function RenderCard({ label, onClick, isActive, children }: Options) {
-  const activeClass = 'scale-95'
+function RenderCard({ label, children }: Options) {
   return (
     <Card
-      onClick={onClick}
-      className={`w-full max-w-sm cursor-pointer transition border-y-0 border-r-0 border-l-6 border-primary bg-primary/20 hover:bg-primary/40 dark:hover:bg-blue-700/30 dark:bg-blue-600/30 dark:border-blue-700 group relative overflow-hidden ${
-        isActive ? activeClass : ''
-      }`}
+      className={`w-full max-w-sm cursor-pointer transition border-y-0 border-r-0 border-l-6 border-primary bg-primary/20 hover:bg-primary/40 dark:hover:bg-blue-700/30 dark:bg-blue-600/30 dark:border-blue-700 group relative overflow-hidden`}
     >
       {/* <!-- Barra inclinada de brillo --> */}
       <span
@@ -49,54 +61,46 @@ function RenderCard({ label, onClick, isActive, children }: Options) {
   )
 }
 
-function UsersTab() {
-  return <>Users Tab</>
-}
-function ProductsTab() {
-  return <>Products Tab</>
-}
-function OrdersTab() {
-  return <>Orders Tab</>
-}
+const FormSchema = z.object({
+  percentage: z.coerce
+    .number()
+    .min(0)
+    .max(100)
+    .refine((value) => value !== 0, {
+      message: 'El porcentaje no puede ser 0',
+    }),
+})
 
 function DahsboardIndex() {
-  const [active, setActive] = useState<string | undefined>(undefined)
+  const [showForm, setShowForm] = useState(false)
 
   const { usersQuery } = useUsers({})
   const { productsQuery } = useProducts({})
   const { ordersQuery } = useOrders()
 
-  const handleActive = (label: string) => {
-    if (active == label) {
-      setActive(undefined)
-      return
-    }
+  const user = useAuthStore((state) => state.user)
 
-    setActive(label)
+  const form = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      percentage: 0,
+    },
+  })
+
+  function onSubmit(data: z.infer<typeof FormSchema>) {
+    if (data.percentage === 0) return
   }
 
   return (
-    <section>
+    <section className="space-y-6">
       <section className="flex gap-2 items-stretch">
-        <RenderCard
-          label="Total usuarios"
-          isActive={active == 'users'}
-          onClick={() => handleActive('users')}
-        >
+        <RenderCard label="Total usuarios">
           {usersQuery.data?.pagination.totalItems || 0}
         </RenderCard>
-        <RenderCard
-          label="Total productos"
-          isActive={active == 'products'}
-          onClick={() => handleActive('products')}
-        >
+        <RenderCard label="Total productos">
           {productsQuery.data?.pagination.totalItems || 0}
         </RenderCard>
-        <RenderCard
-          label="Pedidos pendientes"
-          isActive={active == 'orders'}
-          onClick={() => handleActive('orders')}
-        >
+        <RenderCard label="Pedidos pendientes">
           <div>
             <div>
               {ordersQuery.data?.filter((order) => order.status === OrderStatus.PENDING).length ||
@@ -108,21 +112,63 @@ function DahsboardIndex() {
           </div>
         </RenderCard>
 
-        <RenderCard
-          label={`Total ${20.475}`}
-          isActive={active == 'default'}
-          onClick={() => handleActive('default')}
-        >
-          20.475
-        </RenderCard>
+        <RenderCard label={`Total ${20.475}`}>20.475</RenderCard>
       </section>
-      <div className="my-8">
-        {active == 'users' && <UsersTab />}
-        {active == 'products' && <ProductsTab />}
-        {active == 'orders' && <OrdersTab />}
-        {active == 'default' && 'Default Tab'}
-        {active ?? 'Clickea en una tarjeta para ver más información'}
-      </div>
+      {user && user.isAdmin && (
+        <section className="flex flex-col gap-6">
+          <ExtendedTooltip
+            content={`${showForm ? 'Cancelar' : 'Ajustar precios de los productos'}`}
+          >
+            <Button
+              size={'lg'}
+              onClick={() => setShowForm((prev) => !prev)}
+              variant={showForm ? 'destructive' : 'default'}
+              className="uppercase font-serif font-bold w-fit cursor-pointer"
+            >
+              {showForm ? 'Cancelar' : 'Ajustar precios'}
+            </Button>
+          </ExtendedTooltip>
+          {showForm && (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="w-full max-w-xs space-y-6">
+                <FormField
+                  control={form.control}
+                  name="percentage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Porcentaje de aumento</FormLabel>
+                      <FormControl>
+                        <div className="flex items-center">
+                          <Input placeholder="0" type="number" min={0} max={100} {...field} />
+                          <span className="ml-2">
+                            <PercentIcon />
+                          </span>
+                        </div>
+                      </FormControl>
+                      <FormDescription>
+                        Porcentaje de aumento a aplicar a todos los productos.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {form.formState.errors.percentage?.message && (
+                  <ErrorForm message={form.formState.errors.percentage?.message} />
+                )}
+
+                <Button
+                  type="submit"
+                  className="uppercase font-serif"
+                  disabled={form.formState.isSubmitting || !form.formState.isValid}
+                >
+                  Ajustar precios
+                </Button>
+              </form>
+            </Form>
+          )}
+        </section>
+      )}
     </section>
   )
 }
