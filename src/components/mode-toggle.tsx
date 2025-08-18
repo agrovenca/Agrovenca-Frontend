@@ -1,4 +1,4 @@
-import { Moon, Sun } from 'lucide-react'
+import { CheckIcon, Moon, Sun } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -7,11 +7,24 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { useTheme } from '@/components/theme-provider'
+import { Theme, useTheme } from '@/components/theme-provider'
+
+const labels = {
+  light: 'Claro',
+  dark: 'Oscuro',
+  system: 'Sistema',
+}
+
+function RenderItem({ mode, label }: { mode: Theme; label: string }) {
+  const { theme, setTheme } = useTheme()
+  return (
+    <DropdownMenuItem onClick={() => setTheme(mode)} className="flex items-center justify-between">
+      <span>{label}</span> {theme === mode && <CheckIcon />}
+    </DropdownMenuItem>
+  )
+}
 
 export function ModeToggle() {
-  const { setTheme } = useTheme()
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -22,9 +35,9 @@ export function ModeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme('light')}>Claro</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('dark')}>Oscuro</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('system')}>Sistema</DropdownMenuItem>
+        {Object.entries(labels).map(([mode, label]) => (
+          <RenderItem key={mode} mode={mode as Theme} label={label} />
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   )
