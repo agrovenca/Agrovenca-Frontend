@@ -34,3 +34,16 @@ export const ProductUpdateSchema = baseProductSchema
       path: ['secondPrice'],
     }
   )
+
+export const ChangePricesSchema = z.object({
+  percentage: z.coerce
+    .number({
+      required_error: 'El porcentaje es requerido',
+      invalid_type_error: 'El porcentaje debe ser un número',
+    })
+    .gt(0, { message: 'El porcentaje debe ser mayor a 0' }),
+  increment: z.boolean({
+    required_error: 'El campo increment es requerido',
+    invalid_type_error: 'El campo increment debe ser true o false',
+  }),
+})
