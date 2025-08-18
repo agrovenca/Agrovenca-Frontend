@@ -1,5 +1,5 @@
 import { apiWithCredentials, apiWithOutCredentials } from '@/actions/api'
-import { ProductSchema, ProductUpdateSchema } from '@/schemas/products'
+import { ChangePricesSchema, ProductSchema, ProductUpdateSchema } from '@/schemas/products'
 import { CartItem } from '@/types/cart'
 import {
   ProductsPaginatedResponse,
@@ -147,6 +147,21 @@ export async function updateProductOrder({
       displayOrder,
     })
     return data
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }
+      throw new Error(errorData.error ?? 'Ocurrió un error desconocido')
+    }
+    throw new Error('Ocurrió un error desconocido')
+  }
+}
+
+export const updatePrices = async ({ data }: { data: z.infer<typeof ChangePricesSchema> }) => {
+  try {
+    return await apiWithCredentials.patch<{ message: string; count: number }>(
+      `/products/updatePrices`,
+      data
+    )
   } catch (error) {
     if (axios.isAxiosError(error)) {
       const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }
