@@ -1,3 +1,4 @@
+import WhatsAppBtn from '@/components/blocks/WhatsAppBtn'
 import AppSidebar from '@/components/pages/account/Sidebar'
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { useAutoClearResponseStatus } from '@/hooks/useAutoClearResponseStatus'
@@ -11,7 +12,7 @@ function AccountLayout() {
   useAutoClearResponseStatus()
 
   return (
-    <section className="w-full h-full">
+    <section className="w-full h-full relative">
       <section className="grid grid-cols-[auto_1fr] grid-rows-[1fr] gap-y-[10px] gap-x-[10px] min-h-screen">
         <section className="">
           <SidebarProvider>
@@ -25,6 +26,7 @@ function AccountLayout() {
           <Outlet />
         </section>
       </section>
+      <WhatsAppBtn />
     </section>
   )
 }

@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge'
 import { CartItem } from '@/types/cart'
 import { getProductPrice } from '@/lib/getProductPrice'
 import ProductImage from '@/components/pages/products/ProductImage'
+import { cn } from '@/lib/utils'
 
 function RenderCartItem({ item }: { item: CartItem }) {
   const deleteItem = useCartStore((state) => state.deleteItem)
@@ -54,23 +55,18 @@ function RenderCartItem({ item }: { item: CartItem }) {
 }
 
 function RenderContinueButton({ allowed }: { allowed: boolean }) {
-  return allowed ? (
+  return (
     <Button
-      asChild
       size={'lg'}
+      asChild={allowed}
+      disabled={!allowed}
       variant={'outline'}
-      className="button-primary w-full uppercase cursor-pointer"
+      className={cn(
+        'button-primary w-full uppercase ',
+        allowed ? 'cursor-pointer' : 'cursor-not-allowed'
+      )}
     >
-      <Link to={'/checkout'}>Continuar</Link>
-    </Button>
-  ) : (
-    <Button
-      disabled
-      size={'lg'}
-      variant={'outline'}
-      className="button-primary w-full uppercase cursor-not-allowed"
-    >
-      Continuar
+      {allowed ? <Link to={'/checkout'}>Continuar</Link> : 'No hay productos'}
     </Button>
   )
 }
@@ -113,12 +109,12 @@ function CartPage() {
         </div>
         <SheetFooter>
           {!user && <p className="text-sm text-center">Debes iniciar sesión para continuar</p>}
-          <RenderContinueButton allowed={items.length > 1 || !!user} />
+          <RenderContinueButton allowed={items.length > 0} />
           <Button
             size={'lg'}
             variant={'outline'}
             onClick={clearCart}
-            disabled={items.length < 1}
+            disabled={items.length <= 0}
             className="bg-red-500 hover:bg-red-600 text-white dark:bg-red-500 dark:hover:bg-red-600 w-full uppercase"
           >
             Vaciar carrito
