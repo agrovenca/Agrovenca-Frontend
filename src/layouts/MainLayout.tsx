@@ -5,6 +5,7 @@ import { Loader } from '@/components/ui/loader'
 import { getCurrentUser } from '@/actions/auth/getCurrentUser'
 import { useCartSyncAcrossTabs } from '@/hooks/useCartSyncAcrossTabs'
 import { UIUpdateModal } from '@/components/UIUpdateModal'
+import WhatsAppBtn from '@/components/blocks/WhatsAppBtn'
 
 export const MainLayout = () => {
   const setUser = useAuthStore((state) => state.setUser)
@@ -40,10 +41,12 @@ export const MainLayout = () => {
     )
   } else {
     return (
-      <>
+      <section className="relative">
         <UIUpdateModal />
         <Outlet />
-      </>
+
+        <WhatsAppBtn />
+      </section>
     )
   }
 }
