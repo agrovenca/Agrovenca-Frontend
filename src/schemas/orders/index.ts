@@ -1,5 +1,8 @@
 import { z } from 'zod'
 
+const MAX_FILE_SIZE = 1024 * 1024 * 5
+const ACCEPTED_IMAGE_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png']
+
 export const OrderCreateSchema = z.object({
   id: z.string().regex(/^ORD-\d{8}$/),
   couponId: z.string().optional(),
@@ -17,4 +20,15 @@ export const OrderCreateSchema = z.object({
   discount: z.number().nonnegative().default(0),
   tax: z.number().nonnegative().default(0),
   total: z.number().positive(),
+})
+
+export const OrderPaymentSchema = z.object({
+  receipt: z
+    .instanceof(File)
+    .refine((file) => file.size <= MAX_FILE_SIZE, {
+      message: 'La imagen debe ser de 5MB o menos',
+    })
+    .refine((file) => ACCEPTED_IMAGE_MIME_TYPES.includes(file.type), {
+      message: 'Solo los formatos .jpg, .jpeg y .png están permitidos.',
+    }),
 })

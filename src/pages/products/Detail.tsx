@@ -25,7 +25,12 @@ import {
   Truck,
 } from 'lucide-react'
 import { useCartStore } from '@/store/cart/useCartStore'
-import { getFirstProductImage, parseFormattedText, productImagePlaceholder } from '@/lib/utils'
+import {
+  getFirstProductImage,
+  parseFormattedText,
+  productImagePlaceholder,
+  spaceBaseUrl,
+} from '@/lib/utils'
 import LiteYouTubeEmbed from 'react-lite-youtube-embed'
 import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css'
 import Footer from '@/components/pages/Footer'
@@ -35,8 +40,6 @@ import useProduct from '@/hooks/products/useProduct'
 import { useProductActions } from '@/hooks/products/useActions'
 import ProductSkeleton from './ProductSkeleton'
 import ProductImage from '@/components/pages/products/ProductImage'
-
-const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
 
 function ProductDetail() {
   const navigate = useNavigate()

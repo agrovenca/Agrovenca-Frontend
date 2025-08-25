@@ -30,9 +30,7 @@ import useDeleteProductImage from '@/hooks/products/images/useDeleteProductImage
 import { Loader } from '@/components/ui/loader'
 import useReorderProductImages from '@/hooks/products/images/useReorderProductImages'
 import { Badge } from '@/components/ui/badge'
-import { productImagePlaceholder } from '@/lib/utils'
-
-const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
+import { productImagePlaceholder, spaceBaseUrl } from '@/lib/utils'
 
 export function ReorderLoader() {
   return (

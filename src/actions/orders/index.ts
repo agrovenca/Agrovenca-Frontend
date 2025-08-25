@@ -1,8 +1,8 @@
 import axios from 'axios'
 import { apiWithCredentials } from '../api'
-import { OrderCreateSchema } from '@/schemas/orders'
+import { OrderCreateSchema, OrderPaymentSchema } from '@/schemas/orders'
 import z from 'zod'
-import { Order, OrderResponse } from '@/types/order'
+import { Order, OrderPaymentResponse, OrderResponse } from '@/types/order'
 
 export const createOrder = async ({
   newData,
@@ -42,5 +42,34 @@ export const getAllOrders = async (): Promise<Order[]> => {
       return error.response?.data || { error: 'An unknown error occurred' }
     }
     throw new Error('An unknown error occurred')
+  }
+}
+
+export const registerPayment = async ({
+  userId,
+  orderId,
+  newData,
+}: {
+  userId: string
+  orderId: string
+  newData: z.infer<typeof OrderPaymentSchema>
+}): Promise<OrderPaymentResponse> => {
+  try {
+    const formData = new FormData()
+    formData.append('receipt', newData.receipt)
+    const { data } = await apiWithCredentials.post<OrderPaymentResponse>(
+      `/orders/${userId}/${orderId}`,
+      formData,
+      {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }
+    )
+    return data
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const errorData = error.response?.data || { error: 'Ocurrió un error desconocido' }
+      throw new Error(errorData.error ?? 'Ocurrió un error desconocido')
+    }
+    throw new Error('Ocurrió un error desconocido')
   }
 }

@@ -4,7 +4,7 @@ import { twMerge } from 'tailwind-merge'
 import ProductImagePlaceholder from '@/assets/images/productImagePlaceholder.png'
 import { ProductImage } from '@/types/product/images'
 
-const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
+export const spaceBaseUrl = import.meta.env.VITE_AWS_SPACE_BASE_URL + '/'
 export const productImagePlaceholder = ProductImagePlaceholder
 
 export function cn(...inputs: ClassValue[]) {
