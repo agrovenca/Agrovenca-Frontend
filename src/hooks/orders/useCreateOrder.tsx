@@ -1,6 +1,6 @@
 import { createOrder } from '@/actions/orders'
 import { OrderCreateSchema } from '@/schemas/orders'
-import { Order, OrderStatus, PaymentStatus } from '@/types/order'
+import { Order, OrderStatus } from '@/types/order'
 import { ShippingAddress } from '@/types/shippingAddress'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
@@ -17,7 +17,6 @@ const getOptimisticOrder = (
     shippingId: newData.shippingAddressId,
     couponId: sharedId,
     status: OrderStatus.PENDING,
-    paymentStatus: PaymentStatus.PENDING,
     updatedAt: new Date().toISOString(),
     createdAt: new Date().toISOString(),
     tax: newData.tax.toString(),

@@ -7,6 +7,7 @@ export interface Order {
   userId: string
   shippingId: string
   couponId: string
+  orderPaymentId?: string
   tax: string
   subtotal: string
   discount: string
@@ -23,7 +24,7 @@ export interface Order {
   items: OrderItem[]
   shipping: Shipping
   status: OrderStatus
-  paymentStatus: PaymentStatus
+  payment?: OrderPayment
 }
 
 export interface OrderItem {
@@ -32,6 +33,15 @@ export interface OrderItem {
   quantity: number
   price: string
   product: Product
+}
+
+export interface OrderPayment {
+  id: string
+  orderId: string
+  status: PaymentStatus
+  receipt: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface Product {
@@ -156,5 +166,10 @@ export const paymentStatusConfig: Record<PaymentStatus, StatusConfig> = {
 
 export interface OrderResponse {
   order: Order
+  message: string
+}
+
+export interface OrderPaymentResponse {
+  payment: OrderPayment
   message: string
 }
