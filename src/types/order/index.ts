@@ -1,4 +1,4 @@
-import { Clock, Truck, CheckCircle, Package, RotateCcw } from 'lucide-react'
+import { Package, CreditCardIcon } from 'lucide-react'
 import { ProductImage } from '../product/images'
 import { User } from '../auth/user'
 
@@ -112,22 +112,22 @@ export const orderStatusConfig: Record<OrderStatus, StatusConfig> = {
   [OrderStatus.PENDING]: {
     label: 'Pendiente',
     color: 'bg-gray-100 text-gray-800 border-gray-200',
-    icon: Clock,
+    icon: Package,
   },
   [OrderStatus.PROCESSING]: {
     label: 'Procesando',
     color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    icon: Clock,
+    icon: Package,
   },
   [OrderStatus.SHIPPED]: {
     label: 'Enviado',
     color: 'bg-blue-100 text-blue-800 border-blue-200',
-    icon: Truck,
+    icon: Package,
   },
   [OrderStatus.DELIVERED]: {
     label: 'Entregado',
     color: 'bg-green-100 text-green-800 border-green-200',
-    icon: CheckCircle,
+    icon: Package,
   },
   [OrderStatus.CANCELLED]: {
     label: 'Cancelado',
@@ -137,7 +137,7 @@ export const orderStatusConfig: Record<OrderStatus, StatusConfig> = {
   [OrderStatus.RETURNED]: {
     label: 'Devuelto',
     color: 'bg-orange-100 text-orange-800 border-orange-200',
-    icon: RotateCcw,
+    icon: Package,
   },
 }
 
@@ -145,22 +145,22 @@ export const paymentStatusConfig: Record<PaymentStatus, StatusConfig> = {
   [PaymentStatus.PENDING]: {
     label: 'Pendiente',
     color: 'bg-gray-100 text-gray-800 border-gray-200',
-    icon: Clock,
+    icon: CreditCardIcon,
   },
   [PaymentStatus.PAID]: {
     label: 'Pagado',
     color: 'bg-green-100 text-green-800 border-green-200',
-    icon: CheckCircle,
+    icon: CreditCardIcon,
   },
   [PaymentStatus.REFUNDED]: {
     label: 'Devuelto',
     color: 'bg-orange-100 text-orange-800 border-orange-200',
-    icon: RotateCcw,
+    icon: CreditCardIcon,
   },
   [PaymentStatus.FAILED]: {
     label: 'Fallido',
     color: 'bg-red-100 text-red-800 border-red-200',
-    icon: Package,
+    icon: CreditCardIcon,
   },
 }
 

@@ -19,6 +19,7 @@ import useUserOrders from '@/hooks/orders/useUserOrders'
 import { useAuthStore } from '@/store/auth/useAuthStore'
 import ProductImage from '@/components/pages/products/ProductImage'
 import UploadReceipt from './UploadReceipt'
+import { GetPaymentStatus } from '../dashboard/orders'
 
 function RenderOrderItem({ item }: { item: OrderItem }) {
   return (
@@ -59,14 +60,28 @@ function UserOrdersPage() {
         {useOrdersQuery.isSuccess && useOrdersQuery.data.length ? (
           <section>
             <div className="flex gap-4 items-center justify-center my-8">
+              {Object.entries(OrderStatus).map((statusElement) => {
+                const StatusIcon = orderStatusConfig[statusElement[1]].icon
+                return (
+                  <Badge
+                    key={statusElement[0]}
+                    className={`${orderStatusConfig[statusElement[1]].color} border`}
+                  >
+                    <StatusIcon className="h-6 w-6 mr-1" />
+                    {orderStatusConfig[statusElement[1]].label}
+                  </Badge>
+                )
+              })}
+            </div>
+            <div className="flex gap-4 items-center justify-center my-8">
               {Object.entries(PaymentStatus).map((statusElement) => {
-                const StatusIcon = paymentStatusConfig[statusElement[1]].icon
+                const PaymentStatusIcon = paymentStatusConfig[statusElement[1]].icon
                 return (
                   <Badge
                     key={statusElement[0]}
                     className={`${paymentStatusConfig[statusElement[1]].color} border`}
                   >
-                    <StatusIcon className="h-4 w-4 mr-1" />
+                    <PaymentStatusIcon className="h-6 w-6 mr-1" />
                     {paymentStatusConfig[statusElement[1]].label}
                   </Badge>
                 )
@@ -91,6 +106,11 @@ function UserOrdersPage() {
                             <OrderIcon className="h-4 w-4 mr-1" />
                             {orderStatusConfig[order.status].label}
                           </Badge>
+                          {order.payment ? (
+                            <GetPaymentStatus payment={order.payment} />
+                          ) : (
+                            'Cargar comprobante'
+                          )}
                         </div>
 
                         <div className="flex items-center gap-2">
