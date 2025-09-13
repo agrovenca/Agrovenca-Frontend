@@ -8,8 +8,9 @@
   ],
   "redirects": [
     {
-      "source": "https://www.agrovenca.com",
-      "destination": "https://agrovenca.com",
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "www.agrovenca.com" }],
+      "destination": "https://agrovenca.com/:1",
       "permanent": true
     }
   ]
