@@ -8,50 +8,50 @@ Agrovenca Frontend is a React-based e-commerce platform designed for agricultura
 
 ### Core Stack
 
-- React 19 (Latest React version with React Compiler)
-- Vite (Blazing-fast build tool)
-- TypeScript (Static typing)
-- Tailwind CSS (Utility-first styling + tailwind-merge, tw-animate-css)
-- Zustand (State management)
-- TanStack Query (@tanstack/react-query) (Data fetching/caching)
-- React Router v7 (Client-side navigation)
-- Axios (API requests)
+- **React 19** (Latest React version with React Compiler)
+- **Vite** (Blazing-fast build tool)
+- **TypeScript** (Static typing)
+- **Tailwind CSS** (Utility-first styling + tailwind-merge, tw-animate-css)
+- **Zustand** (State management)
+- **TanStack Query** (@tanstack/react-query) (Data fetching/caching)
+- **React Router v7** (Client-side navigation)
+- **Axios** (API requests)
 
 ### UI & Interaction
 
-- Radix UI (Accessible headless components: Dialogs, Dropdowns, Tooltips, etc.)
-- Lucide React (Icons)
-- Dnd Kit (@dnd-kit) (Drag-and-drop for sortable interfaces)
-- Embla Carousel (Touch-enabled sliders + autoplay)
-- Sonner (Toasts/notifications)
+- **Radix UI** (Accessible headless components: Dialogs, Dropdowns, Tooltips, etc.)
+- **Lucide React** (Icons)
+- **Dnd Kit** (@dnd-kit) (Drag-and-drop for sortable interfaces)
+- **Embla Carousel** (Touch-enabled sliders + autoplay)
+- **Sonner** (Toasts/notifications)
 
 ### Forms & Validation
 
-- React Hook Form (Form management)
-- Zod (Schema validation) + @hookform/resolvers (Integration with forms)
-- Input OTP (OTP/pin input fields)
+- **React Hook Form** (Form management)
+- **Zod** (Schema validation) + @hookform/resolvers (Integration with forms)
+- **Input OTP** (OTP/pin input fields)
 
 ### Utilities
 
-- date-fns (Date formatting)
-- use-debounce (Debounce hooks)
-- clsx + class-variance-authority (Dynamic class names)
-- Next Themes (Dark/light mode support)
+- **date-fns** (Date formatting)
+- **use-debounce** (Debounce hooks)
+- **clsx** + class-variance-authority (Dynamic class names)
+- **Next Themes** (Dark/light mode support)
 
 ### Dev Tools
 
-- ESLint (Code linting)
-- React Query Devtools (Debugging API states)
+- **ESLint** (Code linting)
+- **React Query Devtools** (Debugging API states)
 
 ## Key Features
 
-- User Authentication – Register, login, and account management
-- Product Catalog – Browse and search for agricultural products
-- Shopping Cart – Add/remove items, adjust quantities, and checkout
-- Favorites/Wishlist – Save products for later purchase
-- User Dashboard – Order history, profile settings, and preferences
-- Admin Dashboard – Manage products, orders, and users (if applicable)
-- Responsive Design – Works on desktop, tablet, and mobile
+- **User Authentication** – Register, login, and account management
+- **Product Catalog** – Browse and search for agricultural products
+- **Shopping Cart** – Add/remove items, adjust quantities, and checkout
+- **Favorites/Wishlist** – Save products for later purchase
+- **User Dashboard** – Order history, profile settings, and preferences
+- **Admin Dashboard** – Manage products, orders, and users (if applicable)
+- **Responsive Design** – Works on desktop, tablet, and mobile
 
 ## Project Structure
 
@@ -73,7 +73,7 @@ The main components are organized into:
 1. Clone the repository
 
    ```bash
-   git clone https://github.com/junior-r/Agrovenca-Frontend.git
+   git clone https://github.com/agrovenca/Agrovenca-Frontend.git
    ```
 
 2. Install dependencies:
@@ -90,11 +90,11 @@ The main components are organized into:
 
 The application requires the following environment variables:
 
-- VITE_API_URL - Base URL for the backend API
-- AWS_STORAGE_BUCKET_NAME=BUCKET_NAME
-- AWS_S3_REGION_NAME=REGION_NAME
-- AWS_S3_ENDPOINT_URL=ENDPOINT_URL
-- VITE_AWS_SPACE_BASE_URL=https://BUCKET_NAME.REGION_NAME.ENDPOINT_URL
+- **VITE_API_UR**L - Base URL for the backend API
+- **AWS_STORAGE_BUCKET_NAME**=BUCKET_NAME
+- **AWS_S3_REGION_NAME**=REGION_NAME
+- **AWS_S3_ENDPOINT_URL**=ENDPOINT_URL
+- **VITE_AWS_SPACE_BASE_URL**=https://BUCKET_NAME.REGION_NAME.ENDPOINT_URL
 
 ## Available Scripts
 
