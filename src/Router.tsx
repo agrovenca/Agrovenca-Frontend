@@ -33,12 +33,13 @@ import UnitiesDashboardPage from './pages/dashboard/unities'
 import ProductsDashboardPage from './pages/dashboard/products'
 import CouponsDashboardPage from './pages/dashboard/coupons'
 import OrdersPage from './pages/dashboard/orders'
+import NotFound from './components/pages/NotFound'
 
 export const Router = createBrowserRouter([
   {
     path: '/',
     element: <MainLayout />, // Main envuelve todo
-    errorElement: <div>404</div>,
+    errorElement: <NotFound />,
     children: [
       // 🌐 Rutas públicas (home)
       {
