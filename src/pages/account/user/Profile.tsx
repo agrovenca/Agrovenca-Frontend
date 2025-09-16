@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
+import { useMetaTags } from '@/hooks/useSEO'
 import { ProfileSchema } from '@/schemas/user'
 import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { useAuthStore } from '@/store/auth/useAuthStore'
@@ -49,6 +50,11 @@ function Profile() {
       return
     }
   }
+
+  useMetaTags({
+    title: `Cuenta | Agrovenca`,
+    description: 'Maneja tu cuenta de Agrovenca',
+  })
 
   return (
     <section className="w-full h-full py-6">

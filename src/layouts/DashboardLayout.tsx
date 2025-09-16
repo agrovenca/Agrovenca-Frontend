@@ -3,6 +3,7 @@ import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { useAutoClearResponseStatus } from '@/hooks/useAutoClearResponseStatus'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { useRequireRole } from '@/hooks/useRequireRole'
+import { useMetaTags } from '@/hooks/useSEO'
 import { useAuthStore } from '@/store/auth/useAuthStore'
 import { Outlet } from 'react-router-dom'
 
@@ -12,6 +13,11 @@ function DashboardLayout() {
   useRequireAuth()
   useRequireRole()
   useAutoClearResponseStatus()
+
+  useMetaTags({
+    title: `Dashboard | Agrovenca`,
+    description: 'Panel de control de Agrovenca',
+  })
 
   return (
     <section className="w-full h-full">

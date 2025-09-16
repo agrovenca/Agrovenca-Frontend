@@ -20,6 +20,7 @@ import { useAuthStore } from '@/store/auth/useAuthStore'
 import ProductImage from '@/components/pages/products/ProductImage'
 import UploadReceipt from './UploadReceipt'
 import { GetPaymentStatus } from '../dashboard/orders'
+import { useMetaTags } from '@/hooks/useSEO'
 
 function RenderOrderItem({ item }: { item: OrderItem }) {
   return (
@@ -46,6 +47,11 @@ function UserOrdersPage() {
       prev.includes(orderId) ? prev.filter((id) => id !== orderId) : [...prev, orderId]
     )
   }
+
+  useMetaTags({
+    title: `Órdenes | Agrovenca`,
+    description: 'Maneja tus órdenes de Agrovenca',
+  })
 
   return (
     <div>

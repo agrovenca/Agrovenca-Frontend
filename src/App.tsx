@@ -1,5 +1,6 @@
 import Footer from './components/pages/Footer'
 import Navbar from './components/pages/HomeNavbar'
+import { useMetaTags } from './hooks/useSEO'
 import Benefits from './pages/home/Benefits'
 import CategoryCarrousel from './pages/home/CategoryCarrousel'
 import FeaturedProducts from './pages/home/FeaturedProducts'
@@ -8,6 +9,11 @@ import ActiveBannerDesktop from '@/assets/images/banners/Desktop.webp'
 import ActiveBannerMobile from '@/assets/images/banners/Mobile.webp'
 
 function App() {
+  useMetaTags({
+    title: `Inicio | Agrovenca`,
+    description: 'Descubre nuestra amplia gama de productos agrícolas frescos',
+  })
+
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />

@@ -150,7 +150,7 @@ export const getFirstProductImage = (images: ProductImage[]) => {
     return { ...image, s3Key: spaceBaseUrl + image.s3Key }
   }
 
-  return { id: 0, s3Key: ProductImagePlaceholder }
+  return { id: 0, s3Key: import.meta.env.VITE_SITE_URL + ProductImagePlaceholder }
 }
 
 export const sleep = (ms: number) => {

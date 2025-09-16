@@ -12,6 +12,7 @@ import ProductSkeleton from './ProductSkeleton'
 import ExtendedTooltip from '@/components/blocks/ExtendedTooltip'
 import Filters from '@/components/pages/products/Filters'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { useMetaTags } from '@/hooks/useSEO'
 
 function ProductsPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
@@ -24,6 +25,11 @@ function ProductsPage() {
       setViewMode('grid')
     }
   }, [isMobile])
+
+  useMetaTags({
+    title: `Productos | Agrovenca`,
+    description: 'Descubre nuestra amplia gama de productos agrícolas frescos',
+  })
 
   return (
     <div>

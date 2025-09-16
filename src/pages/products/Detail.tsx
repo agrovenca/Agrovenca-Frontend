@@ -40,6 +40,7 @@ import useProduct from '@/hooks/products/useProduct'
 import { useProductActions } from '@/hooks/products/useActions'
 import ProductSkeleton from './ProductSkeleton'
 import ProductImage from '@/components/pages/products/ProductImage'
+import { useMetaTags } from '@/hooks/useSEO'
 
 function ProductDetail() {
   const navigate = useNavigate()
@@ -103,6 +104,21 @@ function ProductDetail() {
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [])
+
+  useMetaTags({
+    title: `${product?.name} | Agrovenca`,
+    description: product?.description?.slice(0, 150) || '',
+    metaTags: [
+      { property: 'og:title', content: `${product?.name} | Agrovenca` },
+      { property: 'og:description', content: product?.description?.slice(0, 150) || '' },
+      { property: 'og:type', content: 'product' },
+      { property: 'og:url', content: `https://agrovenca.com/products/${product?.slug}` },
+      { property: 'og:image', content: firstImage?.s3Key || '' },
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'twitter:title', content: `${product?.name} | Agrovenca` },
+      { name: 'twitter:description', content: product?.description?.slice(0, 150) || '' },
+    ],
+  })
 
   if (productQuery.isFetching || !product) {
     return (
