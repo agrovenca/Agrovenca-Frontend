@@ -34,6 +34,7 @@ import ProductsDashboardPage from './pages/dashboard/products'
 import CouponsDashboardPage from './pages/dashboard/coupons'
 import OrdersPage from './pages/dashboard/orders'
 import NotFound from './components/pages/NotFound'
+import ContactPage from './pages/contacts'
 
 export const Router = createBrowserRouter([
   {
@@ -50,7 +51,7 @@ export const Router = createBrowserRouter([
           { path: 'products/:slug', element: <ProductDetail /> },
           { path: 'checkout', element: <CheckOutPage /> },
           { path: 'orders', element: <UserOrdersPage /> },
-          { path: 'contacts', element: <div>Contacts</div> },
+          { path: 'contact', element: <ContactPage /> },
           { path: 'privacy-policy', element: <div>Privacy Policy</div> },
           { path: 'terms-and-conditions', element: <div>Terms and Conditions</div> },
         ],

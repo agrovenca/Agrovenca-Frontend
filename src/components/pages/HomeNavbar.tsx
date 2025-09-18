@@ -29,10 +29,6 @@ function Navbar() {
       link: '/products',
     },
     {
-      name: 'Categorías',
-      link: '/categories',
-    },
-    {
       name: 'Contacto',
       link: '/contact',
     },

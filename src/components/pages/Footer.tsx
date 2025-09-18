@@ -1,9 +1,7 @@
 import { Leaf } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import FacebookIcon from '../icons/Facebook'
-import InstagramIcon from '../icons/Instagram'
-import WhatsAppIcon from '../icons/WhatsApp'
 import { ModeToggle } from '../mode-toggle'
+import ContactSocials from '@/pages/contacts/Socials'
 
 function Footer() {
   return (
@@ -84,16 +82,8 @@ function Footer() {
               </a>
             </span>
           </p>
-          <div className="flex gap-2 justify-center mt-4">
-            <Link to={'https://www.facebook.com/agroaliven/'} target="_blank">
-              <FacebookIcon className="w-6 h-6" fill="#1877F2" />
-            </Link>
-            <Link to={'https://www.instagram.com/carnetoday/'} target="_blank">
-              <InstagramIcon className="w-6 h-6" fill="#E4405F" />
-            </Link>
-            <Link to={'https://wa.me/584122647923/'} target="_blank">
-              <WhatsAppIcon className="w-6 h-6" fill="#25D366" />
-            </Link>
+          <div className="flex justify-center mt-4">
+            <ContactSocials size={6} />
           </div>
         </div>
       </footer>
