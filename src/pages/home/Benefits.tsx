@@ -29,27 +29,27 @@ function Benefits() {
         <div className="container space-y-12 mx-auto">
           <div className="flex flex-col items-center gap-4 text-center">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-              Why Choose Us
+              ¿Por qué elegirnos?
             </h2>
             <p className="max-w-[700px] text-muted-foreground md:text-xl">
-              We're committed to providing the best agricultural products with exceptional service
+              Estamos comprometidos en ofrecer los mejores productos con un servicio excepcional
             </p>
           </div>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mx-4 md:mx-0">
             <BenefitCard
               icon={<Truck className="h-10 w-10 text-primary" />}
-              title="Fast Delivery"
-              description="We deliver your products within 24-48 hours of ordering"
+              title="Entrega rápida"
+              description="Recibe tus productos en un plazo de 24 a 48 horas después de tu pedido"
             />
             <BenefitCard
               icon={<ShieldCheck className="h-10 w-10 text-primary" />}
-              title="Quality Guarantee"
-              description="All our products are quality checked and certified"
+              title="Garantía de calidad"
+              description="Todos nuestros productos son verificados y cuentan con certificación de calidad"
             />
             <BenefitCard
               icon={<Users className="h-10 w-10 text-primary" />}
-              title="Direct from Farmers"
-              description="We source directly from local farmers, ensuring fair prices"
+              title="Directo del productor"
+              description="Trabajamos directamente con productores locales para garantizar precios justos"
             />
           </div>
         </div>

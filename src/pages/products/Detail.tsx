@@ -18,7 +18,6 @@ import {
   HeartOffIcon,
   Minus,
   Plus,
-  RotateCcw,
   Share2,
   Shield,
   ShoppingCart,
@@ -296,22 +295,15 @@ function ProductDetail() {
                 <div className="flex items-center gap-2">
                   <Truck className="h-5 w-5 text-green-600" />
                   <div>
-                    <p className="text-sm font-medium">Free Delivery</p>
-                    <p className="text-xs text-muted-foreground">Orders over $25</p>
+                    <p className="text-sm font-medium">Envío gratis</p>
+                    <p className="text-xs text-muted-foreground">A todo el país</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Shield className="h-5 w-5 text-green-600" />
                   <div>
-                    <p className="text-sm font-medium">Quality Guarantee</p>
-                    <p className="text-xs text-muted-foreground">100% organic</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <RotateCcw className="h-5 w-5 text-green-600" />
-                  <div>
-                    <p className="text-sm font-medium">Easy Returns</p>
-                    <p className="text-xs text-muted-foreground">7-day policy</p>
+                    <p className="text-sm font-medium">Garantía de calidad</p>
+                    <p className="text-xs text-muted-foreground">Lo mejor para ti</p>
                   </div>
                 </div>
               </div>

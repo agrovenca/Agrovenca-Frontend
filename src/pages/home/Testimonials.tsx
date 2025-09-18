@@ -22,27 +22,27 @@ function Testimonials() {
         <div className="container space-y-12 mx-auto">
           <div className="flex flex-col items-center gap-4 text-center">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-              What Our Customers Say
+              Lo que opinan nuestros clientes
             </h2>
             <p className="max-w-[700px] text-muted-foreground md:text-xl">
-              Hear from our satisfied customers about their experience
+              Conoce cómo nuestros insumos y equipos ayudan a mejorar el trabajo en el campo
             </p>
           </div>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 mx-4 md:mx-0">
             <TestimonialCard
-              quote="The quality of produce I receive is consistently excellent. It's like having a farmers market delivered to my doorstep!"
-              author="Sarah Johnson"
-              role="Home Gardener"
+              quote="Los productos veterinarios que compré aquí han sido efectivos y seguros. Mis animales están mejor cuidados y con insumos confiables."
+              author="María González"
+              role="Ganadera"
             />
             <TestimonialCard
-              quote="As a restaurant owner, I rely on fresh ingredients. AgriMarket has never disappointed me with their quality and timely delivery."
-              author="Michael Chen"
-              role="Restaurant Owner"
+              quote="Las etiquetas y envases que adquirí son de excelente calidad. Me han facilitado mucho la organización y presentación de mis productos."
+              author="Carlos Pérez"
+              role="Productor agrícola"
             />
             <TestimonialCard
-              quote="Their farming tools are top-notch and reasonably priced. I've seen a significant improvement in my crop yield since using their products."
-              author="Robert Miller"
-              role="Farmer"
+              quote="Las herramientas y equipos que conseguí en la tienda son resistentes y a buen precio. He notado un gran ahorro de tiempo en mis labores."
+              author="Juan Ramírez"
+              role="Agricultor"
             />
           </div>
         </div>
