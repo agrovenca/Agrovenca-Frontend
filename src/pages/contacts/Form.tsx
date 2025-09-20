@@ -17,11 +17,15 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ContactSchema } from '@/schemas/contact'
 import z from 'zod'
+import Turnstile from 'react-turnstile'
+import { toast } from 'sonner'
+import { contactSendMessage } from '@/actions/home/contact'
 
 function ContactForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [charCount, setCharCount] = useState(0)
   const [description, setDescription] = useState('')
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
 
   const form = useForm<z.infer<typeof ContactSchema>>({
     resolver: zodResolver(ContactSchema),
@@ -33,8 +37,35 @@ function ContactForm() {
     },
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof ContactSchema>> = async (_data) => {
+  const onSubmit: SubmitHandler<z.infer<typeof ContactSchema>> = async (data) => {
     setIsLoading(true)
+    if (!captchaToken) {
+      toast.error('Por favor valida el captcha antes de enviar')
+      setIsLoading(false)
+      return
+    }
+
+    try {
+      const response = await contactSendMessage({ contactData: data, captchaToken })
+
+      if (!response.success) {
+        toast.error(response.error)
+        return
+      }
+
+      toast.success(response.message || 'Mensaje enviado con éxito')
+      form.reset()
+      setCharCount(0)
+      setDescription('')
+      setCaptchaToken(null)
+      return
+    } catch (error) {
+      const errorMsg =
+        error instanceof Error ? error.message : 'Ocurrió un error. Por favor intenta de nuevo.'
+      toast.error(errorMsg)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -133,6 +164,12 @@ function ContactForm() {
                 </FormItem>
               )}
             />
+            <Turnstile
+              sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY!}
+              onSuccess={(token: string | null) => setCaptchaToken(token)}
+              onExpire={() => setCaptchaToken(null)}
+            />
+
             <Button
               type="submit"
               disabled={!form.formState.isValid || isLoading}
