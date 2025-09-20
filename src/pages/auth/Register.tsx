@@ -1,5 +1,6 @@
 import { signUp } from '@/actions/auth/signUp'
 import ErrorForm from '@/components/pages/ErrorForm'
+import { useTheme } from '@/components/theme-provider'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -17,12 +18,16 @@ import { RegisterSchema } from '@/schemas/auth'
 import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeft } from 'lucide-react'
+import { useState } from 'react'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router'
+import Turnstile from 'react-turnstile'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
 function Register() {
+  const { theme } = useTheme()
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const errorStatus = useResponseStatusStore((state) => state.errorStatus)
   const setError = useResponseStatusStore((state) => state.setError)
   const navigate = useNavigate()
@@ -30,7 +35,7 @@ function Register() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isLoading },
+    formState: { errors, isLoading, isValid },
   } = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
@@ -43,7 +48,12 @@ function Register() {
   })
 
   const onSubmit: SubmitHandler<z.infer<typeof RegisterSchema>> = async (data) => {
-    const res = await signUp(data)
+    if (!captchaToken) {
+      toast.error('Por favor valida el captcha antes de enviar')
+      return
+    }
+
+    const res = await signUp({ data, captchaToken })
 
     if (res.error) {
       setError(res.error)
@@ -53,6 +63,7 @@ function Register() {
     if (res.status === 201) {
       const { message } = res.data
       toast.success(message)
+      setCaptchaToken(null)
       navigate('/auth/login')
     }
   }
@@ -117,6 +128,16 @@ function Register() {
                 <ErrorForm message={errors.passwordConfirm.message || ''} />
               )}
             </div>
+
+            <div className="flex justify-center">
+              <Turnstile
+                sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY!}
+                onSuccess={(token: string | null) => setCaptchaToken(token)}
+                onExpire={() => setCaptchaToken(null)}
+                theme={theme === 'dark' ? 'dark' : 'light'}
+              />
+            </div>
+
             <div className="items-top flex space-x-2">
               <Checkbox
                 id="showPassword"
@@ -138,7 +159,11 @@ function Register() {
         <CardFooter className="flex flex-col space-y-4">
           {errorStatus.error && <ErrorForm message={errorStatus.message} />}
 
-          <Button className="w-full" type="submit" disabled={isLoading}>
+          <Button
+            className="w-full"
+            type="submit"
+            disabled={!isValid || isLoading || !captchaToken}
+          >
             {isLoading ? 'Loading...' : 'Registrarme'}
           </Button>
           <div className="text-center text-sm">
