@@ -20,8 +20,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import Turnstile from 'react-turnstile'
+import { useTheme } from '@/components/theme-provider'
 
 function ForgotPasswordPage() {
+  const { theme } = useTheme()
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const errorStatus = useResponseStatusStore((state) => state.errorStatus)
   const setError = useResponseStatusStore((state) => state.setError)
@@ -36,8 +40,14 @@ function ForgotPasswordPage() {
 
   const onSubmit: SubmitHandler<z.infer<typeof ForgotPasswordSchema>> = async (data) => {
     setIsLoading(true)
+
+    if (!captchaToken) {
+      toast.error('Por favor valida el captcha antes de enviar')
+      return
+    }
+
     try {
-      const res = await resetPasswordEmail(data)
+      const res = await resetPasswordEmail({ data, captchaToken })
       if (res.error) {
         setError(res.error)
       }
@@ -52,6 +62,7 @@ function ForgotPasswordPage() {
       toast.error('Un error inesperado ocurrió')
     } finally {
       setIsLoading(false)
+      setCaptchaToken(null)
     }
   }
   return (
@@ -79,11 +90,22 @@ function ForgotPasswordPage() {
               )}
             ></FormField>
 
+            <div className="flex justify-center">
+              <Turnstile
+                sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY!}
+                onSuccess={(token: string | null) => setCaptchaToken(token)}
+                onExpire={() => setCaptchaToken(null)}
+                theme={theme === 'dark' ? 'dark' : 'light'}
+              />
+            </div>
+
             <Button
               type="submit"
-              disabled={isLoading || !form.formState.isValid}
+              disabled={isLoading || !form.formState.isValid || !captchaToken}
               className={`${
-                isLoading || !form.formState.isValid ? 'cursor-not-allowed' : 'cursor-pointer'
+                isLoading || !form.formState.isValid || !captchaToken
+                  ? 'cursor-not-allowed'
+                  : 'cursor-pointer'
               } w-full`}
             >
               {isLoading ? <Loader size="sm" variant="spinner" /> : 'Enviar'}

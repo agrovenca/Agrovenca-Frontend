@@ -7,9 +7,17 @@ import {
 } from '@/schemas/auth'
 import axios from 'axios'
 
-export const resetPasswordEmail = async (data: z.infer<typeof ForgotPasswordSchema>) => {
+interface ResetPasswordEmailProps {
+  data: z.infer<typeof ForgotPasswordSchema>
+  captchaToken: string | null
+}
+
+export const resetPasswordEmail = async ({ data, captchaToken }: ResetPasswordEmailProps) => {
   try {
-    const res = await apiWithOutCredentials.post('/auth/reset-password-send', data, {})
+    const res = await apiWithOutCredentials.post('/auth/reset-password-send', {
+      ...data,
+      captchaToken,
+    })
     return res
   } catch (error) {
     if (axios.isAxiosError(error)) {
