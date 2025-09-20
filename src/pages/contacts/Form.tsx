@@ -20,8 +20,10 @@ import z from 'zod'
 import Turnstile from 'react-turnstile'
 import { toast } from 'sonner'
 import { contactSendMessage } from '@/actions/home/contact'
+import { useTheme } from '@/components/theme-provider'
 
 function ContactForm() {
+  const { theme } = useTheme()
   const [isLoading, setIsLoading] = useState(false)
   const [charCount, setCharCount] = useState(0)
   const [description, setDescription] = useState('')
@@ -164,17 +166,23 @@ function ContactForm() {
                 </FormItem>
               )}
             />
-            <Turnstile
-              sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY!}
-              onSuccess={(token: string | null) => setCaptchaToken(token)}
-              onExpire={() => setCaptchaToken(null)}
-            />
+
+            <div className="flex justify-center">
+              <Turnstile
+                sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY!}
+                onSuccess={(token: string | null) => setCaptchaToken(token)}
+                onExpire={() => setCaptchaToken(null)}
+                theme={theme === 'dark' ? 'dark' : 'light'}
+              />
+            </div>
 
             <Button
               type="submit"
-              disabled={!form.formState.isValid || isLoading}
+              disabled={!form.formState.isValid || isLoading || !captchaToken}
               className={`${
-                !form.formState.isValid || isLoading ? 'cursor-not-allowed' : 'cursor-pointer'
+                !form.formState.isValid || isLoading || !captchaToken
+                  ? 'cursor-not-allowed'
+                  : 'cursor-pointer'
               } w-full font-serif`}
             >
               {isLoading ? (

@@ -22,8 +22,13 @@ import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { toast } from 'sonner'
 import { Checkbox } from '@/components/ui/checkbox'
 import { togglePasswordVisibility } from '@/lib/utils'
+import { useState } from 'react'
+import { useTheme } from '@/components/theme-provider'
+import Turnstile from 'react-turnstile'
 
 export default function LoginPage() {
+  const { theme } = useTheme()
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const setUser = useAuthStore((state) => state.setUser)
   const errorStatus = useResponseStatusStore((state) => state.errorStatus)
   const setError = useResponseStatusStore((state) => state.setError)
@@ -42,7 +47,12 @@ export default function LoginPage() {
   })
 
   const onSubmit: SubmitHandler<z.infer<typeof LoginSchema>> = async (data) => {
-    const res = await login(data)
+    if (!captchaToken) {
+      toast.error('Por favor valida el captcha antes de enviar')
+      return
+    }
+
+    const res = await login({ data, captchaToken })
 
     if (res.error) {
       setError(res.error)
@@ -52,7 +62,7 @@ export default function LoginPage() {
     if (res.status === 200) {
       const { user, message } = res.data
       toast.success(message)
-      // Redirect to home page or dashboard
+      setCaptchaToken(null)
       setUser(user)
       navigate('/')
     }
@@ -105,6 +115,15 @@ export default function LoginPage() {
                 defaultValue={''}
               />
               {errors.password && <ErrorForm message={errors.password.message || ''} />}
+            </div>
+
+            <div className="flex justify-center">
+              <Turnstile
+                sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY!}
+                onSuccess={(token: string | null) => setCaptchaToken(token)}
+                onExpire={() => setCaptchaToken(null)}
+                theme={theme === 'dark' ? 'dark' : 'light'}
+              />
             </div>
 
             <div className="items-top flex space-x-2">

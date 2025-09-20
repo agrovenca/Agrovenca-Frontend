@@ -3,9 +3,17 @@ import { z } from 'zod'
 import axios from 'axios'
 import { apiWithCredentials } from '../api'
 
-export const login = async (data: z.infer<typeof LoginSchema>) => {
+interface Props {
+  data: z.infer<typeof LoginSchema>
+  captchaToken: string | null
+}
+
+export const login = async ({ data, captchaToken }: Props) => {
   try {
-    const res = await apiWithCredentials.post(`/auth/login`, data, {})
+    const res = await apiWithCredentials.post(`/auth/login`, {
+      ...data,
+      captchaToken,
+    })
     return res
   } catch (error) {
     if (axios.isAxiosError(error)) {
