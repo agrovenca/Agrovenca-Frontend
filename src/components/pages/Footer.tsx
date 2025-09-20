@@ -1,4 +1,3 @@
-import { Leaf } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { ModeToggle } from '../mode-toggle'
 import ContactSocials from '@/pages/contacts/Socials'
@@ -10,10 +9,11 @@ function Footer() {
       <footer className="w-full border-t py-6 md:py-12">
         <div className="container flex flex-col gap-8 px-8 md:flex-row md:gap-12 md:mx-auto">
           <div className="flex flex-col gap-2 md:w-1/4">
-            <div className="flex items-center gap-2">
-              <Leaf className="h-6 w-6 text-green-600" />
-              <span className="text-xl font-bold font-sans">Agrovenca</span>
-            </div>
+            <figure className="w-32 overflow-hidden">
+              <Link to={'/'} className="flex items-center gap-2">
+                <img src="/logo.webp" alt="Agrovenca Logo" className="w-full h-full" />
+              </Link>
+            </figure>
             <p className="text-sm text-muted-foreground">
               La mejor tienda de productos agrícolas y ganaderos de Venezuela.
             </p>
