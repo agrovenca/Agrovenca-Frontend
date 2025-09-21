@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Ana García Rodríguez",
+    "position": "CEO & Fundadora",
+    "image": "/professional-woman-ceo-in-business-attire.jpg",
+    "quote": "Liderando con visión y pasión por la innovación"
+  },
+  {
+    "name": "Carlos Mendoza Silva",
+    "position": "Director de Tecnología",
+    "image": "/professional-man-cto-with-tech-background.jpg",
+    "quote": "Construyendo el futuro con código y creatividad"
+  },
+  {
+    "name": "María Elena Vásquez",
+    "position": "Directora de Marketing",
+    "image": "/professional-woman-marketing-director.jpg",
+    "quote": "Conectando marcas con historias que importan"
+  },
+  {
+    "name": "Roberto Jiménez Torres",
+    "position": "Director de Operaciones",
+    "image": "/professional-man-operations-director.jpg",
+    "quote": "Optimizando procesos para resultados excepcionales"
+  },
+  {
+    "name": "Laura Fernández Castro",
+    "position": "Diseñadora Principal",
+    "image": "/professional-woman-designer-creative.jpg",
+    "quote": "Creando experiencias visuales memorables"
+  },
+  {
+    "name": "Diego Morales Ruiz",
+    "position": "Desarrollador Senior",
+    "image": "/professional-man-senior-developer-programmer.jpg",
+    "quote": "Transformando ideas en soluciones digitales"
+  }
+]

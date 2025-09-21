@@ -1,0 +1,47 @@
+[
+  {
+    "id": "1a2b3c4d-0001-4e5f-8a9b-abcdef123456",
+    "question": "¿Dónde están ubicados?",
+    "answer": "Estamos en Quíbor, Estado Lara, Venezuela, en la Av. 5 entre calle 12 y 13. Detrás de la parada de buses que van a Barquisimeto."
+  },
+  {
+    "id": "1a2b3c4d-0002-4e5f-8a9b-abcdef123457",
+    "question": "¿Qué productos venden?",
+    "answer": "Ofrecemos insumos y productos agropecuarios, incluyendo identificación y control ganadero, jeringas y material médico, sistemas de cerco eléctrico y más."
+  },
+  {
+    "id": "1a2b3c4d-0003-4e5f-8a9b-abcdef123458",
+    "question": "¿Hacen envíos a todo el país?",
+    "answer": "Sí, realizamos envíos a todas las regiones de Venezuela. Los tiempos de entrega dependen de la ubicación y disponibilidad del servicio de transporte."
+  },
+  {
+    "id": "1a2b3c4d-0004-4e5f-8a9b-abcdef123459",
+    "question": "¿Puedo devolver un producto?",
+    "answer": "Actualmente no aceptamos devoluciones ni reembolsos, salvo que el producto llegue defectuoso comprobable."
+  },
+  {
+    "id": "1a2b3c4d-0005-4e5f-8a9b-abcdef123460",
+    "question": "¿Qué métodos de pago aceptan?",
+    "answer": "En la tienda online solo aceptamos transferencias bancarias. En la tienda física puedes pagar con efectivo o tarjetas."
+  },
+  {
+    "id": "1a2b3c4d-0006-4e5f-8a9b-abcdef123461",
+    "question": "¿Necesito tener cuenta para comprar?",
+    "answer": "Puedes guardar productos en favoritos y agregarlos al carrito sin registrarte. Sin embargo, para finalizar la compra sí necesitas crear una cuenta."
+  },
+  {
+    "id": "1a2b3c4d-0007-4e5f-8a9b-abcdef123462",
+    "question": "¿Cómo puedo hacer seguimiento a mi pedido?",
+    "answer": "Una vez confirmado tu pago, te enviaremos un correo electrónico con la información de tu pedido y seguimiento del envío."
+  },
+  {
+    "id": "1a2b3c4d-0008-4e5f-8a9b-abcdef123463",
+    "question": "¿Protegen mis datos personales?",
+    "answer": "Sí, tus datos están protegidos según nuestra Política de Privacidad. No los vendemos ni compartimos con terceros."
+  },
+  {
+    "id": "1a2b3c4d-0009-4e5f-8a9b-abcdef123464",
+    "question": "¿Cómo puedo contactarlos?",
+    "answer": "Puedes contactarnos por WhatsApp, correo electrónico o visitarnos en nuestra tienda física para cualquier consulta o asistencia."
+  }
+]

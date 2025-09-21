@@ -47,19 +47,16 @@ function Footer() {
             <div className="flex flex-col gap-2">
               <h3 className="font-medium font-sans">Soporte</h3>
               <nav className="flex flex-col gap-2">
-                <Link to="/faqs" className="text-sm text-muted-foreground hover:text-primary">
-                  Preguntas frecuentes
-                </Link>
                 <Link
-                  to="/shippingPolicy"
+                  to="/terms-and-conditions"
                   className="text-sm text-muted-foreground hover:text-primary"
                 >
-                  Política de envíos
-                </Link>
-                <Link to="/terms" className="text-sm text-muted-foreground hover:text-primary">
                   Términos y condiciones
                 </Link>
-                <Link to="/privacy" className="text-sm text-muted-foreground hover:text-primary">
+                <Link
+                  to="/privacy-policy"
+                  className="text-sm text-muted-foreground hover:text-primary"
+                >
                   Política de privacidad
                 </Link>
               </nav>

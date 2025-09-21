@@ -3,6 +3,7 @@ import Navbar from './components/pages/HomeNavbar'
 import { useMetaTags } from './hooks/useSEO'
 import Benefits from './pages/home/Benefits'
 import CategoryCarrousel from './pages/home/CategoryCarrousel'
+import FaqPage from './pages/home/Faq'
 import FeaturedProducts from './pages/home/FeaturedProducts'
 import Testimonials from './pages/home/Testimonials'
 import ActiveBannerDesktop from '@/assets/images/banners/Desktop.webp'
@@ -40,6 +41,10 @@ function App() {
 
       {/* Testimonials Section */}
       <Testimonials />
+
+      {/* FAQ Section */}
+      <FaqPage />
+
       <Footer />
     </div>
   )

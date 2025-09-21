@@ -35,6 +35,10 @@ import CouponsDashboardPage from './pages/dashboard/coupons'
 import OrdersPage from './pages/dashboard/orders'
 import NotFound from './components/pages/NotFound'
 import ContactPage from './pages/contacts'
+import AboutPage from './pages/about'
+import PolicyPage from './pages/home/Policy'
+import TermsPage from './pages/home/Terms'
+import { TeamPage } from './pages/team'
 
 export const Router = createBrowserRouter([
   {
@@ -51,9 +55,11 @@ export const Router = createBrowserRouter([
           { path: 'products/:slug', element: <ProductDetail /> },
           { path: 'checkout', element: <CheckOutPage /> },
           { path: 'orders', element: <UserOrdersPage /> },
+          { path: 'about', element: <AboutPage /> },
           { path: 'contact', element: <ContactPage /> },
-          { path: 'privacy-policy', element: <div>Privacy Policy</div> },
-          { path: 'terms-and-conditions', element: <div>Terms and Conditions</div> },
+          { path: 'team', element: <TeamPage /> },
+          { path: 'privacy-policy', element: <PolicyPage /> },
+          { path: 'terms-and-conditions', element: <TermsPage /> },
         ],
       },
 
