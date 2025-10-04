@@ -12,15 +12,25 @@ import {
 
 import useOrders from '@/hooks/orders/useOrders'
 import { getLocalDateTime } from '@/lib/utils'
-import { OrderPayment, orderStatusConfig, paymentStatusConfig } from '@/types/order'
+import { OrderPayment, orderStatusConfig, PaymentStatus, paymentStatusConfig } from '@/types/order'
 import { EditIcon } from 'lucide-react'
 
-export const GetPaymentStatus = ({ payment }: { payment: OrderPayment }) => {
-  const PaymentOrderIcon = paymentStatusConfig[payment.status].icon
+export const GetPaymentStatus = ({ payment }: { payment?: OrderPayment }) => {
+  const paymentStatus = payment ? payment.status : PaymentStatus.UNPAID
+  const PaymentOrderIcon = paymentStatusConfig[paymentStatus].icon
+
+  if (!payment) {
+    return (
+      <Badge className={`${paymentStatusConfig[paymentStatus].color} border`}>
+        <PaymentOrderIcon className="h-4 w-4 mr-1" />
+        {paymentStatusConfig[paymentStatus].label}
+      </Badge>
+    )
+  }
   return (
-    <Badge className={`${paymentStatusConfig[payment.status].color} border`}>
+    <Badge className={`${paymentStatusConfig[paymentStatus].color} border`}>
       <PaymentOrderIcon className="h-4 w-4 mr-1" />
-      {paymentStatusConfig[payment.status].label}
+      {paymentStatusConfig[paymentStatus].label}
     </Badge>
   )
 }

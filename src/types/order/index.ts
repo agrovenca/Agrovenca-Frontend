@@ -80,10 +80,10 @@ export enum OrderStatus {
 }
 
 export enum PaymentStatus {
-  PENDING = 'PENDING',
+  UNPAID = 'UNPAID',
+  PROCESSING = 'PROCESSING',
   PAID = 'PAID',
   REFUNDED = 'REFUNDED',
-  FAILED = 'FAILED',
 }
 
 export const OrderStatusLabels: Record<OrderStatus, string> = {
@@ -96,10 +96,10 @@ export const OrderStatusLabels: Record<OrderStatus, string> = {
 }
 
 export const PaymentStatusLabels: Record<PaymentStatus, string> = {
-  [PaymentStatus.PENDING]: 'Pendiente',
+  [PaymentStatus.UNPAID]: 'No pagado',
+  [PaymentStatus.PROCESSING]: 'Procesando',
   [PaymentStatus.PAID]: 'Pagado',
-  [PaymentStatus.REFUNDED]: 'Devuelto',
-  [PaymentStatus.FAILED]: 'Fallido',
+  [PaymentStatus.REFUNDED]: 'Rembolsado',
 }
 
 type StatusConfig = {
@@ -142,9 +142,14 @@ export const orderStatusConfig: Record<OrderStatus, StatusConfig> = {
 }
 
 export const paymentStatusConfig: Record<PaymentStatus, StatusConfig> = {
-  [PaymentStatus.PENDING]: {
-    label: 'Pendiente',
-    color: 'bg-gray-100 text-gray-800 border-gray-200',
+  [PaymentStatus.UNPAID]: {
+    label: 'No pagado',
+    color: 'bg-red-100 text-red-800 border-red-200',
+    icon: CreditCardIcon,
+  },
+  [PaymentStatus.PROCESSING]: {
+    label: 'Procesando',
+    color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
     icon: CreditCardIcon,
   },
   [PaymentStatus.PAID]: {
@@ -153,13 +158,8 @@ export const paymentStatusConfig: Record<PaymentStatus, StatusConfig> = {
     icon: CreditCardIcon,
   },
   [PaymentStatus.REFUNDED]: {
-    label: 'Devuelto',
+    label: 'Rembolsado',
     color: 'bg-orange-100 text-orange-800 border-orange-200',
-    icon: CreditCardIcon,
-  },
-  [PaymentStatus.FAILED]: {
-    label: 'Fallido',
-    color: 'bg-red-100 text-red-800 border-red-200',
     icon: CreditCardIcon,
   },
 }

@@ -17,7 +17,7 @@ function useCreatePayment({ order, userId }: Props) {
       const optimisticPayment: OrderPayment = {
         id: `temp-${crypto.randomUUID()}`,
         orderId: order.id,
-        status: PaymentStatus.PENDING,
+        status: PaymentStatus.UNPAID,
         receipt: URL.createObjectURL(newData.receipt),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
