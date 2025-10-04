@@ -139,8 +139,6 @@ function DahsboardIndex() {
             </div>
           </div>
         </RenderCard>
-
-        <RenderCard label={`Total ${20.475}`}>20.475</RenderCard>
       </section>
       {user && user.isAdmin && (
         <section className="flex flex-col gap-6">
