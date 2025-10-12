@@ -131,11 +131,11 @@ function DahsboardIndex() {
         <RenderCard label="Pedidos pendientes">
           <div>
             <div>
-              {ordersQuery.data?.filter((order) => order.status === OrderStatus.PENDING).length ||
-                0}
+              {ordersQuery.data?.objects.filter((order) => order.status === OrderStatus.PENDING)
+                .length || 0}
             </div>
             <div className="absolute bottom-4 right-4 text-2xl">
-              <span>Total: {ordersQuery.data?.length || 0}</span>
+              <span>Total: {ordersQuery.data?.objects.length || 0}</span>
             </div>
           </div>
         </RenderCard>
