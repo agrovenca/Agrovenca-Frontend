@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { pluralize } from '@/lib/utils'
 import { BasePaginatedResponse } from '@/types/shared'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
@@ -65,7 +66,7 @@ function Pagination({
         <Badge className="mx-1" variant={'outline'}>
           {paginationData.totalItems}
         </Badge>
-        <span>resultados en total</span>
+        <span>{pluralize('resultado', paginationData.totalItems, 's')} en total</span>
       </div>
       <div className="flex flex-wrap gap-4 items-center justify-center mt-4 p-4">
         <Button
