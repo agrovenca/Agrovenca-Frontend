@@ -10,10 +10,9 @@ const OrderFlow = [
 
 export function OrderProgress({ status }: { status: OrderStatus }) {
   const currentIndex = OrderFlow.indexOf(status)
-  const className = `relative grid grid-cols-[repeat(${OrderFlow.length},minmax(0,1fr))] items-center justify-evenly w-full py-6`
 
   return (
-    <div className={className}>
+    <div className={`relative grid grid-cols-4 items-center justify-evenly w-full py-6`}>
       {/* Línea base (fondo) */}
       <div className="absolute left-0 right-0 top-1/2 h-[2px] bg-gray-200 -translate-y-1/2 z-0" />
 

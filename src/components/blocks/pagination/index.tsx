@@ -1,6 +1,5 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { useProductFiltersStore } from '@/store/products/useProductFiltersStore'
 import { BasePaginatedResponse } from '@/types/shared'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
@@ -10,6 +9,7 @@ type Props = {
   setPrevPage: () => void
   setNextPage: () => void
   setPageNumber: (page: number) => void
+  limit: number
 }
 
 const handleClick = (callback: (page?: number) => void) => {
@@ -45,8 +45,8 @@ function Pagination({
   setPrevPage,
   setNextPage,
   setPageNumber,
+  limit,
 }: Props) {
-  const { limit } = useProductFiltersStore()
   const { hasNextPage, hasPreviousPage, page: currentPage, totalPages } = paginationData
   const visiblePages = getVisiblePages(currentPage, totalPages)
 

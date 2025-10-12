@@ -1,3 +1,4 @@
+import { OrderStatus, PaymentStatus } from '@/types/order'
 import { z } from 'zod'
 
 const MAX_FILE_SIZE = 1024 * 1024 * 5
@@ -31,4 +32,9 @@ export const OrderPaymentSchema = z.object({
     .refine((file) => ACCEPTED_IMAGE_MIME_TYPES.includes(file.type), {
       message: 'Solo los formatos .jpg, .jpeg y .png están permitidos.',
     }),
+})
+
+export const OrderAdminUpdateSchema = z.object({
+  orderStatus: z.nativeEnum(OrderStatus).optional(),
+  paymentStatus: z.nativeEnum(PaymentStatus).optional(),
 })

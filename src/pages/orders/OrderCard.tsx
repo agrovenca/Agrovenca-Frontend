@@ -4,7 +4,7 @@ import { GetPaymentStatus } from '../dashboard/orders'
 import { Order, OrderItem, OrderStatus, orderStatusConfig } from '@/types/order'
 import { getLocalDateTime, pluralize, spaceBaseUrl } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { ChevronDown, ChevronUp, ExternalLinkIcon, Undo2, XCircle } from 'lucide-react'
+import { ChevronDown, ChevronUp, Undo2, XCircle } from 'lucide-react'
 import ProductImage from '@/components/pages/products/ProductImage'
 import { Separator } from '@/components/ui/separator'
 import UploadReceipt from './UploadReceipt'
@@ -184,17 +184,19 @@ function OrderCard({ order, expandedOrderId, onToggle }: Props) {
                   key={'upload' + order.id}
                 />
               ) : (
-                <p className="flex items-center gap-1">
-                  <span>Pago cargado </span>
+                <Badge
+                  variant={'outline'}
+                  asChild
+                  className="py-2 px-4 flex items-center justify-center transition hover:bg-slate-100 dark:hover:bg-slate-900"
+                >
                   <a
                     href={spaceBaseUrl + order.payment.receipt}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-500"
                   >
-                    <ExternalLinkIcon />
+                    Ver comprobante de pago
                   </a>
-                </p>
+                </Badge>
               )}
               {order.status === OrderStatus.DELIVERED && (
                 <Button variant="outline" size="sm">

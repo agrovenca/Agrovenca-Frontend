@@ -1,6 +1,7 @@
 import { Package, CreditCardIcon } from 'lucide-react'
 import { ProductImage } from '../product/images'
 import { User } from '../auth/user'
+import { BasePaginatedResponse } from '../shared'
 
 export interface Order {
   id: string
@@ -172,4 +173,9 @@ export interface OrderResponse {
 export interface OrderPaymentResponse {
   payment: OrderPayment
   message: string
+}
+
+export interface OrdersPaginatedResponse {
+  objects: Order[]
+  pagination: BasePaginatedResponse
 }

@@ -230,6 +230,7 @@ function ProductsTable({ isDraggable, setIsDraggable }: Props) {
           setNextPage={setNextPage}
           setPrevPage={setPrevPage}
           setPageNumber={setPageNumber}
+          limit={limit}
         />
       )}
     </div>

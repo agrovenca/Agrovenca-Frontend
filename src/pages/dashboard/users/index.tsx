@@ -24,6 +24,7 @@ import { useUserFiltersStore } from '@/store/users/useUserFiltersStore'
 function UsersDashboardPage() {
   const [data, setData] = useState<User[]>([])
 
+  const limit = useUserFiltersStore((state) => state.limit)
   const setLimit = useUserFiltersStore((state) => state.setLimit)
   const setSearch = useUserFiltersStore((state) => state.setSearch)
   const setIsActive = useUserFiltersStore((state) => state.setIsActive)
@@ -125,6 +126,7 @@ function UsersDashboardPage() {
           setNextPage={setNextPage}
           setPrevPage={setPrevPage}
           setPageNumber={setPageNumber}
+          limit={limit}
         />
       )}
     </>

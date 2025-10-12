@@ -1,5 +1,4 @@
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/ui/loader'
 import {
   Table,
@@ -13,7 +12,10 @@ import {
 import useOrders from '@/hooks/orders/useOrders'
 import { getLocalDateTime } from '@/lib/utils'
 import { OrderPayment, orderStatusConfig, PaymentStatus, paymentStatusConfig } from '@/types/order'
-import { EditIcon } from 'lucide-react'
+import OrderUpdateStatusPage from './UpdateStatus'
+import OrdersFilters from './Filters'
+import Pagination from '@/components/blocks/pagination'
+import { useOrderFiltersStore } from '@/store/orders/useOrderFiltersStore'
 
 export const GetPaymentStatus = ({ payment }: { payment?: OrderPayment }) => {
   const paymentStatus = payment ? payment.status : PaymentStatus.UNPAID
@@ -36,9 +38,12 @@ export const GetPaymentStatus = ({ payment }: { payment?: OrderPayment }) => {
 }
 
 function OrdersPage() {
-  const { ordersQuery } = useOrders()
+  const { limit } = useOrderFiltersStore()
+  const { ordersQuery, setNextPage, setPrevPage, setPageNumber } = useOrders()
+
   return (
     <div>
+      <OrdersFilters />
       <Table className="my-4">
         <TableHeader>
           <TableRow>
@@ -62,8 +67,8 @@ function OrdersPage() {
                 </div>
               </TableCell>
             </TableRow>
-          ) : ordersQuery.data && ordersQuery.data.length > 0 ? (
-            ordersQuery.data.map((order) => {
+          ) : ordersQuery.isSuccess && ordersQuery.data.objects.length > 0 ? (
+            ordersQuery.data.objects.map((order) => {
               const OrderIcon = orderStatusConfig[order.status].icon
               return (
                 <TableRow key={order.id} className="font-serif">
@@ -81,7 +86,7 @@ function OrdersPage() {
                     {getLocalDateTime(order.createdAt, ['es-ve'])}
                   </TableCell>
                   <TableCell>
-                    {order.payment && <GetPaymentStatus payment={order.payment} />}
+                    <GetPaymentStatus payment={order.payment} />
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2 items-center">
@@ -93,22 +98,30 @@ function OrdersPage() {
                   </TableCell>
                   <TableCell>${order.total}</TableCell>
                   <TableCell>
-                    <Button size={'icon'} className="cursor-pointer">
-                      <EditIcon />
-                    </Button>
+                    <OrderUpdateStatusPage order={order} />
                   </TableCell>
                 </TableRow>
               )
             })
           ) : (
             <TableRow>
-              <TableCell colSpan={7} className="text-center">
+              <TableCell colSpan={8} className="text-center">
                 No existen ordenes
               </TableCell>
             </TableRow>
           )}
         </TableBody>
       </Table>
+      {ordersQuery.data && (
+        <Pagination
+          paginationData={ordersQuery.data.pagination}
+          currentItems={ordersQuery.data.objects.length}
+          setNextPage={setNextPage}
+          setPrevPage={setPrevPage}
+          setPageNumber={setPageNumber}
+          limit={limit}
+        />
+      )}
     </div>
   )
 }
