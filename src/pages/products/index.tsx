@@ -13,8 +13,10 @@ import ExtendedTooltip from '@/components/blocks/ExtendedTooltip'
 import Filters from '@/components/pages/products/Filters'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useMetaTags } from '@/hooks/useSEO'
+import { useProductFiltersStore } from '@/store/products/useProductFiltersStore'
 
 function ProductsPage() {
+  const { limit } = useProductFiltersStore()
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
   const isMobile = useIsMobile()
@@ -110,6 +112,7 @@ function ProductsPage() {
                 setNextPage={setNextPage}
                 setPrevPage={setPrevPage}
                 setPageNumber={setPageNumber}
+                limit={limit}
               />
             )}
           </main>
