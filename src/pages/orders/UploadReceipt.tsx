@@ -61,6 +61,10 @@ function UploadReceipt({ order, userId }: Props) {
           }
           toast.error(errorMsg())
         },
+        onSettled: () => {
+          form.reset({ receipt: undefined })
+          setSelectedFile(undefined)
+        },
       }
     )
   }
