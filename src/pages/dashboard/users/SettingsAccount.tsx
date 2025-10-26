@@ -18,11 +18,11 @@ import { useResponseStatusStore } from '@/store/api/useResponseStatus'
 import { Loader } from '@/components/ui/loader'
 import { User } from '@/types/auth/user'
 import { Dispatch, SetStateAction, useState } from 'react'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
 import { UserAccountSettingsSchema } from '@/schemas/user'
 import { updateAccountOptions } from '@/actions/users'
 import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
 
 type Props = {
   user: User
@@ -108,22 +108,20 @@ function AccountOptions({ user, users, setUsers }: Props) {
           <Controller
             name="isActive"
             control={control}
+            defaultValue={user.isActive}
             render={({ field }) => (
-              <div className="items-top flex space-x-2">
-                <Checkbox id="isActive" checked={field.value} onCheckedChange={field.onChange} />
-                <div className="grid gap-1.5 leading-none">
-                  <label
-                    htmlFor="isActive"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    {user.isActive ? 'Desactivar cuenta' : 'Activar cuenta'}
-                  </label>
+              <div className="flex items-start justify-between space-x-4 rounded-lg border p-4">
+                <div className="space-y-1">
+                  <Label htmlFor="isActive" className="text-sm font-medium">
+                    {field.value ? 'Cuenta activa' : 'Cuenta inactiva'}
+                  </Label>
                   <p className="text-sm text-muted-foreground">
                     {user.isActive
-                      ? 'Desactivar la cuenta del usuario. No podrá iniciar sesión'
-                      : 'Activar la cuenta del usuario. Podrá iniciar sesión'}
+                      ? 'Desactiva la cuenta para impedir el acceso del usuario.'
+                      : 'Activa la cuenta para permitir el acceso del usuario.'}
                   </p>
                 </div>
+                <Switch id="isActive" checked={field.value} onCheckedChange={field.onChange} />
               </div>
             )}
           />

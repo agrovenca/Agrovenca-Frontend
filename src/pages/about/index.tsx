@@ -36,25 +36,27 @@ function AboutPage() {
                   entiende y responde a las necesidades del productor en cada etapa de su labor.
                 </p>
               </div>
-              <div className="relative h-80 rounded-lg overflow-hidden">
+              <figure className="relative h-92 rounded-lg overflow-hidden">
                 <img
-                  src="/familia-de-agricultores-trabajando-en-el-campo-con.jpg"
+                  src="/aboutUs/about-us1.webp"
                   alt="Familia de agricultores trabajando en el campo"
+                  loading="lazy"
                   className="object-cover"
                 />
-              </div>
+              </figure>
             </div>
 
             {/* Second Section */}
             <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div className="relative h-80 rounded-lg overflow-hidden md:order-1">
+              <figure className="relative h-92 rounded-lg overflow-hidden order-2 md:order-1">
                 <img
-                  src="/almac-n-moderno-con-productos-agr-colas-organizado.jpg"
+                  src="/aboutUs/about-us2.webp"
                   alt="Almacén con productos agrícolas frescos"
+                  loading="lazy"
                   className="object-cover"
                 />
-              </div>
-              <div className="space-y-6 md:order-2">
+              </figure>
+              <div className="space-y-6 order-1 md:order-2">
                 <h2 className="text-2xl font-semibold text-foreground">Nuestro Compromiso</h2>
                 <p className="font-serif text-muted-foreground leading-relaxed">
                   En AGROVENCA, creemos firmemente que el éxito del campo es también el éxito de
@@ -95,13 +97,14 @@ function AboutPage() {
                   para el futuro del agro en Venezuela.
                 </p>
               </div>
-              <div className="relative h-80 rounded-lg overflow-hidden">
+              <figure className="relative h-92 rounded-lg overflow-hidden">
                 <img
-                  src="/tecnolog-a-agr-cola-moderna--drones-sobre-cultivos.jpg"
+                  src="/aboutUs/about-us3.webp"
                   alt="Tecnología agrícola moderna"
+                  loading="lazy"
                   className="object-cover"
                 />
-              </div>
+              </figure>
             </div>
           </div>
         </div>

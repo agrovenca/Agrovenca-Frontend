@@ -36,9 +36,9 @@ function Footer() {
                 <Link to="/about" className="text-sm text-muted-foreground hover:text-primary">
                   Acerca de nosotros
                 </Link>
-                <Link to="/team" className="text-sm text-muted-foreground hover:text-primary">
+                {/* <Link to="/team" className="text-sm text-muted-foreground hover:text-primary">
                   Nuestro equipo
-                </Link>
+                </Link> */}
                 <Link to="/contact" className="text-sm text-muted-foreground hover:text-primary">
                   Contacto
                 </Link>
