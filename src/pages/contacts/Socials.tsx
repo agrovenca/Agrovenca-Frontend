@@ -7,7 +7,7 @@ function ContactSocials({ size = 4 }: { size?: number }) {
   return (
     <div className="flex gap-3">
       <a
-        href="https://wa.me/584122647923/"
+        href="https://wa.me/584145363248/"
         target="_blank"
         rel="noopener noreferrer"
         className="text-[#25D366] bg-white dark:bg-black p-2 rounded-md transition hover:outline outline-[#25D366]"
