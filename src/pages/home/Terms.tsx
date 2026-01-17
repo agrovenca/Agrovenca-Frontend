@@ -74,14 +74,14 @@ function TermsPage() {
 
       <h2 className="text-xl font-semibold mt-4 mb-2">10. Contacto</h2>
       <p className="mb-1 font-serif">Correo: support@agrovenca.com</p>
-      <p className="mb-1 font-serif">Teléfono: +58 412-2647923</p>
+      <p className="mb-1 font-serif">Teléfono: +58 414-5363248</p>
       <p className="mb-1 font-serif">Sitio web: www.agrovenca.com</p>
 
       <Separator className="my-4" />
 
       <section className="flex justify-center">
         <small>
-          Última actualización: {new Date('2025-09-21T02:38:41.868Z').toLocaleDateString('es-VE')}
+          Última actualización: {new Date('2026-01-17T15:04:13.776Z').toLocaleDateString('es-VE')}
         </small>
       </section>
     </section>

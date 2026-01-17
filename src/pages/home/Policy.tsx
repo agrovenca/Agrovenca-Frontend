@@ -59,7 +59,7 @@ function PolicyPage() {
 
       <h2 className="text-xl font-semibold mt-4 mb-2">7. Contacto</h2>
       <p className="mb-1 font-serif">Correo: support@agrovenca.com</p>
-      <p className="mb-1 font-serif">Teléfono: +58 412-2647923</p>
+      <p className="mb-1 font-serif">Teléfono: +58 414-5363248</p>
       <p className="mb-1 font-serif">Redes sociales:</p>
       <ul className="list-disc list-inside font-serif">
         <li>

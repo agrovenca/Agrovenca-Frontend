@@ -16,7 +16,7 @@ function ContactInfo() {
             </div>
             <div>
               <h3 className="font-semibold text-foreground">Teléfono</h3>
-              <p className="text-muted-foreground font-serif">+58 412-2647923</p>
+              <p className="text-muted-foreground font-serif">+58 414-5363248</p>
               <p className="text-sm text-muted-foreground font-serif">Lun - Sab: 8:00AM - 5:00PM</p>
             </div>
           </div>
