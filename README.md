@@ -115,6 +115,6 @@ Contributions are welcome. Please fork the repository and submit a pull request 
   </a> <br /> <strong>Junior Ruiz</strong> 
   <br /> 
   <a href="https://github.com/junior-r" target="_blank">GitHub</a> • 
-  <a href="https://junior-dev.vercel.app/" target="_blank">Portfolio</a> • 
-  <a href="mailto:juniorruiz331@gmail.com">Contact</a> 
+  <a href="https://juniorz.dev" target="_blank">Portfolio</a> • 
+  <a href="mailto:juniorruiz331+work@gmail.com">Contact</a> 
 </div>

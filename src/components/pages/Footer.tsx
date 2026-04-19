@@ -71,7 +71,7 @@ function Footer() {
             <span>
               Desarrollado por{' '}
               <a
-                href="https://junior-dev.vercel.app/"
+                href="https://juniorz.dev"
                 target="_blank"
                 className="transition text-blue-600 dark:text-blue-500 hover:underline"
               >
